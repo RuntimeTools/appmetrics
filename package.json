@@ -1,0 +1,19 @@
+{
+  "name": "appmetrics",
+  "version": "1.0.0",
+  "description": "Node Application Metrics",  
+  "bin": { "node-hc": "bin/appmetrics-cli.js" },
+  "dependencies": {
+    "nan": "latest",
+    "node-gyp": "latest"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node download_licenses.js && node download_binaries.js && node-gyp rebuild"
+  },
+  "directories" : {
+    "licenses": "licenses"
+  },
+  "author": "",
+  "license": "proprietary"
+}
