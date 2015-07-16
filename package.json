@@ -14,6 +14,10 @@
   "directories" : {
     "licenses": "licenses"
   },
+  "repository" : {
+    "type" : "git",
+    "url" : "git://github.com/RuntimeTools/appmetrics.git"
+  },
   "author": "",
   "license": "proprietary"
 }
