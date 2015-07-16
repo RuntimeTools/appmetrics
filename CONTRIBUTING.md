@@ -37,7 +37,7 @@ change your rights to use your own Contributions for any other purpose.
 
 You can download the CLAs here:
 
- - [Contributor License Agreement](http://github.com/RuntimeTools/appmetrics/NodeApplicationMetrics-V1-CLA.odt)
+ - [Contributor License Agreement](https://github.com/RuntimeTools/appmetrics/raw/master/NodeApplicationMetrics-V1-CLA.odt)
 
 If you are an IBMer, please contact us directly as the contribution process is
 slightly different.
