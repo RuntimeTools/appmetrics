@@ -41,13 +41,14 @@ var monitoring = appmetrics.monitor();
 The monitoring instance can then be used to register callbacks and request information about the application:
 ```sh
 monitoring.on('initialized', function (env) {
-	env = monitoring.getEnvironment());
+    env = monitoring.getEnvironment();
     for (var entry in env) {
-		console.log(entry + ':' + env[entry]);
-	};
+        console.log(entry + ':' + env[entry]);
+    };
 });
+
 monitoring.on('cpu', function (cpu) {
-	console.log('[' + new Date(data.time) + ] CPU: ' + cpu.process');
+    console.log('[' + new Date(cpu.time) + '] CPU: ' + cpu.process);
 });
 ```
 
@@ -82,14 +83,14 @@ Disable data generation of the specified data type.
 ### Event: 'cpu'
 Emitted when a CPU monitoring sample is taken.
 * `data` (Object) the data from the CPU sample:
-    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(cpu.time)`.
+    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
     * `process` (Number) the percentage of CPU used by the Node.js application itself. This is a value between 0.0 and 1.0.
     * `system` (Number) the percentage of CPU used by the system as a whole. This is a value between 0.0 and 1.0.
 
 ### Event: 'memory'
 Emitted when a memory monitoring sample is taken.
 * `data` (Object) the data from the memory sample:
-    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(cpu.time)`.
+    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
     * `physical_total` (Number) the total amount of RAM available on the system in bytes.
     * `physical_used` (Number) the total amount of RAM in use on the system in bytes.
     * `physical_free` (Number) the total amount of free RAM available on the system in bytes.
@@ -100,7 +101,7 @@ Emitted when a memory monitoring sample is taken.
 ### Event: 'gc'
 Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime.
 * `data` (Object) the data from the GC sample:
-    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(cpu.time)`.
+    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
     * `type` (String) the type of GC cycle, either 'M' or 'S'.
     * `size` (Number) the size of the JavaScript heap in bytes.
     * `used` (Number) the amount of memory used on the JavaScript heap in bytes.
@@ -109,7 +110,7 @@ Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime
 ### Event: 'profiling'
 Emitted when a profiling sample is available from the underlying V8 runtime.
 * `data` (Object) the data from the profiling sample:
-    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(cpu.time)`.
+    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
     * `functions` (Array) an array of functions that ran during the sample. Each array entry consists of:
         * `self` (Number) the ID for this function.
         * `parent` (Number) the ID for this function's caller.
