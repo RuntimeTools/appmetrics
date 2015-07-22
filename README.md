@@ -123,7 +123,7 @@ Emitted when a profiling sample is available from the underlying V8 runtime.
 This project is released under an Apache 2.0 open source license, however it has a dependency on a common agent from IBM Monitoring and Diagnostic Tools - Health Center, which has a proprietary IBM license.
 
 ## Version
-1.0.0
+1.0.1
 
 [1]:https://marketplace.eclipse.org/content/ibm-monitoring-and-diagnostic-tools-health-center**
 [2]:http://www-01.ibm.com/support/knowledgecenter/SS3KLZ/com.ibm.java.diagnostics.healthcenter.doc/topics/connecting.html
