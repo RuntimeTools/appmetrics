@@ -30,6 +30,10 @@
         "defines": [ "_AIX", "AIX" ],
         "libraries": [ "-Wl,-bexpall,-brtllib,-G,-bernotok,-brtl" ],
       }],
+      ['OS=="mac"', {
+        "defines": [ "__MACH__", "__APPLE__",  ],
+         "libraries": [ "-undefined dynamic_lookup" ],
+      }],
       ['OS=="linux"', {
         "defines": [ "_LINUX", "LINUX" ],
       }],

@@ -60,6 +60,26 @@ static char* NewCString(const std::string& s) {
 }
 
 /*
+ * OSX
+ */
+#if defined(__MACH__) || defined(__APPLE__)
+static bool GetSteadyTime(struct timeval* tv) {
+	//int rc = clock_gettime(CLOCK_MONOTONIC, tv);
+	int rc = gettimeofday(tv, 0);
+	return rc == 0;
+}
+static uint64 CalculateDuration(struct timeval start, struct timeval finish) {
+	return static_cast<uint64>((finish.tv_sec - start.tv_sec) * 1000 + (finish.tv_usec - start.tv_usec) / 1000);
+}
+static unsigned long long GetRealTime() {
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return (unsigned long long)(tv.tv_sec) * 1000 +
+	       (unsigned long long)(tv.tv_usec) / 1000;
+}
+#endif
+
+/*
  * Linux
  */
 #if defined(_LINUX) || defined(_AIX)
