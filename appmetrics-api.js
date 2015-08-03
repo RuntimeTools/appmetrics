@@ -16,6 +16,7 @@
 
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
+var serializer = require('./lib/serializer');
 
 function API(agent) {
 	this.agent = agent;
@@ -162,7 +163,7 @@ function API(agent) {
     	lines.forEach(function (line) {
     	    var parts = line.split(/:(.+)/);
             var topic = parts[0];
-            var data = JSON.parse(parts[1]);
+            var data = serializer.deserialize(parts[1]);
             that.emit(topic, data);	
     	});
     };

@@ -34,7 +34,8 @@ for (var prop in agent) {
 
 // Export emit() API for JS data providers
 module.exports.emit = function (topic, data) {
-	agent.nativeEmit(topic, JSON.stringify(data));
+	data = serializer.serialize(data);
+	agent.nativeEmit(topic, String(data));
 };
 
 // Export monitor() API for consuming data in-process
