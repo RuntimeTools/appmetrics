@@ -17,6 +17,7 @@
 var path = require("path")
 var module_dir = path.dirname(module.filename)
 var os = require("os")
+var serializer = require('./lib/serializer.js');
 
 var agent = require("./appmetrics")
 // Set the plugin search path
