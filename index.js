@@ -36,6 +36,8 @@ var httpProbe = require('./probes/http-probe.js');
 probes.push(httpProbe);
 var mysqlProbe = require('./probes/mysql-probe.js');
 probes.push(mysqlProbe);
+var mongoProbe = require('./probes/mongo-probe.js');
+probes.push(mongoProbe);
 
 /*
  * Patch the module require function to run the probe attach function
