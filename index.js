@@ -39,6 +39,9 @@ probes.push(mysqlProbe);
 var mongoProbe = require('./probes/mongo-probe.js');
 probes.push(mongoProbe);
 
+var traceProbe = require('./probes/trace-probe.js')
+//Don't enable function tracing by default
+
 /*
  * Patch the module require function to run the probe attach function
  * for any matching module. This loads the monitoring probes into the modules
@@ -65,6 +68,12 @@ module.exports.enable = function (data, config) {
 			probes.forEach(function (probe) {
 				probe.enableRequests();
 			});
+			break;
+		case 'trace':
+			if (probes.indexOf(traceProbe) === -1) {
+				probes.push(traceProbe);
+			}
+			traceProbe.enable();
 			break;
 		default:
 			probes.forEach(function (probe) {
