@@ -13,7 +13,8 @@
   },
   "directories" : {
     "licenses": "licenses",
-    "lib": "lib"
+    "lib": "lib",
+    "probes": "probes"
   },
   "repository" : {
     "type" : "git",

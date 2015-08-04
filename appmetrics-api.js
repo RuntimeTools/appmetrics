@@ -18,7 +18,8 @@ var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var serializer = require('./lib/serializer');
 
-function API(agent) {
+function API(agent, appmetrics) {
+	this.appmetrics = appmetrics;
 	this.agent = agent;
     this.environment = {};
     /*
@@ -174,20 +175,20 @@ function API(agent) {
     });
 //    agent.sendControlCommand("history", "");
 }
-module.exports.getAPI = function(agent) {
-	return new API(agent);
+module.exports.getAPI = function(agent, appmetrics) {
+	return new API(agent, appmetrics);
 };
 
 util.inherits(API, EventEmitter);
 
 API.prototype.enable = function (data) {
 	var that = this;
-    if (data == 'profiling') that.agent.sendControlCommand("profiling_node", "on,profiling_node_subsystem"); 
+    that.appmetrics.enable(data); 
 };
 
 API.prototype.disable = function (data) {
 	var that = this;
-	if (data == 'profiling') that.agent.sendControlCommand("profiling_node", "off,profiling_node_subsystem");
+    that.appmetrics.disable(data); 
 };
 
 API.prototype.getEnvironment = function() {
