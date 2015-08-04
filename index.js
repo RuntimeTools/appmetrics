@@ -34,6 +34,8 @@ var hcAPI = require("./appmetrics-api.js");
 var probes = [];
 var httpProbe = require('./probes/http-probe.js');
 probes.push(httpProbe);
+var mysqlProbe = require('./probes/mysql-probe.js');
+probes.push(mysqlProbe);
 
 /*
  * Patch the module require function to run the probe attach function
