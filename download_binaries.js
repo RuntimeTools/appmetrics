@@ -74,9 +74,6 @@ var getLibraryFileName = function(name) {
 	if (OS == 'win32') {
 		return name + '.dll';
 	}
-	if (OS == 'aix') {
-		return 'lib' + name + '.a';
-	}
 	return 'lib' + name + '.so';
 };
 
