@@ -114,6 +114,7 @@ typedef int (*sendMessage)(const char * sourceId, unsigned int size,void *data);
 typedef void (*exposedLogger)(ibmras::common::logging::Level lev, const char * message);
 typedef const char * (*agentProperty)(const char * key);
 typedef void (*setAgentProp)(const char* key, const char* value);
+
 typedef void (*lifeCycle)();
 typedef bool (*loadPropFunc)(const char* filename);
 typedef std::string (*getVer)();
@@ -140,6 +141,7 @@ typedef struct loaderCoreFunctions {
 
 } loaderCoreFunctions;
 
+typedef loaderCoreFunctions* (*LOADER_CORE)();
 
 typedef int (*PLUGIN_INITIALIZE)(const char* properties);
 typedef pushsource* (*PUSH_SOURCE_REGISTER)(agentCoreFunctions aCF, unsigned int provID);
