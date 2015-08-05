@@ -63,10 +63,6 @@ var ensureSupportedOSOrExit = function() {
 	/*
 	 * Check for unsupported operating systems and fail fast
 	 */
-	if (OS == 'darwin') {
-		console.log('Mac OS is not a currently supported platform. Exiting');
-		process.exit(1);
-	}
 	if (OS == 'sunos') {
 		console.log('Smart OS is not a currently supported platform. Exiting');
 		process.exit(1);
