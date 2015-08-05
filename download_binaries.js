@@ -26,6 +26,17 @@ var ENDIANNESS = process.config.variables.node_byteorder; // e.g. 'little'
 var INSTALL_DIR = process.cwd();
 var PLUGINS_DIR = path.join(INSTALL_DIR, 'plugins');
 var BASE_DOWNLOAD_URL = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/runtimes/tools/healthcenter/agents';
+var AGENTCORE_PLATFORMS = ['aix-ppc',
+                           'aix-ppc64',
+                           'linux-ia32',
+                           'linux-ppc',
+                           'linux-ppc64',
+                           'linux-ppc64le',
+                           'linux-s390',
+                           'linux-s390x',
+                           'linux-x64',
+                           'win32-ia32',
+                           'win32-x64'];;
 var AGENTCORE_VERSION = '3.0.5';
 var AGENTCORE_LIBRARY_NAME = 'agentcore';
 var AGENTCORE_PLUGIN_NAMES = ['hcmqtt',
@@ -59,16 +70,6 @@ var showLegalWarning = function() {
 	console.log('********************************************************************************');
 };
 
-var ensureSupportedOSOrExit = function() {
-	/*
-	 * Check for unsupported operating systems and fail fast
-	 */
-	if (OS == 'sunos') {
-		console.log('Smart OS is not a currently supported platform. Exiting');
-		process.exit(1);
-	}
-};
-
 var getLibraryFileName = function(name) {
 	if (OS == 'win32') {
 		return name + '.dll';
@@ -79,33 +80,30 @@ var getLibraryFileName = function(name) {
 	return 'lib' + name + '.so';
 };
 
-var getPlatformDir = function() {
-	var platformDir;
+var getPlatform = function() {
+	var platform;
 	if (ARCH === 'ppc64' && ENDIANNESS === 'little') {
-		platformDir = 'linux-ppc64le';
+		platform = 'linux-ppc64le';
 	} else {
-		platformDir = OS + '-' + ARCH;
+		platform = OS + '-' + ARCH;
 	}
-	return platformDir;
+	return platform;
 };
 
-var getSupportedNodeVersionOrExit = function() {
-	if (process.version.indexOf('v0.10') === 0) {
-		return '0.10';
+var ensureSupportedPlatformOrExit = function() {
+	/*
+	 * Check up front for the platform-architectures for which there are
+	 * available Health Center core agent downloads.
+	 */
+	var platform = getPlatform();
+	if (AGENTCORE_PLATFORMS.indexOf(platform) === -1) {
+		console.log(platform + ' is not a currently supported platform. Exiting');
+		process.exit(1);
 	}
-	if (process.version.indexOf('v0.12') === 0) {
-		return '0.12';
-	}
-	console.log('Unsupported version ' + process.version + '. Exiting.');
-	process.exit(1);
 };
 
 var getAgentCorePlatformVersionDownloadURL = function() {
-	return [BASE_DOWNLOAD_URL, 'core/binaries', getPlatformDir(), AGENTCORE_VERSION].join('/');
-};
-
-var getAppMetricsPlatformVersionDownloadURL = function() {
-	return [BASE_DOWNLOAD_URL, 'nodejs/binaries', getSupportedNodeVersionOrExit(), getPlatformDir(), APPMETRICS_VERSION].join('/');
+	return [BASE_DOWNLOAD_URL, 'core/binaries', getPlatform(), AGENTCORE_VERSION].join('/');
 };
 
 var downloadBinary = function(filename, sourcePathURL, destDir) {
@@ -139,7 +137,7 @@ var downloadBinary = function(filename, sourcePathURL, destDir) {
  * Start the download
  */
 showLegalWarning();
-ensureSupportedOSOrExit();
+ensureSupportedPlatformOrExit();
 fs.mkdir(PLUGINS_DIR, function(err) { 
 	// ignore err creating directory (eg if it already exists)
 	downloadBinary(getLibraryFileName(AGENTCORE_LIBRARY_NAME),
