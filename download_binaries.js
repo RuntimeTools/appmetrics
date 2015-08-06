@@ -25,15 +25,14 @@ var ARCH = process.arch; // e.g. ia32
 var ENDIANNESS = process.config.variables.node_byteorder; // e.g. 'little'
 var INSTALL_DIR = process.cwd();
 var PLUGINS_DIR = path.join(INSTALL_DIR, 'plugins');
-var BASE_DOWNLOAD_URL = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/runtimes/tools/healthcenter/agents/nodejs/binaries';
-var HC_VERSION = "1.0.0";
-var BINARY_FILE = 'appmetrics.node';
-var PLUGIN_NAMES = [ 'apiplugin',
-                     'cpuplugin',
-                     'envplugin',
-                     'hcmqtt',
-                     'memoryplugin' ];
-
+var BASE_DOWNLOAD_URL = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/runtimes/tools/healthcenter/agents';
+var AGENTCORE_VERSION = '3.0.5';
+var AGENTCORE_LIBRARY_NAME = 'agentcore';
+var AGENTCORE_PLUGIN_NAMES = ['hcmqtt',
+                              'hcapiplugin',
+                              'envplugin',
+                              'cpuplugin',
+                              'memoryplugin'];
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, {flags : 'a'});
 
@@ -105,8 +104,12 @@ var getSupportedNodeVersionOrExit = function() {
 	process.exit(1);
 };
 
-var getPlatformVersionDownloadURL = function() {
-	return [BASE_DOWNLOAD_URL, getSupportedNodeVersionOrExit(), getPlatformDir(), HC_VERSION].join('/');
+var getAgentCorePlatformVersionDownloadURL = function() {
+	return [BASE_DOWNLOAD_URL, 'core/binaries', getPlatformDir(), AGENTCORE_VERSION].join('/');
+};
+
+var getAppMetricsPlatformVersionDownloadURL = function() {
+	return [BASE_DOWNLOAD_URL, 'nodejs/binaries', getSupportedNodeVersionOrExit(), getPlatformDir(), APPMETRICS_VERSION].join('/');
 };
 
 var downloadBinary = function(filename, sourcePathURL, destDir) {
@@ -143,10 +146,12 @@ showLegalWarning();
 ensureSupportedOSOrExit();
 fs.mkdir(PLUGINS_DIR, function(err) { 
 	// ignore err creating directory (eg if it already exists)
-	downloadBinary(BINARY_FILE, getPlatformVersionDownloadURL(), INSTALL_DIR);
-	for (var i=0; i < PLUGIN_NAMES.length; i++) {
-		downloadBinary(getLibraryFileName(PLUGIN_NAMES[i]), 
-		               getPlatformVersionDownloadURL() + '/plugins',
+	downloadBinary(getLibraryFileName(AGENTCORE_LIBRARY_NAME),
+	               getAgentCorePlatformVersionDownloadURL(),
+	               INSTALL_DIR);
+	for (var i=0; i < AGENTCORE_PLUGIN_NAMES.length; i++) {
+		downloadBinary(getLibraryFileName(AGENTCORE_PLUGIN_NAMES[i]),
+		               getAgentCorePlatformVersionDownloadURL() + '/plugins',
 		               PLUGINS_DIR);
 	}
 });
