@@ -61,33 +61,51 @@ Note that both the API and the Health Center Eclipse IDE can be used at the same
 
 ## API Documentation
 
-### appmetrics.monitor()
-Creates a Node Application Metrics agent client instance. This can subsequently be used to control data collection, request data, and subscribe to data events.
-
 ### appmetrics.emit(`type`, `data`)
 Allows custom monitoring events to be added into the Node Application Metrics agent.
 * `type` (String) the name you wish to use for the data. A subsequent event of that type will be raised, allowing callbacks to be registered for it.
 * `data` (Object) the data to be made available with the event. The object must not contain circular references, and by convention should contain a `time` value representing the milliseconds when the event occurred.
 
-### appmetrics.monitor.getEnvironment()
-Requests an object containing all of the available environment information for the running application.
+### appmetrics.enable(`type`, `config`)
+Enable data generation of the specified data type with optional configuration.
+* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'requests' and 'trace' are currently supported.
+* `config` (Object) configuration to be added for the data type being enabled. See appmetrics.setConfig() for more information.
 
-### appmetrics.monitor.enable(`type`)
-Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Only 'profiling' is currently supported.
+The following data types are disabled by default: `profiling`, `requests`, `trace`
 
-### appmetrics.monitor.disable(`type`)
+### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
 * `type` (String) the type of event to stop generating data for. Only 'profiling' is currently supported.
 
-### Event: 'cpu'
+### appmetrics.setConfig(`type`, `config`)
+Set the configuration to be applied to a specific data type. The configuration available is specific to the data type.
+*   `type` (String) the type of event to apply the configuration to.
+*   `config` (Object) key value pairs of configurations to be applied to the specified event. The available configuration options are as follows:
+
+
+#####   'http':
+*   `filters` (Array) an array of URL filter Objects consisting of:
+    * `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
+    * `to` (String) a conversion for the URL to allow grouping. A value of '' causes the URL to be ignored.
+#####   'requests': 
+*   `excludeModules` (Array) an array of String names for modules to exclude from request tracking
+#####   'trace: 
+*   `includeModules` (Array) an array of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
+
+### appmetrics.monitor()
+Creates a Node Application Metrics agent client instance. This can subsequently be used to get environment data and subscribe to data events.
+
+### appmetrics.monitor.getEnvironment()
+Requests an object containing all of the available environment information for the running application.
+
+### Monitor Event: 'cpu'
 Emitted when a CPU monitoring sample is taken.
 * `data` (Object) the data from the CPU sample:
     * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
     * `process` (Number) the percentage of CPU used by the Node.js application itself. This is a value between 0.0 and 1.0.
     * `system` (Number) the percentage of CPU used by the system as a whole. This is a value between 0.0 and 1.0.
 
-### Event: 'memory'
+### Monitor Event: 'memory'
 Emitted when a memory monitoring sample is taken.
 * `data` (Object) the data from the memory sample:
     * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
@@ -98,7 +116,7 @@ Emitted when a memory monitoring sample is taken.
     * `private` (Number) the amount of memory used by the Node.js application that cannot be shared with other processes, in bytes.
     * `physical` (Number) the amount of RAM used by the Node.js application in bytes.
 
-### Event: 'gc'
+### Monitor Event: 'gc'
 Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime.
 * `data` (Object) the data from the GC sample:
     * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
@@ -107,7 +125,7 @@ Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime
     * `used` (Number) the amount of memory used on the JavaScript heap in bytes.
     * `duration` (Number) the duration of the GC cycle in milliseconds.
 
-### Event: 'profiling'
+### Monitor Event: 'profiling'
 Emitted when a profiling sample is available from the underlying V8 runtime.
 * `data` (Object) the data from the profiling sample:
     * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
@@ -118,6 +136,42 @@ Emitted when a profiling sample is available from the underlying V8 runtime.
         * `file` (String) the file in which this function is defined.
         * `line` (Number) the line number in the file.
         * `count` (Number) the number of samples for this function.
+
+### Monitor Event: 'http'
+Emitted when a HTTP request is made.
+* `data` (Object) the data from the HTTP request:
+    * `time` (Number) the milliseconds when the HTTP request was made. This can be converted to a Date using `new Date(data.time)`.
+    * `method` (String) the HTTP method used for the request.
+    * `url` (String) the URL on which the request was made.
+    * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
+
+### Monitor Event: 'mysql'
+Emitted when a MySQL query is made using the `mysql` module.
+* `data` (Object) the data from the MySQL query:
+    * `time` (Number) the milliseconds when the MySQL query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the MySQL database.
+    * `duration` (Number) the time taken for the MySQL query to be responded to in ms.
+
+### Monitor Event: 'mongo'
+Emitted when a MongoDB query is made using the `mongodb` module.
+* `data` (Object) the data from the MongoDB request:
+    * `time` (Number) the milliseconds when the MongoDB query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the MongoDB database.
+    * `duration` (Number) the time taken for the MongoDB query to be responded to in ms.
+
+### Monitor Event: 'request'
+Emitted when a request is made of the application that involves one or more monitored application level events. Request events are disabled by default.
+* `data` (Object) the data from the request:
+    * `time` (Number) the milliseconds when the request occurred. This can be converted to a Date using `new Date(data.time)`.
+    * `type` (String) The type of the request event. This can currently be 'HTTP' or 'DB'
+    * `name` (String) The name of the request event. This is the request task, eg. the url, or the method being used.
+    * `request` (Object) the detailed data for the request event:
+        * `type` (String) The type of the request event. This can currently be 'HTTP' or 'DB'
+        * `name` (String) The name of the request event. This is the request task, eg. the url, or the method being used.
+        * `context` (Object) A map of any addition context information for the request event.
+        * `stack` (String) A stack trace for the event call.
+        * `children` (Array) An array of child request events that occurred as part of the overall request event.
+    * `duration` (Number) the time taken for the request to complete in ms.
 
 ## License
 This project is released under an Apache 2.0 open source license, however it has a dependency on a common agent from IBM Monitoring and Diagnostic Tools - Health Center, which has a proprietary IBM license.
