@@ -87,8 +87,10 @@ Set the configuration to be applied to a specific data type. The configuration a
 *   `filters` (Array) an array of URL filter Objects consisting of:
     * `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
     * `to` (String) a conversion for the URL to allow grouping. A value of '' causes the URL to be ignored.
+    
 #####   'requests': 
-*   `excludeModules` (Array) an array of String names for modules to exclude from request tracking
+*   `excludeModules` (Array) an array of String names for modules to exclude from request tracking.
+
 #####   'trace: 
 *   `includeModules` (Array) an array of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
 
