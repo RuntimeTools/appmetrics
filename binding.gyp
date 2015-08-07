@@ -2,6 +2,8 @@
   "variables": {
     "srcdir%": "./src",
     "nandir%": "./node_modules/nan",
+    'build_id%': '.<!(["python", "./generate_build_id.py"])',
+    'appmetricsversion%':  '<!(["python", "./get_from_json.py", "./package.json", "version"])',
   },
   "conditions": [
     ['OS=="aix"', {
@@ -53,6 +55,29 @@
   },
 
   "targets": [
+      {
+      "target_name": "appmetrics",
+      "sources": [
+        "<(INTERMEDIATE_DIR)/appmetrics.cpp",
+      ],
+      'variables': {
+        'appmetricslevel%':'<(appmetricsversion)<(build_id)',
+      },
+      'actions': [{
+        'action_name': 'Set appmetrics reported version/build level',
+        'inputs': [ "<(srcdir)/appmetrics.cpp" ],
+        'outputs': [ "<(INTERMEDIATE_DIR)/appmetrics.cpp" ],
+        'action': [
+          'python',
+          './replace_in_file.py',
+          '<(srcdir)/appmetrics.cpp',
+          '<(INTERMEDIATE_DIR)/appmetrics.cpp',
+          '--from="99\.99\.99\.29991231"',
+          '--to="<(appmetricslevel)"',
+          '-v'
+         ],
+      }],
+    },
     {
       "target_name": "nodeenvplugin",
       "type": "shared_library",
@@ -79,11 +104,18 @@
       "target_name": "install",
       "type": "none",
       "dependencies": [
+        "appmetrics",
         "nodeenvplugin",
         "nodegcplugin",
         "nodeprofplugin",
      ],
       "copies": [
+        {
+          "destination": "./",
+          "files": [
+            "<(PRODUCT_DIR)/appmetrics.node",
+          ],
+        },
         {
           "destination": "./plugins",
           "files": [
