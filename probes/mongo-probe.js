@@ -135,13 +135,13 @@ exports.disableRequests = function() {
 }
 
 exports.enable = function() {
-	probeFunctionStart = lightweightProbeStart;
-	probeFunctionEnd = lightweightProbeEnd;
+	metricsProbeStart = metricsStart;
+	metricsProbeEnd = metricsEnd;
 };
 
 exports.disable = function() {
-	probeFunctionStart = function() {};
-	probeFunctionEnd = function() {};
+	metricsProbeStart = function() {};
+	metricsProbeEnd = function() {};
 };
 
 var config = {
