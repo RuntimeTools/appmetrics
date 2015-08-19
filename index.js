@@ -20,6 +20,7 @@ var os = require("os")
 var serializer = require('./lib/serializer.js');
 var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
+var fs = require('fs');
 
 var agent = require("./appmetrics")
 // Set the plugin search path
@@ -29,18 +30,24 @@ agent.start();
 var hcAPI = require("./appmetrics-api.js");
 
 /*
- * Load module probes into probes array
+ * Load module probes into probes array by searching the probes directory.
+ * We handle the 'trace' probe as a special case because we don't want to put
+ * the probe hooks in by default due to the performance cost.
  */
 var probes = [];
-var httpProbe = require('./probes/http-probe.js');
-probes.push(httpProbe);
-var mysqlProbe = require('./probes/mysql-probe.js');
-probes.push(mysqlProbe);
-var mongoProbe = require('./probes/mongo-probe.js');
-probes.push(mongoProbe);
-
-var traceProbe = require('./probes/trace-probe.js')
-//Don't enable function tracing by default
+var traceProbe;
+	
+var dirPath = path.join(__dirname, 'probes'); 
+var files = fs.readdirSync(dirPath);
+files.forEach(function (fileName) {
+	var file = path.join(dirPath, fileName);
+	var probeModule = (require(file));
+	if (probeModule.name === 'trace') {
+		traceProbe = probeModule;
+	} else {
+		probes.push(require(file));					
+	}
+});
 
 /*
  * Patch the module require function to run the probe attach function
