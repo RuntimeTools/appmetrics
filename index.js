@@ -41,11 +41,11 @@ var dirPath = path.join(__dirname, 'probes');
 var files = fs.readdirSync(dirPath);
 files.forEach(function (fileName) {
 	var file = path.join(dirPath, fileName);
-	var probeModule = (require(file));
+	var probeModule = new (require(file))();
 	if (probeModule.name === 'trace') {
 		traceProbe = probeModule;
 	} else {
-		probes.push(require(file));					
+		probes.push(probeModule);					
 	}
 });
 
@@ -55,7 +55,9 @@ files.forEach(function (fileName) {
  */
 aspect.after(module.__proto__, 'require', function(obj, args, ret) {
 	for (var i = 0; i < probes.length; i++) {
-		probes[i].attach(args[0], ret, module.exports);
+		if (probes[i].name === args[0] || probes[i].name === 'trace') {
+			probes[i].attach(args[0], ret, module.exports);
+		}
 	}
 	return ret;
 });

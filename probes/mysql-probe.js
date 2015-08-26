@@ -13,11 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
+var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
+var request = require('../lib/request.js');
+var util = require('util');
 
-exports.name = 'mysql';
-exports.attach = function( name, target, hc ) {
+function MySqlProbe() {
+	Probe.call(this, 'mysql');
+}
+util.inherits(MySqlProbe, Probe);
+
+MySqlProbe.prototype.attach = function( name, target, am ) {
+	var that = this;
     if( name != "mysql" ) return target;
     target.__ddProbeAttached__ = true;
     
@@ -26,12 +33,12 @@ exports.attach = function( name, target, hc ) {
             function(target, methodArgs) {
         	    var req;
         		var method = 'query';
-        		metricsProbeStart(method, methodArgs, hc);
-        		requestProbeStart(method, methodArgs, hc);
+        		that.metricsProbeStart(method, methodArgs);
+        		that.requestProbeStart(method, methodArgs);
             	if (aspect.findCallbackArg(methodArgs) != undefined) {
             		aspect.aroundCallback( methodArgs, function(target,args){
-            			metricsProbeEnd(method, methodArgs, hc);
-            			requestProbeEnd(method, methodArgs, hc);
+            			that.metricsProbeEnd(method, methodArgs, am);
+            			that.requestProbeEnd(method, methodArgs);
             		});
             	};
             }
@@ -49,70 +56,21 @@ exports.attach = function( name, target, hc ) {
  * 		query:		The SQL executed
  * 		duration:	the time for the request to respond
  */
-var metricsStart = function(method, methodArgs, hc) {
-	start = Date.now();
-};
-
-var metricsEnd = function(method, methodArgs, hc) {
-	hc.emit('mysql', {time: start, query: JSON.stringify(methodArgs[0]), duration: Date.now() - start});
+MySqlProbe.prototype.metricsEnd = function(method, methodArgs, am) {
+	am.emit('mysql', {time: start, query: JSON.stringify(methodArgs[0]), duration: Date.now() - start});
 };
 
 /*
  * Heavyweight request probes for MySQL queries
  */
-var request = require('../lib/request.js');
-
-var requestStart = function (method, methodArgs, hc) {
+MySqlProbe.prototype.requestStart = function (method, methodArgs) {
 	start = Date.now();
 	req = request.startRequest( 'DB', "query" );
 	req.setContext({sql: JSON.stringify(methodArgs[0])});
 };
 
-var requestEnd = function (method, methodArgs, hc) {
+MySqlProbe.prototype.requestEnd = function (method, methodArgs) {
 	req.stop({sql: JSON.stringify(methodArgs[0])});
 };
 
-/*
- * Default to metrics on
- */
-var metricsProbeStart = metricsStart;
-var metricsProbeEnd = metricsEnd;
-/*
- * Default to requests off
- */
-var requestProbeStart = function () {};
-var requestProbeEnd = function () {};
-
-exports.enableRequests = function() {
-	requestProbeStart = requestStart;
-	requestProbeEnd = requestEnd;
-}
-
-exports.disableRequests = function() {
-	requestProbeStart = function () {};
-	requestProbeEnd = function () {};
-}
-
-exports.enable = function() {
-	metricsProbeStart = metricsStart;
-	metricsProbeEnd = metricsEnd;
-};
-
-exports.disable = function() {
-	metricsProbeStart = function() {};
-	metricsProbeEnd = function() {};
-};
-
-var config = {
-};
-	
-/*
- * Set configuration by merging passed in config with current one
- */
-exports.setConfig = function (newConfig) {
-	for (var prop in newConfig) {
-		if (typeof(newConfig[prop]) !== 'undefined') {
-			config[prop] = newConfig[prop];
-		}
-	}
-};
+module.exports = MySqlProbe;

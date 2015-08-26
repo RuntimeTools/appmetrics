@@ -13,28 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
+var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
+var request = require('../lib/request.js');
+var util = require('util');
 var url = require('url');
 
-/*
- * Ignore requests for URLs which we've been configured via regex to ignore
- */
-function filterUrl(req) {
-    var resultUrl = url.parse( req.url, true ).pathname;
-    var identifier = req.method + ' ' + resultUrl;
-    var filters = config.filters;
-    for (var i = 0; i < filters.length; ++i) {
-        var filter = filters[i];
-        if (filter.regex.test(identifier)) {
-            return filter.to;
-        }
-    }
-    return resultUrl;
+function HttpProbe() {
+	Probe.call(this, 'http');
+	this.config = {
+			filters: []
+	};
 }
+util.inherits(HttpProbe, Probe);
 
-exports.name = 'http';
-exports.attach = function(name, target, hc) {
+HttpProbe.prototype.attach = function(name, target, am) {
+	var that = this;
 	if( name == 'http' ) {
 		if(target.__probeAttached__) return;
 	    target.__probeAttached__ = true;
@@ -51,15 +45,15 @@ exports.attach = function(name, target, hc) {
 	            var reqDomain;
 	            var tr;
 	            // Filter out urls where filter.to is ''
-	            var traceUrl = filterUrl(req);
+	            var traceUrl = that.filterUrl(req);
 	            if (traceUrl !== '') {
-	            	metricsProbeStart(req, res, hc);
-	            	requestProbeStart(req, res, hc);
+	            	that.metricsProbeStart(req, res);
+	            	that.requestProbeStart(req, res);
 	            }
 	            aspect.after(res, 'end',function(obj, args, ret) {
 	            	if (traceUrl !== '') {
-	            		metricsProbeEnd(req, res, hc);
-	            		requestProbeEnd(req, res, hc);
+	            		that.metricsProbeEnd(req, res, am);
+	            		that.requestProbeEnd(req, res);
 	            	}
 	            });
 	        });
@@ -67,6 +61,22 @@ exports.attach = function(name, target, hc) {
 	}	
 	return target;
 };
+
+/*
+ * Ignore requests for URLs which we've been configured via regex to ignore
+ */
+HttpProbe.prototype.filterUrl = function(req) {
+    var resultUrl = url.parse( req.url, true ).pathname;
+    var identifier = req.method + ' ' + resultUrl;
+    var filters = this.config.filters;
+    for (var i = 0; i < filters.length; ++i) {
+        var filter = filters[i];
+        if (filter.regex.test(identifier)) {
+            return filter.to;
+        }
+    }
+    return resultUrl;
+}
 
 /*
  * Lightweight metrics probe for HTTP requests
@@ -77,20 +87,16 @@ exports.attach = function(name, target, hc) {
  * 		url:		The url requested
  * 		duration:	the time for the request to respond
  */
-var metricsStart = function(req, res, hc) {
-	start = Date.now();
-};
 
-var metricsEnd = function(req, res, hc) {
-	hc.emit('http', {time: start, method: req.method, url: req.url, duration: Date.now() - start});
+HttpProbe.prototype.metricsEnd = function(req, res, am) {
+	am.emit('http', {time: start, method: req.method, url: req.url, duration: Date.now() - start});
 };
 
 /*
  * Heavyweight request probes for HTTP requests
  */
-var request = require('../lib/request.js');
 
-var requestStart = function (req, res, hc) {
+HttpProbe.prototype.requestStart = function (req, res, am) {
     start = Date.now();
     var reqType = 'HTTP';
     var reqUrl = url.parse( req.url, true ).pathname;
@@ -99,59 +105,27 @@ var requestStart = function (req, res, hc) {
     tr.setContext({url: reqUrl }); 
 };
 
-var requestEnd = function (req, res, hc) {
+HttpProbe.prototype.requestEnd = function (req, res, am) {
 	var reqUrl = url.parse( req.url, true ).pathname;
     tr.stop({url: reqUrl });
-};
-
-/*
- * Default to metrics on
- */
-var metricsProbeStart = metricsStart;
-var metricsProbeEnd = metricsEnd;
-
-/*
- * Default to requests off
- */
-var requestProbeStart = function () {};
-var requestProbeEnd = function () {};
-
-exports.enableRequests = function() {
-	requestProbeStart = requestStart;
-	requestProbeEnd = requestEnd;
-}
-
-exports.disableRequests = function() {
-	requestProbeStart = function () {};
-	requestProbeEnd = function () {};
-}
-
-exports.enable = function() {
-	metricsProbeStart = metricsStart;
-	metricsProbeEnd = metricsEnd;
-};
-
-exports.disable = function() {
-	metricsProbeStart = function() {};
-	metricsProbeEnd = function() {};
-};
-
-var config = {
-		filters: []
 };
 	
 /*
  * Set configuration by merging passed in config with current one
  */
-exports.setConfig = function (newConfig) {
+HttpProbe.prototype.setConfig = function (newConfig) {
+	if (typeof(newConfig.filters) !== 'undefined') {
+		newConfig.filters.forEach(function(filter) {
+			if (typeof(filter.regex) === 'undefined') {
+				filter.regex = new RegExp(filter.pattern);
+			}
+		});
+	}
 	for (var prop in newConfig) {
 		if (typeof(newConfig[prop]) !== 'undefined') {
-			config[prop] = newConfig[prop];
+			this.config[prop] = newConfig[prop];
 		}
 	}
-	config.filters.forEach(function(filter) {
-		if (typeof(filter.regex) === 'undefined') {
-			filter.regex = new RegExp(filter.pattern);
-		}
-	});
 };
+
+module.exports = HttpProbe;

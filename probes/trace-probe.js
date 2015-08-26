@@ -13,10 +13,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
+var Probe = require('../lib/probe.js');
 var request = require('../lib/request.js');
 var aspect = require('../lib/aspect');
+var util = require('util');
 var path = require('path');
+
+function TraceProbe() {
+	Probe.call(this, 'trace');
+	this.config = {
+			includeModules: [],
+			excludeModules: []
+	};
+}
+util.inherits(TraceProbe, Probe);
+
+TraceProbe.prototype.attach = function( moduleName, target ) {
+    if( moduleName.slice(0,1) != "." || stopList[moduleName] || !isAppInnerRequire() || 
+    	this.config.excludeModules.indexOf(moduleName) != -1 ) {
+    	return target;
+    }
+    
+    if(target.__ddProbeAttached__) {
+    	return target;
+    }
+    
+    var ret = target;
+    if (typeof(target) != "function") {
+        instrumentMethods(moduleName, target);
+    } else {
+        instrumentMethods(moduleName, target.prototype);
+        ret = target;
+		if(Object.keys(target.prototype).length==0 && Object.keys(target).length == 0){
+			ret = function () {
+				var rc = target.apply(null, arguments);
+				instrumentMethods(moduleName, rc);
+				return rc;
+			}
+		}
+    }
+
+    ret.__ddProbeAttached__ = function(){return true};
+    return ret;
+};
 
 var stopList = { "./commands/base_command" : true, "./aspects": true };
 
@@ -170,48 +209,7 @@ function instrumentMethods(moduleName, target) {
     }
 }
 
-exports.name = 'trace';
-exports.attach = function( moduleName, target ) {
-    if( moduleName.slice(0,1) != "." || stopList[moduleName] || !isAppInnerRequire() || config.excludeModules.indexOf(moduleName) != -1 ) return target;
+TraceProbe.prototype.enable = function () {};
+TraceProbe.prototype.enableRequests = function () {};
 
-    if(target.__ddProbeAttached__) {
-    	return target;
-    }
-    
-    var ret = target;
-    if (typeof(target) != "function") {
-        instrumentMethods(moduleName, target);
-    } else {
-        instrumentMethods(moduleName, target.prototype);
-        ret = target;
-		if(Object.keys(target.prototype).length==0 && Object.keys(target).length == 0){
-			ret = function () {
-				var rc = target.apply(null, arguments);
-				instrumentMethods(moduleName, rc);
-				return rc;
-			}
-		}
-    }
-
-    ret.__ddProbeAttached__ = function(){return true};
-    return ret;
-};
-
-exports.enable = function () {};
-exports.enableRequests = function () {};
-
-var config = {
-		includeModules: [],
-		excludeModules: []
-};
-
-/*
- * Set configuration by merging passed in config with current one
- */
-exports.setConfig = function (newConfig) {
-	for (var prop in newConfig) {
-		if (typeof(newConfig[prop]) !== 'undefined') {
-			config[prop] = newConfig[prop];
-		}
-	}
-};
+module.exports = TraceProbe;

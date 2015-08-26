@@ -2,7 +2,7 @@
  * Copyright 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
+ * you may not use that file except in compliance with the License.
  * You may obtain a copy of the License at
  *
  * http://www.apache.org/licenses/LICENSE-2.0
@@ -13,34 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
+var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
+var request = require('../lib/request.js');
+var util = require('util');
 
-function aspectCollectionMethod(coll, method, hc) {
+function MongoProbe() {
+	Probe.call(this, 'mongodb');
+}
+util.inherits(MongoProbe, Probe);
+
+MongoProbe.prototype.aspectCollectionMethod = function(coll, method, am) {
+	var that = this;
     var req;
     aspect.around( coll, method,
         function(target, methodArgs) {
-			metricsProbeStart(target, method, methodArgs, hc);
-			requestProbeStart(target, method, methodArgs, hc);
+			that.metricsProbeStart(target, method, methodArgs);
+			that.requestProbeStart(target, method, methodArgs);
             if (aspect.findCallbackArg(methodArgs) != undefined) {
                 aspect.aroundCallback( methodArgs, function(target,args){
-                	metricsProbeEnd(method, methodArgs, hc);
-                	requestProbeEnd(method, methodArgs, hc);
+                	that.metricsProbeEnd(method, methodArgs, am);
+                	that.requestProbeEnd(method, methodArgs);
                 } );
             } 
     },
         function(target, methodArgs, rc) {
             if (aspect.findCallbackArg(methodArgs) == undefined) {
-            	metricsProbeEnd(method, methodArgs, hc);
-            	requestProbeEnd(method, methodArgs, hc);
+            	that.metricsProbeEnd(method, methodArgs, am);
+            	that.requestProbeEnd(method, methodArgs);
             }
             return rc;
     	}
     );
 }
 
-exports.name = 'mongodb';
-exports.attach = function( name, target, hc ) {
+MongoProbe.prototype.attach = function( name, target, am ) {
+	var that = this;
     if( name != "mongodb" ) return target;
     if(target.__ddProbeAttached__) return target;
     target.__ddProbeAttached__ = true;
@@ -50,33 +58,33 @@ exports.attach = function( name, target, hc ) {
     var method = 'find';
     aspect.around( coll, "find",
         function(target, methodArgs){
-    		metricsProbeStart(target, method, methodArgs, hc);
-    		requestProbeStart(target, method, methodArgs, hc);
+    		that.metricsProbeStart(target, method, methodArgs, am);
+    		that.requestProbeStart(target, method, methodArgs, am);
     	},
         function(target, findArgs, rc){
             if (rc == undefined) {
-            	metricsProbeEnd(method, findArgs, hc);
-            	requestProbeEnd(method, findArgs, hc);
+            	that.metricsProbeEnd(method, findArgs, am);
+            	that.requestProbeEnd(method, findArgs, am);
             } else {
                 aspect.before( rc, "toArray", function(target, args){
                     aspect.aroundCallback( args, function(target, args){
-                    	metricsProbeEnd(method, findArgs, hc);
-                    	requestProbeEnd(method, findArgs, hc);
+                    	that.metricsProbeEnd(method, findArgs, am);
+                    	that.requestProbeEnd(method, findArgs, am);
                     });
                 });
             }
             return rc;
       });
 
-    aspectCollectionMethod(coll, "insert", hc);
-    aspectCollectionMethod(coll, "save", hc);
-    aspectCollectionMethod(coll, "update", hc);
-    aspectCollectionMethod(coll, "remove", hc);
-    aspectCollectionMethod(coll, "findOne", hc);
-    aspectCollectionMethod(coll, "count", hc);
-    aspectCollectionMethod(coll, "findAndModify", hc);
-    aspectCollectionMethod(coll, "findAndRemove", hc);
-    aspectCollectionMethod(coll, "aggregate", hc);
+    that.aspectCollectionMethod(coll, "insert", am);
+    that.aspectCollectionMethod(coll, "save", am);
+    that.aspectCollectionMethod(coll, "update", am);
+    that.aspectCollectionMethod(coll, "remove", am);
+    that.aspectCollectionMethod(coll, "findOne", am);
+    that.aspectCollectionMethod(coll, "count", am);
+    that.aspectCollectionMethod(coll, "findAndModify", am);
+    that.aspectCollectionMethod(coll, "findAndRemove", am);
+    that.aspectCollectionMethod(coll, "aggregate", am);
 
     return target;
 
@@ -90,70 +98,21 @@ exports.attach = function( name, target, hc ) {
  * 		query:		the query itself
  * 		duration:	the time for the request to respond
  */
-var metricsStart = function(target, method, methodArgs, hc) {
-	start = Date.now();
-};
-
-var metricsEnd = function(method, methodArgs, hc) {
-	hc.emit('mongo', {time: start, query: JSON.stringify(methodArgs[0]), duration: Date.now() - start});
+MongoProbe.prototype.metricsEnd = function(method, methodArgs, am) {
+	am.emit('mongo', {time: start, query: JSON.stringify(methodArgs[0]), duration: Date.now() - start});
 };
 
 /*
  * Heavyweight request probes for MonngoDB queries
  */
-var request = require('../lib/request.js');
-
-var requestStart = function (target, method, methodArgs, hc) {
+MongoProbe.prototype.requestStart = function (target, method, methodArgs, am) {
 	start = Date.now();
 	req = request.startRequest( 'DB', method + "("+target.collectionName+")" );
 	req.setContext( { query: JSON.stringify(methodArgs[0]) } );
 };
 
-var requestEnd = function (method, methodArgs, hc) {
+MongoProbe.prototype.requestEnd = function (method, methodArgs, am) {
 	req.stop( { query: JSON.stringify(methodArgs[0]) } );
 };
 
-/*
- * Default to metrics on
- */
-var metricsProbeStart = metricsStart;
-var metricsProbeEnd = metricsEnd;
-/*
- * Default to requests off
- */
-var requestProbeStart = function () {};
-var requestProbeEnd = function () {};
-
-exports.enableRequests = function() {
-	requestProbeStart = requestStart;
-	requestProbeEnd = requestEnd;
-}
-
-exports.disableRequests = function() {
-	requestProbeStart = function () {};
-	requestProbeEnd = function () {};
-}
-
-exports.enable = function() {
-	metricsProbeStart = metricsStart;
-	metricsProbeEnd = metricsEnd;
-};
-
-exports.disable = function() {
-	metricsProbeStart = function() {};
-	metricsProbeEnd = function() {};
-};
-
-var config = {
-};
-	
-/*
- * Set configuration by merging passed in config with current one
- */
-exports.setConfig = function (newConfig) {
-	for (var prop in newConfig) {
-		if (typeof(newConfig[prop]) !== 'undefined') {
-			config[prop] = newConfig[prop];
-		}
-	}
-};
+module.exports = MongoProbe;
