@@ -19,15 +19,18 @@ var util = require('util');
 var http = require('http');
 var url = require('url');
 var path = require('path');
+var zlib = require('zlib');
+var tar = require('tar');
 
 var OS = process.platform; // e.g. linux
 var ARCH = process.arch; // e.g. ia32
 var ENDIANNESS = process.config.variables.node_byteorder; // e.g. 'little'
 var INSTALL_DIR = process.cwd();
-var PLUGINS_DIR = path.join(INSTALL_DIR, 'plugins');
 var BASE_DOWNLOAD_URL = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/runtimes/tools/healthcenter/agents';
 var AGENTCORE_PLATFORMS = ['aix-ppc',
                            'aix-ppc64',
+                           'darwin-ia32',
+                           'darwin-x64',
                            'linux-ia32',
                            'linux-ppc',
                            'linux-ppc64',
@@ -36,14 +39,9 @@ var AGENTCORE_PLATFORMS = ['aix-ppc',
                            'linux-s390x',
                            'linux-x64',
                            'win32-ia32',
-                           'win32-x64'];;
+                           'win32-x64'];
 var AGENTCORE_VERSION = '3.0.5';
-var AGENTCORE_LIBRARY_NAME = 'agentcore';
-var AGENTCORE_PLUGIN_NAMES = ['hcmqtt',
-                              'hcapiplugin',
-                              'envplugin',
-                              'cpuplugin',
-                              'memoryplugin'];
+
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, {flags : 'a'});
 
@@ -70,13 +68,6 @@ var showLegalWarning = function() {
 	console.log('********************************************************************************');
 };
 
-var getLibraryFileName = function(name) {
-	if (OS == 'win32') {
-		return name + '.dll';
-	}
-	return 'lib' + name + '.so';
-};
-
 var getPlatform = function() {
 	var platform;
 	if (ARCH === 'ppc64' && ENDIANNESS === 'little') {
@@ -100,49 +91,34 @@ var ensureSupportedPlatformOrExit = function() {
 };
 
 var getAgentCorePlatformVersionDownloadURL = function() {
-	return [BASE_DOWNLOAD_URL, 'core/binaries', getPlatform(), AGENTCORE_VERSION].join('/');
+	return [BASE_DOWNLOAD_URL, 'core/tgz'].join('/') + 
+	       ['/agentcore', AGENTCORE_VERSION, getPlatform()].join('-') + '.tgz';
 };
 
-var downloadBinary = function(filename, sourcePathURL, destDir) {
-	var downloadURL = [sourcePathURL, filename].join('/');
-
+var downloadAndExtractTGZ = function(downloadURL, destDir) {
 	/* Downloading the binaries */
-	var file = fs.createWriteStream(path.join(destDir, filename));
-
 	var req = http.get(downloadURL, function(response) {
-		console.log('Downloading binary from ' + downloadURL + ' to ' + path.join(destDir, filename));
+		console.log('Downloading and extracting tgz from ' + downloadURL + ' to ' + destDir);
 
 		if (response.statusCode != 200) {
-			console.log('ERROR: Unable to download ' + filename + ' from ' + downloadURL);
+			console.log('ERROR: Unable to download ' + downloadURL);
 			process.exit(1);
 		}
 
-		response.pipe(file);
-
-		file.on('finish', function() {
-			console.log('Download of ' + filename + ' finished.');
-			file.close();
-		});
+		response.pipe(zlib.createGunzip())         .on('error', function(e) { console.log("Failed to gunzip: " + e.message); })
+		        .pipe(tar.Extract({path: destDir})).on('error', function(e) { console.log("Failed to untar: " + e.message); })
+		        .on('close', function() {
+		        	console.log('Download and extract of ' + downloadURL + ' finished.');
+		        });
 	}).on('error', function(e) {
 		console.log('Got an error: ' + e.message);
 		process.exit(1);
 	});	
 };
 
-
 /*
  * Start the download
  */
 showLegalWarning();
 ensureSupportedPlatformOrExit();
-fs.mkdir(PLUGINS_DIR, function(err) { 
-	// ignore err creating directory (eg if it already exists)
-	downloadBinary(getLibraryFileName(AGENTCORE_LIBRARY_NAME),
-	               getAgentCorePlatformVersionDownloadURL(),
-	               INSTALL_DIR);
-	for (var i=0; i < AGENTCORE_PLUGIN_NAMES.length; i++) {
-		downloadBinary(getLibraryFileName(AGENTCORE_PLUGIN_NAMES[i]),
-		               getAgentCorePlatformVersionDownloadURL() + '/plugins',
-		               PLUGINS_DIR);
-	}
-});
+downloadAndExtractTGZ(getAgentCorePlatformVersionDownloadURL(), '.');
