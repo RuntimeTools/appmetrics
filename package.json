@@ -13,7 +13,9 @@
     "install": "node download_licenses.js && node download_binaries.js && node-gyp rebuild"
   },
   "directories" : {
-    "licenses": "licenses"
+    "licenses": "licenses",
+    "lib": "lib",
+    "probes": "probes"
   },
   "repository" : {
     "type" : "git",

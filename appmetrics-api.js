@@ -16,8 +16,10 @@
 
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
+var serializer = require('./lib/serializer');
 
-function API(agent) {
+function API(agent, appmetrics) {
+	this.appmetrics = appmetrics;
 	this.agent = agent;
     this.environment = {};
     /*
@@ -162,35 +164,44 @@ function API(agent) {
     	lines.forEach(function (line) {
     	    var parts = line.split(/:(.+)/);
             var topic = parts[0];
-            var data = JSON.parse(parts[1]);
+            var data = serializer.deserialize(parts[1]);
             that.emit(topic, data);	
     	});
     };
 
     agent.localConnect(function events(topic, data) {
+    	if (topic === 'api') {
+    		// API events are passed by copy
+    		return;
+    	}
        	message = data.toString();
        	raiseEvent(topic, message);
     });
 //    agent.sendControlCommand("history", "");
 }
-module.exports.getAPI = function(agent) {
-	return new API(agent);
+module.exports.getAPI = function(agent, appmetrics) {
+	return new API(agent, appmetrics);
 };
 
 util.inherits(API, EventEmitter);
 
 API.prototype.enable = function (data) {
 	var that = this;
-    if (data == 'profiling') that.agent.sendControlCommand("profiling_node", "on,profiling_node_subsystem"); 
+    that.appmetrics.enable(data); 
 };
 
 API.prototype.disable = function (data) {
 	var that = this;
-	if (data == 'profiling') that.agent.sendControlCommand("profiling_node", "off,profiling_node_subsystem");
+    that.appmetrics.disable(data); 
 };
 
 API.prototype.getEnvironment = function() {
 	var that = this;
 	return that.environment;
+};
+
+API.prototype.raiseLocalEvent = function(topic, data) {
+	var self = this;
+	self.emit(topic, data);
 };
 
