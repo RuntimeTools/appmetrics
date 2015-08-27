@@ -19,20 +19,29 @@ var util = require('util');
 var http = require('http');
 var url = require('url');
 var path = require('path');
+var zlib = require('zlib');
+var tar = require('tar');
 
 var OS = process.platform; // e.g. linux
 var ARCH = process.arch; // e.g. ia32
 var ENDIANNESS = process.config.variables.node_byteorder; // e.g. 'little'
 var INSTALL_DIR = process.cwd();
-var PLUGINS_DIR = path.join(INSTALL_DIR, 'plugins');
 var BASE_DOWNLOAD_URL = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/runtimes/tools/healthcenter/agents';
+var AGENTCORE_PLATFORMS = ['aix-ppc',
+                           'aix-ppc64',
+                           'darwin-ia32',
+                           'darwin-x64',
+                           'linux-ia32',
+                           'linux-ppc',
+                           'linux-ppc64',
+                           'linux-ppc64le',
+                           'linux-s390',
+                           'linux-s390x',
+                           'linux-x64',
+                           'win32-ia32',
+                           'win32-x64'];
 var AGENTCORE_VERSION = '3.0.5';
-var AGENTCORE_LIBRARY_NAME = 'agentcore';
-var AGENTCORE_PLUGIN_NAMES = ['hcmqtt',
-                              'hcapiplugin',
-                              'envplugin',
-                              'cpuplugin',
-                              'memoryplugin'];
+
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, {flags : 'a'});
 
@@ -59,95 +68,57 @@ var showLegalWarning = function() {
 	console.log('********************************************************************************');
 };
 
-var ensureSupportedOSOrExit = function() {
+var getPlatform = function() {
+	var platform;
+	if (ARCH === 'ppc64' && ENDIANNESS === 'little') {
+		platform = 'linux-ppc64le';
+	} else {
+		platform = OS + '-' + ARCH;
+	}
+	return platform;
+};
+
+var ensureSupportedPlatformOrExit = function() {
 	/*
-	 * Check for unsupported operating systems and fail fast
+	 * Check up front for the platform-architectures for which there are
+	 * available Health Center core agent downloads.
 	 */
-	if (OS == 'sunos') {
-		console.log('Smart OS is not a currently supported platform. Exiting');
+	var platform = getPlatform();
+	if (AGENTCORE_PLATFORMS.indexOf(platform) === -1) {
+		console.log(platform + ' is not a currently supported platform. Exiting');
 		process.exit(1);
 	}
 };
 
-var getLibraryFileName = function(name) {
-	if (OS == 'win32') {
-		return name + '.dll';
-	}
-	if (OS == 'aix') {
-		return 'lib' + name + '.a';
-	}
-	return 'lib' + name + '.so';
-};
-
-var getPlatformDir = function() {
-	var platformDir;
-	if (ARCH === 'ppc64' && ENDIANNESS === 'little') {
-		platformDir = 'linux-ppc64le';
-	} else {
-		platformDir = OS + '-' + ARCH;
-	}
-	return platformDir;
-};
-
-var getSupportedNodeVersionOrExit = function() {
-	if (process.version.indexOf('v0.10') === 0) {
-		return '0.10';
-	}
-	if (process.version.indexOf('v0.12') === 0) {
-		return '0.12';
-	}
-	console.log('Unsupported version ' + process.version + '. Exiting.');
-	process.exit(1);
-};
-
 var getAgentCorePlatformVersionDownloadURL = function() {
-	return [BASE_DOWNLOAD_URL, 'core/binaries', getPlatformDir(), AGENTCORE_VERSION].join('/');
+	return [BASE_DOWNLOAD_URL, 'core/tgz'].join('/') + 
+	       ['/agentcore', AGENTCORE_VERSION, getPlatform()].join('-') + '.tgz';
 };
 
-var getAppMetricsPlatformVersionDownloadURL = function() {
-	return [BASE_DOWNLOAD_URL, 'nodejs/binaries', getSupportedNodeVersionOrExit(), getPlatformDir(), APPMETRICS_VERSION].join('/');
-};
-
-var downloadBinary = function(filename, sourcePathURL, destDir) {
-	var downloadURL = [sourcePathURL, filename].join('/');
-
+var downloadAndExtractTGZ = function(downloadURL, destDir) {
 	/* Downloading the binaries */
-	var file = fs.createWriteStream(path.join(destDir, filename));
-
 	var req = http.get(downloadURL, function(response) {
-		console.log('Downloading binary from ' + downloadURL + ' to ' + path.join(destDir, filename));
+		console.log('Downloading and extracting tgz from ' + downloadURL + ' to ' + destDir);
 
 		if (response.statusCode != 200) {
-			console.log('ERROR: Unable to download ' + filename + ' from ' + downloadURL);
+			console.log('ERROR: Unable to download ' + downloadURL);
 			process.exit(1);
 		}
 
-		response.pipe(file);
-
-		file.on('finish', function() {
-			console.log('Download of ' + filename + ' finished.');
-			file.close();
-		});
+		response.pipe(zlib.createGunzip())         .on('error', function(e) { console.log("Failed to gunzip: " + e.message); })
+		        .pipe(tar.Extract({path: destDir})).on('error', function(e) { console.log("Failed to untar: " + e.message); })
+		        .on('close', function() {
+		        	console.log('Download and extract of ' + downloadURL + ' finished.');
+		        });
 	}).on('error', function(e) {
 		console.log('Got an error: ' + e.message);
 		process.exit(1);
 	});	
 };
 
-
 /*
  * Start the download
  */
 showLegalWarning();
-ensureSupportedOSOrExit();
-fs.mkdir(PLUGINS_DIR, function(err) { 
-	// ignore err creating directory (eg if it already exists)
-	downloadBinary(getLibraryFileName(AGENTCORE_LIBRARY_NAME),
-	               getAgentCorePlatformVersionDownloadURL(),
-	               INSTALL_DIR);
-	for (var i=0; i < AGENTCORE_PLUGIN_NAMES.length; i++) {
-		downloadBinary(getLibraryFileName(AGENTCORE_PLUGIN_NAMES[i]),
-		               getAgentCorePlatformVersionDownloadURL() + '/plugins',
-		               PLUGINS_DIR);
-	}
-});
+ensureSupportedPlatformOrExit();
+downloadAndExtractTGZ(getAgentCorePlatformVersionDownloadURL(), '.');

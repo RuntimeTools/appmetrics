@@ -14,4 +14,4 @@
 # limitations under the License.
 ###############################################################################
 import datetime
-print (datetime.datetime.now().strftime('%Y%m%d'))
+print (datetime.datetime.now().strftime('%Y%m%d%H%M'))
