@@ -161,6 +161,7 @@ static void StartTheProfiler() {
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 	Isolate *isolate = GetIsolate();
 	if (isolate == NULL) return;
+	NanScope();
 	
 	CpuProfiler *cpu = GetCpuProfiler(isolate);
 	if (cpu == NULL) return;
@@ -177,7 +178,8 @@ static const CpuProfile* StopTheProfiler() {
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 	Isolate *isolate = GetIsolate();
 	if (isolate == NULL) return NULL;
-
+	NanScope();
+	
 	CpuProfiler *cpu = GetCpuProfiler(isolate);
 	if (cpu == NULL) return NULL;
 	
@@ -420,6 +422,6 @@ extern "C" {
 	}
 	
 	NODEPROFPLUGIN_DECL const char* ibmras_monitoring_getVersion() {
-		return "2.0";
+		return "3.0";
 	}
 }
