@@ -191,7 +191,7 @@ function isAppInnerRequire() {
     var trace = {};
     Error.captureStackTrace(trace);
     var callerLine = trace.stack.split('\n'); // This line contains 'node_modules' reference for generic libs
-    return callerLine[9].indexOf('node_modules') == -1;
+    return callerLine[6].indexOf('node_modules') == -1;
 }
 
 // not used right now, but may be needed in the future:
