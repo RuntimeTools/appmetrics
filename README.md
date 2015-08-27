@@ -7,6 +7,7 @@ Additionally the data can be visualized in an Eclipse IDE using the [IBM Monitor
 See https://www.ibm.com/developerworks/java/jdk/tools/healthcenter/ for more details.
 
 Node Application Metrics provides the following built-in data collection sources:
+
  Source           | Description
 :-----------------|:-------------------------------------------
  Environment      | Machine and runtime environment information
@@ -206,7 +207,7 @@ Find below some possible problem scenarios and corresponding diagnostic steps. U
 ### Checking Node Application Metrics has started
 By default, a message similar to the following will be written to console output when Node Application Metrics starts:
 
-    [Fri Aug 21 09:36:58 2015] com.ibm.diagnostics.healthcenter.loader INFO: Node Application Metrics 1.0.1-201508210934 (Agent Core 3.0.5.201508210934)
+`[Fri Aug 21 09:36:58 2015] com.ibm.diagnostics.healthcenter.loader INFO: Node Application Metrics 1.0.1-201508210934 (Agent Core 3.0.5.201508210934)`
 
 ### Error "Conflicting appmetrics module was already loaded by node-hc. Try running with node instead." when using `node-hc`
 This error indicates you are using `node-hc` to run an application that uses the Node Application Metrics monitoring API (see *[Modifying your application to use the local installation](#run-local)*). Resolve this by using `node` to run the application instead. **Alternatively**, you could remove (or disable temporarily) the use of the Node Application Metrics monitoring API in your application.
