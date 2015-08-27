@@ -55,8 +55,11 @@ files.forEach(function (fileName) {
  */
 aspect.after(module.__proto__, 'require', function(obj, args, ret) {
 	for (var i = 0; i < probes.length; i++) {
-		if (probes[i].name === args[0] || probes[i].name === 'trace') {
+		if (probes[i].name === args[0]) {
 			probes[i].attach(args[0], ret, module.exports);
+		}
+		if (probes[i].name === 'trace') {
+			ret = probes[i].attach(args[0], ret);
 		}
 	}
 	return ret;
