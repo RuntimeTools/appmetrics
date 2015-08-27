@@ -160,6 +160,10 @@ for (var prop in agent) {
 
 // Export emit() API for JS data providers
 module.exports.emit = function (topic, data) {
+	if (typeof(this.api) !== 'undefined') {
+		// We have a listener, so fast path the notification to them
+		this.api.raiseLocalEvent(topic, data);
+	}
 	data = serializer.serialize(data);
 	agent.nativeEmit(topic, String(data));
 };

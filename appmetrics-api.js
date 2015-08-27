@@ -170,6 +170,10 @@ function API(agent, appmetrics) {
     };
 
     agent.localConnect(function events(topic, data) {
+    	if (topic === 'api') {
+    		// API events are passed by copy
+    		return;
+    	}
        	message = data.toString();
        	raiseEvent(topic, message);
     });
@@ -194,5 +198,10 @@ API.prototype.disable = function (data) {
 API.prototype.getEnvironment = function() {
 	var that = this;
 	return that.environment;
+};
+
+API.prototype.raiseLocalEvent = function(topic, data) {
+	var self = this;
+	self.emit(topic, data);
 };
 
