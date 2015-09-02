@@ -52,7 +52,7 @@ $ npm install appmetrics
 ```
 A local install will put the module inside "*`./node_modules` of the current package root*" (see the [npm documentation][4] for more information); usually this is the current directory and in that case the module installation directory will be `./node_modules/appmetrics`.
 
-**When installed globally** you can access monitoring data via the Health Center client (but not the API) by using the `node-hc` command-line utility (see *[The `node-hc` command](#run-global)).
+**When installed globally** you can access monitoring data via the Health Center client (but not the API) by using the `node-hc` command-line utility (see *[The `node-hc` command](#run-global)*).
 
 To perform a global install:
 ```sh
@@ -151,7 +151,7 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
 * `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
-* `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[appmetrics.setConfig() ](#setconfig)*) for more information.
+* `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[appmetrics.setConfig()](#setconfig)* ) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
