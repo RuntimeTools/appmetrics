@@ -151,7 +151,7 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
 * `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
-* `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[appmetrics.setConfig()](#setconfig)* ) for more information.
+* `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
@@ -159,7 +159,7 @@ The following data types are disabled by default: `profiling`, `requests`, `trac
 Disable data generation of the specified data type.
 * `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mysql`, `requests` and `trace` are currently supported.
 
-<a name=“setconfig”></a>
+<a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
 Set the configuration to be applied to a specific data type. The configuration available is specific to the data type.
 * `type` (String) the type of event to apply the configuration to.
@@ -301,7 +301,7 @@ This project is released under an Apache 2.0 open source license, however it has
 The npm package for this project uses a semver-parsable X.0.Z version number for releases, where X is incremented for breaking changes to the public API described in this document and Z is incremented for bug fixes **and** for non-breaking changes to the public API that provide new function.
 
 ### Development versions
-Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3].
+Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
 1.0.2
