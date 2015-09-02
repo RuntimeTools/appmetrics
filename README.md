@@ -301,7 +301,7 @@ This project is released under an Apache 2.0 open source license, however it has
 The npm package for this project uses a semver-parsable X.0.Z version number for releases, where X is incremented for breaking changes to the public API described in this document and Z is incremented for bug fixes **and** for non-breaking changes to the public API that provide new function.
 
 ### Development versions
-Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process got to the  [appmetrics wiki][3].
+Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3].
 
 ## Version
 1.0.2
