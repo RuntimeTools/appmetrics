@@ -8,13 +8,18 @@ See https://www.ibm.com/developerworks/java/jdk/tools/healthcenter/ for more det
 
 Node Application Metrics provides the following built-in data collection sources:
 
- Source           | Description
-:-----------------|:-------------------------------------------
- Environment      | Machine and runtime environment information
- CPU              | Process and system CPU
- Memory           | Process and system memory usage
- GC               | Node/V8 garbage collection statistics
- Method profiling | Node/V8 method profiling (disabled by default)
+ Source             | Description
+:-------------------|:-------------------------------------------
+ Environment        | Machine and runtime environment information
+ CPU                | Process and system CPU
+ Memory             | Process and system memory usage
+ GC                 | Node/V8 garbage collection statistics
+ Function profiling | Node/V8 function profiling (disabled by default)
+ HTTP               | HTTP request calls made of the application
+ MySQL              | MySQL queries made by the application
+ MongoDB            | MongoDB queries made by the application
+ Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
+ Function trace     | Tracing of application function calls that occur during a request (disabled by default)
 
 ## Getting Started
 ### Prerequisites
@@ -143,24 +148,41 @@ Starts the appmetrics monitoring agent. If the agent is already running this fun
 ### appmetrics.stop()
 Stops the appmetrics monitoring agent. If the agent is not running this function does nothing.
 
-### appmetrics.monitor()
-Creates a Node Application Metrics agent client instance. This can subsequently be used to control data collection, request data, and subscribe to data events. This function will start the appmetrics monitoring agent if it is not already running.
+### appmetrics.enable(`type`, `config`)
+Enable data generation of the specified data type.
+* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[appmetrics.setConfig() ](#setconfig)*) for more information.
+
+The following data types are disabled by default: `profiling`, `requests`, `trace`
+
+### appmetrics.disable(`type`)
+Disable data generation of the specified data type.
+* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mysql`, `requests` and `trace` are currently supported.
+
+<a name=“setconfig”></a>
+### appmetrics.setConfig(`type`, `config`)
+Set the configuration to be applied to a specific data type. The configuration available is specific to the data type.
+* `type` (String) the type of event to apply the configuration to.
+* `config` (Object) key value pairs of configurations to be applied to the specified event. The available configuration options are as follows:
+
+ Source     | Configuration            | Effect
+:-----------|:-------------------------|:-----------------------------
+ `http`     | `filters`                | (Array) of URL filter Objects consisting of: 
+            |                          | `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
+            |                          | `to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.             
+ `requests` | `excludeModules`         | (Array) of String names of modules to exclude from request tracking.
+ `trace`    | `includeModules`         | (Array) of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
 
 ### appmetrics.emit(`type`, `data`)
 Allows custom monitoring events to be added into the Node Application Metrics agent.
 * `type` (String) the name you wish to use for the data. A subsequent event of that type will be raised, allowing callbacks to be registered for it.
 * `data` (Object) the data to be made available with the event. The object must not contain circular references, and by convention should contain a `time` value representing the milliseconds when the event occurred.
 
+### appmetrics.monitor()
+Creates a Node Application Metrics agent client instance. This can subsequently be used to get environment data and subscribe to data events. This function will start the appmetrics monitoring agent if it is not already running.
+
 ### appmetrics.monitor.getEnvironment()
 Requests an object containing all of the available environment information for the running application.
-
-### appmetrics.monitor.enable(`type`)
-Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Only 'profiling' is currently supported.
-
-### appmetrics.monitor.disable(`type`)
-Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Only 'profiling' is currently supported.
 
 ### Event: 'cpu'
 Emitted when a CPU monitoring sample is taken.
@@ -200,6 +222,43 @@ Emitted when a profiling sample is available from the underlying V8 runtime.
         * `file` (String) the file in which this function is defined.
         * `line` (Number) the line number in the file.
         * `count` (Number) the number of samples for this function.
+
+### Event: 'http'
+Emitted when a HTTP request is made of the application.
+* `data` (Object) the data from the HTTP request:
+    * `time` (Number) the milliseconds when the request was made. This can be converted to a Date using `new Date(data.time)`.
+    * `method` (String) the HTTP method used for the request.
+    * `url` (String) the URL on which the request was made.
+    * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
+
+### Event: 'mysql'
+Emitted when a MySQL query is made using the `mysql` module.
+* `data` (Object) the data from the MySQL query:
+    * `time` (Number) the milliseconds when the MySQL query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the MySQL database.
+    * `duration` (Number) the time taken for the MySQL query to be responded to in ms.
+
+### Event: 'mongo'
+Emitted when a MongoDB query is made using the `mongodb` module.
+* `data` (Object) the data from the MongoDB request:
+    * `time` (Number) the milliseconds when the MongoDB query was made. This can be converted to a Date using `new Date(data.time)`
+    * `query` (String) the query made of the MongoDB database.
+    * `duration` (Number) the time taken for the MongoDB query to be responded to in ms.
+
+### Event: 'request'
+Emitted when a request is made of the application that involves one or more monitored application level events. Request events are disabled by default.
+* `data` (Object) the data from the request:
+    * `time` (Number) the milliseconds when the request occurred. This can be converted to a Date using `new Date(data.time)`.
+    * `type` (String) The type of the request event. This can currently be set to 'HTTP' or 'DB'.
+    * `name` (String) The name of the request event. This is the request task, eg. the url, or the method being used.
+    * `request` (Object) the detailed data for the root request event:
+        * `type` (String) The type of the request event. This can currently be set to 'HTTP' or 'DB'.
+        * `name` (String) The name of the request event. This is the request task, eg. the url, or the method being used.
+        * `context` (Object) A map of any additional context information for the request event.
+        * `stack` (String) A stack trace for the event call.
+        * `children` (Array) An array of child request events that occurred as part of the overall request event. Child request events may include function trace entries, which will have a `type` of null.
+        * `duration` (Number) the time taken for the request to complete in ms.
+    * `duration` (Number) the time taken for the overall request to complete in ms.
 
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
@@ -245,9 +304,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process got to the  [appmetrics wiki][3].
 
 ## Version
-1.0.1
+1.0.2
 
 ## Release History
+`1.0.2` - HTTP, MySQL, MongoDB, request tracking and function tracing support  
 `1.0.1` - Mac OS X support, io.js v2 support  
 `1.0.0` - First release
 
