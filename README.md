@@ -311,7 +311,7 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 `1.0.1` - Mac OS X support, io.js v2 support  
 `1.0.0` - First release
 
-[1]:https://marketplace.eclipse.org/content/ibm-monitoring-and-diagnostic-tools-health-center**
+[1]:https://marketplace.eclipse.org/content/ibm-monitoring-and-diagnostic-tools-health-center
 [2]:http://www-01.ibm.com/support/knowledgecenter/SS3KLZ/com.ibm.java.diagnostics.healthcenter.doc/topics/connecting.html
 [3]:https://github.com/RuntimeTools/appmetrics/wiki
 [4]:https://docs.npmjs.com/files/folders
