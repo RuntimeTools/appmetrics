@@ -48,14 +48,14 @@ HttpProbe.prototype.attach = function(name, target, am) {
 	            var traceUrl = that.filterUrl(req);
 	            if (traceUrl !== '') {
 	            	that.metricsProbeStart(req, res);
-	            	that.requestProbeStart(req, res);
+	            	that.requestProbeStart(traceUrl, res);
+	            	aspect.after(res, 'end',function(obj, args, ret) {
+	            		if (traceUrl !== '') {
+	            			that.metricsProbeEnd(req, res, am);
+	            			that.requestProbeEnd(req, res);
+	            		}
+	            	});
 	            }
-	            aspect.after(res, 'end',function(obj, args, ret) {
-	            	if (traceUrl !== '') {
-	            		that.metricsProbeEnd(req, res, am);
-	            		that.requestProbeEnd(req, res);
-	            	}
-	            });
 	        });
 	    });		
 	}	
@@ -67,8 +67,10 @@ HttpProbe.prototype.attach = function(name, target, am) {
  */
 HttpProbe.prototype.filterUrl = function(req) {
     var resultUrl = url.parse( req.url, true ).pathname;
-    var identifier = req.method + ' ' + resultUrl;
     var filters = this.config.filters;
+    if (filters.length == 0) return resultUrl;
+    
+    var identifier = req.method + ' ' + resultUrl;
     for (var i = 0; i < filters.length; ++i) {
         var filter = filters[i];
         if (filter.regex.test(identifier)) {
@@ -96,13 +98,10 @@ HttpProbe.prototype.metricsEnd = function(req, res, am) {
  * Heavyweight request probes for HTTP requests
  */
 
-HttpProbe.prototype.requestStart = function (req, res, am) {
-    start = Date.now();
+HttpProbe.prototype.requestStart = function (traceUrl, res, am) {
     var reqType = 'HTTP';
-    var reqUrl = url.parse( req.url, true ).pathname;
     // Mark as a root request as this happens due to an external event
-    tr = request.startRequest(reqType, reqUrl, true);
-    tr.setContext({url: reqUrl }); 
+    tr = request.startRequest(reqType, traceUrl, true);
 };
 
 HttpProbe.prototype.requestEnd = function (req, res, am) {
