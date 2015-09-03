@@ -117,7 +117,7 @@ The call to `appmetrics.monitor()` starts the data collection agent, making the 
 
 You should start your application using the `node` command as usual (**not** `node-hc`). 
 
-To use the monitoring to register callbacks and request information about the application:
+You can then use the monitoring object to register callbacks and request information about the application:
 ```js
 monitoring.on('initialized', function (env) {
     env = monitoring.getEnvironment();
@@ -312,7 +312,7 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 `1.0.0` - First release
 
 [1]:https://marketplace.eclipse.org/content/ibm-monitoring-and-diagnostic-tools-health-center
-[2]:http://www-01.ibm.com/support/knowledgecenter/SS3KLZ/com.ibm.java.diagnostics.healthcenter.doc/topics/connecting.html
+[2]:http://www.ibm.com/support/knowledgecenter/SS3KLZ/com.ibm.java.diagnostics.healthcenter.doc/topics/connecting.html
 [3]:https://github.com/RuntimeTools/appmetrics/wiki
 [4]:https://docs.npmjs.com/files/folders
 [5]:https://github.com/RuntimeTools/appmetrics/issues
