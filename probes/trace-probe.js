@@ -173,29 +173,12 @@ function traceMethod( moduleName, target, name ) {
     }
 }
 
-var moduleStackRegexp = /\((.*):\d*:\d*\)/;
-var debug = typeof v8debug === 'object';
-
-function getRootModuleDir() {
-    Error.stackTraceLimit = 40;
-    var trace = {};
-    Error.captureStackTrace(trace);
-    var stack = trace.stack.split('\n');
-    var rootAppModule = stack[stack.length - (debug ? 7 : 8)]; // stack changes depending on debug
-    var match = moduleStackRegexp.exec(rootAppModule);
-    Error.stackTraceLimit = 10;
-    return path.dirname(match[1]);
-}
-
 function isAppInnerRequire() {
     var trace = {};
     Error.captureStackTrace(trace);
     var callerLine = trace.stack.split('\n'); // This line contains 'node_modules' reference for generic libs
     return callerLine[6].indexOf('node_modules') == -1;
 }
-
-// not used right now, but may be needed in the future:
-var rootModuleDir = getRootModuleDir();
 
 function instrumentMethods(moduleName, target) {
     for( var name in target ) {
