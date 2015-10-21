@@ -161,14 +161,14 @@ static void StartTheProfiler() {
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 	Isolate *isolate = GetIsolate();
 	if (isolate == NULL) return;
-	NanScope();
+	Nan::HandleScope scope;
 	
 	CpuProfiler *cpu = GetCpuProfiler(isolate);
 	if (cpu == NULL) return;
 
-	cpu->StartProfiling(NanNew<String>("NodeProfPlugin"), false);
+	cpu->StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked(), false);
 #else
-	CpuProfiler::StartProfiling(NanNew<String>("NodeProfPlugin"));
+	CpuProfiler::StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
 #endif
 }
 
@@ -178,14 +178,14 @@ static const CpuProfile* StopTheProfiler() {
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 	Isolate *isolate = GetIsolate();
 	if (isolate == NULL) return NULL;
-	NanScope();
+	Nan::HandleScope scope;
 	
 	CpuProfiler *cpu = GetCpuProfiler(isolate);
 	if (cpu == NULL) return NULL;
 	
-	return cpu->StopProfiling(NanNew<String>("NodeProfPlugin"));
+	return cpu->StopProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
 #else
-	return CpuProfiler::StopProfiling(NanNew<String>("NodeProfPlugin"));
+	return CpuProfiler::StopProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
 #endif
 }
 
@@ -208,7 +208,7 @@ void OnGatherDataOnV8Thread(uv_timer_s *data, int status) {
 	// isn't running
 	if (!plugin::enabled) return;
 	
-	NanScope();
+	Nan::HandleScope scope;
 	
 	// Get profile
 	const CpuProfile *profile = StopTheProfiler();
