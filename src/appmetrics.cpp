@@ -314,6 +314,7 @@ Listener* listener;
 static void cleanupData(uv_handle_t *handle) {
 
 	MessageData* payload = static_cast<MessageData*>(handle->data);
+	free(payload->data);
 	delete payload->source;
 	delete payload;
 	delete handle;
@@ -332,7 +333,7 @@ static void emitMessage(uv_async_t *handle, int status) {
 	//When a node::Buffer instance is garbage collected and a FreeCallback has not been specified,
 	//data will be disposed of via a call to free(). You must not free the memory space manually
 	//once you have created a Buffer in this way.
-	Local<Object> buffer = Nan::NewBuffer((char*)payload->data, payload->size).ToLocalChecked();
+	Local<Object> buffer = Nan::CopyBuffer((char*)payload->data, payload->size).ToLocalChecked();
 	argv[0] = Nan::New<String>(source).ToLocalChecked();
 	argv[1] = buffer;
 
