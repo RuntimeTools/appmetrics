@@ -329,10 +329,6 @@ static void emitMessage(uv_async_t *handle, int status) {
 	Local<Value> argv[argc];
 	const char * source = (*payload->source).c_str();
 
-	//https://github.com/nodejs/nan/blob/master/doc/buffers.md#api_nan_new_buffer
-	//When a node::Buffer instance is garbage collected and a FreeCallback has not been specified,
-	//data will be disposed of via a call to free(). You must not free the memory space manually
-	//once you have created a Buffer in this way.
 	Local<Object> buffer = Nan::CopyBuffer((char*)payload->data, payload->size).ToLocalChecked();
 	argv[0] = Nan::New<String>(source).ToLocalChecked();
 	argv[1] = buffer;
