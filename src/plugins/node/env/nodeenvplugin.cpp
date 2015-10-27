@@ -34,7 +34,7 @@
 namespace plugin {
 	agentCoreFunctions api;
 	uint32 provid = 0;
-	
+
 	std::string nodeVersion;
 	std::string nodeTag;
 	std::string nodeVendor;
@@ -72,29 +72,29 @@ static std::string ToStdString(Local<String> s) {
 }
 
 static Local<Object> GetProcessObject() {
-	return NanGetCurrentContext()->Global()->Get(NanNew<String>("process"))->ToObject();
+	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("process").ToLocalChecked())->ToObject();
 }
 
 static Local<Object> GetProcessConfigObject() {
-	return NanGetCurrentContext()->Global()->Get(NanNew<String>("process"))->ToObject()->Get(NanNew<String>("config"))->ToObject();
+	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("process").ToLocalChecked())->ToObject()->Get(Nan::New<String>("config").ToLocalChecked())->ToObject();
 
 }
 	
 static std::string GetNodeVersion() {
-	Local<String> version = GetProcessObject()->Get(NanNew<String>("version"))->ToString();
+	Local<String> version = GetProcessObject()->Get(Nan::New<String>("version").ToLocalChecked())->ToString();
 	return ToStdString(version);
 }
 
 static std::string GetNodeTag() {
-	Local<String> tag = GetProcessConfigObject()->Get(NanNew<String>("variables"))->ToObject()->Get(NanNew<String>("node_tag"))->ToString();
+	Local<String> tag = GetProcessConfigObject()->Get(Nan::New<String>("variables").ToLocalChecked())->ToObject()->Get(Nan::New<String>("node_tag").ToLocalChecked())->ToString();
 	return ToStdString(tag);
 }
 
 static std::string GetNodeArguments(const std::string separator="@@@") {
 	std::stringstream ss;
 	Local<Object> process = GetProcessObject();
-	Local<Object> nodeArgv = process->Get(NanNew<String>("execArgv"))->ToObject();
-	int64 nodeArgc = nodeArgv->Get(NanNew<String>("length"))->ToInteger()->Value();
+	Local<Object> nodeArgv = process->Get(Nan::New<String>("execArgv").ToLocalChecked())->ToObject();
+	int64 nodeArgc = nodeArgv->Get(Nan::New<String>("length").ToLocalChecked())->ToInteger()->Value();
 
 	int written = 0;
 	if (nodeArgc > 0) {
@@ -117,7 +117,7 @@ static void GetNodeInformation(uv_async_t *async) {
 static void GetNodeInformation(uv_async_t *async, int status) {
 #endif
 
-	NanScope();
+	Nan::HandleScope scope;
 	plugin::nodeVersion = GetNodeVersion();
 	plugin::nodeTag = GetNodeTag();
 	if (plugin::nodeTag.find("IBMBuild") != std::string::npos) {

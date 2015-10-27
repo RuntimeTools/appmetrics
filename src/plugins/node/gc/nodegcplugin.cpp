@@ -151,7 +151,7 @@ void afterGC(GCType type, GCCallbackFlags flags) {
 	// GC heap stats
 	HeapStatistics hs;
 
-	NanGetHeapStatistics(&hs);
+	Nan::GetHeapStatistics(&hs);
 
 	std::stringstream contentss;
 	contentss << "NodeGCData";
