@@ -295,7 +295,7 @@ This error indicates there was a problem while loading the native part of the mo
 Check:
 
 * Your system has the required version of `libstdc++` installed. You may need to install or update a package in your package manager. If your OS does not supply a package at this version, you may have to install standalone software - consult the documentation or support forums for your OS.
-* If you have an appropriate version of `libstdc++`installed, ensure it is on the system library path, or use a method (such as setting `LD_LIBRARY_PATH` environment variable on Linux) to add the library to the search path.
+* If you have an appropriate version of `libstdc++`installed, ensure it is on the system library path, or use a method (such as setting `LD_LIBRARY_PATH` environment variable on Linux, or LIBPATH environment variable on AIX) to add the library to the search path.
 
 ### No profiling data present for Node.js applications
 Method profiling data is not collected by default, check *[Configuring Node Application Metrics](#config)* for information on how to enable it.
