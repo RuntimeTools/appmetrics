@@ -26,7 +26,7 @@ Node Application Metrics provides the following built-in data collection sources
 
 The Node Application Metrics agent supports the following runtime environments:
 
-* **io.js v2** on:
+* **Node.js v4 and io.js v2** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86)
   * 64-bit runtime on Mac OS X (x64)
@@ -34,6 +34,11 @@ The Node Application Metrics agent supports the following runtime environments:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86)
   * 64-bit or 32-bit runtime on Mac OS X (x64 or x86)
+* **IBM SDK for Node.js 4** on:
+  * 64-bit or 32-bit runtime on Windows (x64 or x86)
+  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
+  * 64-bit or 32-bit runtime on AIX (PPC32, PPC64)
+  * 64-bit runtime on Mac OS X (x64)
 * **IBM SDK for Node.js 1.1 and 1.2** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
@@ -284,6 +289,14 @@ Check:
 
 Note: On Windows, the global module installation directory might be shared between multiple Node.js runtime environments. This can cause problems with globally installed modules with native components, particularly if some of the Node.js runtime environments are 32-bit and others are 64-bit because the native components will only work with those with matching bitness.
 
+### Error "Failed to open library .../libagentcore.so: /usr/lib64/libstdc++.so.6: version `GLIBCXX_3.4.15' not found"
+This error indicates there was a problem while loading the native part of the module or one of its dependent libraries. On non-Windows platforms, `libagentcore.so` depends on a particular (minimum) version of the C runtime library and if it cannot be found this error is the result.
+
+Check:
+
+* Your system has the required version of `libstdc++` installed. You may need to install or update a package in your package manager. If your OS does not supply a package at this version, you may have to install standalone software - consult the documentation or support forums for your OS.
+* If you have an appropriate version of `libstdc++`installed, ensure it is on the system library path, or use a method (such as setting `LD_LIBRARY_PATH` environment variable on Linux, or LIBPATH environment variable on AIX) to add the library to the search path.
+
 ### No profiling data present for Node.js applications
 Method profiling data is not collected by default, check *[Configuring Node Application Metrics](#config)* for information on how to enable it.
 
@@ -304,9 +317,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.0.2
+1.0.3
 
 ## Release History
+`1.0.3` - Node.js v4 support
 `1.0.2` - HTTP, MySQL, MongoDB, request tracking and function tracing support  
 `1.0.1` - Mac OS X support, io.js v2 support  
 `1.0.0` - First release

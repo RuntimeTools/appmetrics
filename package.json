@@ -1,10 +1,12 @@
 {
   "name": "appmetrics",
-  "version": "1.0.2-dev.0",
-  "description": "Node Application Metrics",  
-  "bin": { "node-hc": "bin/appmetrics-cli.js" },
+  "version": "1.0.4-dev.0",
+  "description": "Node Application Metrics",
+  "bin": {
+    "node-hc": "bin/appmetrics-cli.js"
+  },
   "dependencies": {
-    "nan": "^1.8.4",
+    "nan": "2.x",
     "node-gyp": "2.x",
     "tar": "2.x"
   },
@@ -12,14 +14,14 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "install": "node download_licenses.js && node download_binaries.js && node-gyp rebuild"
   },
-  "directories" : {
+  "directories": {
     "licenses": "licenses",
     "lib": "lib",
     "probes": "probes"
   },
-  "repository" : {
-    "type" : "git",
-    "url" : "git://github.com/RuntimeTools/appmetrics.git"
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/RuntimeTools/appmetrics.git"
   },
   "author": "",
   "license": "Apache-2.0 and proprietary"
