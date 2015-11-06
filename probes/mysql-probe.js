@@ -31,7 +31,6 @@ MySqlProbe.prototype.attach = function( name, target, am ) {
 	aspect.after(target, 'createConnection', function(target, args, rc) {
         aspect.before( rc, 'query',
             function(target, methodArgs) {
-        	    var req;
         		var method = 'query';
         		that.metricsProbeStart(method, methodArgs);
         		that.requestProbeStart(method, methodArgs);
@@ -57,14 +56,13 @@ MySqlProbe.prototype.attach = function( name, target, am ) {
  * 		duration:	the time for the request to respond
  */
 MySqlProbe.prototype.metricsEnd = function(method, methodArgs, am) {
-	am.emit('mysql', {time: start, query: JSON.stringify(methodArgs[0]), duration: Date.now() - start});
+	am.emit('mysql', {time: start, query: JSON.stringify(methodArgs[0]), duration: this.getDuration()});
 };
 
 /*
  * Heavyweight request probes for MySQL queries
  */
 MySqlProbe.prototype.requestStart = function (method, methodArgs) {
-	start = Date.now();
 	req = request.startRequest( 'DB', "query" );
 	req.setContext({sql: JSON.stringify(methodArgs[0])});
 };

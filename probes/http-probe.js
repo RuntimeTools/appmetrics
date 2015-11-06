@@ -33,7 +33,6 @@ HttpProbe.prototype.attach = function(name, target, am) {
 		if(target.__probeAttached__) return;
 	    target.__probeAttached__ = true;
 	    var methods = ['on', 'addListener'];
-	    var start;
 	    aspect.before(target.Server.prototype, methods,
 	      function(obj, args) {
 	        if(args[0] !== 'request') return;
@@ -42,8 +41,6 @@ HttpProbe.prototype.attach = function(name, target, am) {
 	        aspect.aroundCallback(args, function(obj, args) {
 	            var req = args[0];
 	            var res = args[1];
-	            var reqDomain;
-	            var tr;
 	            // Filter out urls where filter.to is ''
 	            var traceUrl = that.filterUrl(req);
 	            if (traceUrl !== '') {
@@ -91,7 +88,7 @@ HttpProbe.prototype.filterUrl = function(req) {
  */
 
 HttpProbe.prototype.metricsEnd = function(req, res, am) {
-	am.emit('http', {time: start, method: req.method, url: req.url, duration: Date.now() - start});
+	am.emit('http', {time: start, method: req.method, url: req.url, duration: this.getDuration()});
 };
 
 /*
