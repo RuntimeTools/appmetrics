@@ -54,7 +54,6 @@ MongoProbe.prototype.attach = function( name, target, am ) {
     target.__ddProbeAttached__ = true;
 
     var coll = target['Collection'].prototype;
-    var req;
     var method = 'find';
     aspect.around( coll, "find",
         function(target, methodArgs){
@@ -99,14 +98,13 @@ MongoProbe.prototype.attach = function( name, target, am ) {
  * 		duration:	the time for the request to respond
  */
 MongoProbe.prototype.metricsEnd = function(method, methodArgs, am) {
-	am.emit('mongo', {time: start, query: JSON.stringify(methodArgs[0]), duration: Date.now() - start});
+	am.emit('mongo', {time: start, query: JSON.stringify(methodArgs[0]), duration: this.getDuration()});
 };
 
 /*
- * Heavyweight request probes for MonngoDB queries
+ * Heavyweight request probes for MongoDB queries
  */
 MongoProbe.prototype.requestStart = function (target, method, methodArgs, am) {
-	start = Date.now();
 	req = request.startRequest( 'DB', method + "("+target.collectionName+")" );
 	req.setContext( { query: JSON.stringify(methodArgs[0]) } );
 };
