@@ -62,19 +62,19 @@ PostgresProbe.prototype.attach = function( name, target, am ) {
     target.__ddProbeAttached__ = true;
 
     //After the client has been instantiated
-    aspect.after(target, 'Client', function(clientTarget, args, rc) {
+    aspect.after(target, 'Client', function(clientTarget, args, rc, methodName) {
 
         //After a connection has been established on the client
-        aspect.after(clientTarget, 'connect', function(connectionTarget, args, rc) {
+        aspect.after(clientTarget, 'connect', function(connectionTarget, args, rc, methodName) {
                        
             //Before the query hits, start monitoring then finish when the result is calledback
             aspect.before(connectionTarget, 'query',
-                function(target, methodArgs) {
+                function(target, methodArgs, methodName) {
                     var method = 'query';
                     that.metricsProbeStart(method, methodArgs);
                     that.requestProbeStart(method, methodArgs);
                     if (aspect.findCallbackArg(methodArgs) != undefined) {
-                        aspect.aroundCallback( methodArgs, function(target,args){
+                        aspect.aroundCallback(methodArgs, function(target,args,methodName){
 
                             //Here, the query has executed and returned it's callback. Then
                             //stop monitoring
