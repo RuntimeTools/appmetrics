@@ -260,7 +260,7 @@ Emitted when a request is made of the application that involves one or more moni
         * `type` (String) The type of the request event. This can currently be set to 'HTTP' or 'DB'.
         * `name` (String) The name of the request event. This is the request task, eg. the url, or the method being used.
         * `context` (Object) A map of any additional context information for the request event.
-        * `stack` (String) A stack trace for the event call.
+        * `stack` (String) An optional stack trace for the event call.
         * `children` (Array) An array of child request events that occurred as part of the overall request event. Child request events may include function trace entries, which will have a `type` of null.
         * `duration` (Number) the time taken for the request to complete in ms.
     * `duration` (Number) the time taken for the overall request to complete in ms.
