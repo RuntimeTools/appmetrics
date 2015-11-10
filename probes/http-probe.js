@@ -44,13 +44,11 @@ HttpProbe.prototype.attach = function(name, target, am) {
 	            // Filter out urls where filter.to is ''
 	            var traceUrl = that.filterUrl(req);
 	            if (traceUrl !== '') {
-	            	that.metricsProbeStart(req, res);
-	            	that.requestProbeStart(traceUrl, res);
+	            	that.metricsProbeStart(req.method, traceUrl);
+	            	that.requestProbeStart(req.method, traceUrl);
 	            	aspect.after(res, 'end',function(obj, args, ret) {
-	            		if (traceUrl !== '') {
-	            			that.metricsProbeEnd(req, res, am);
-	            			that.requestProbeEnd(req, res);
-	            		}
+            			that.metricsProbeEnd(req.method, traceUrl, am);
+            			that.requestProbeEnd(req.method, traceUrl);
 	            	});
 	            }
 	        });
@@ -87,23 +85,22 @@ HttpProbe.prototype.filterUrl = function(req) {
  * 		duration:	the time for the request to respond
  */
 
-HttpProbe.prototype.metricsEnd = function(req, res, am) {
-	am.emit('http', {time: start, method: req.method, url: req.url, duration: this.getDuration()});
+HttpProbe.prototype.metricsEnd = function(method, url, am) {
+	am.emit('http', {time: start, method: method, url: url, duration: this.getDuration()});
 };
 
 /*
  * Heavyweight request probes for HTTP requests
  */
 
-HttpProbe.prototype.requestStart = function (traceUrl, res, am) {
+HttpProbe.prototype.requestStart = function (method, url, am) {
     var reqType = 'HTTP';
     // Mark as a root request as this happens due to an external event
-    tr = request.startRequest(reqType, traceUrl, true);
+    tr = request.startRequest(reqType, url, true);
 };
 
-HttpProbe.prototype.requestEnd = function (req, res, am) {
-	var reqUrl = url.parse( req.url, true ).pathname;
-    tr.stop({url: reqUrl });
+HttpProbe.prototype.requestEnd = function (method, url, am) {
+    tr.stop({url: url });
 };
 	
 /*
