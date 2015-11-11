@@ -67,7 +67,7 @@ PostgresProbe.prototype.attach = function( name, target, am ) {
         //After a connection has been established on the client
         aspect.after(clientTarget, 'connect', function(connectionTarget, args, rc, methodName) {
                        
-            //Before the query hits, start monitoring then finish when the result is calledback
+            //Before the query hits, start monitoring
             aspect.before(connectionTarget, 'query',
                 function(target, methodArgs, methodName) {
                     var method = 'query';
@@ -78,12 +78,6 @@ PostgresProbe.prototype.attach = function( name, target, am ) {
 
                             //Here, the query has executed and returned it's callback. Then
                             //stop monitoring
-                            console.log("POSTGRES QUERY RETURNED");
-                            console.log("RESULT (within postgres-probe.js):");
-                            console.log("--------------------------------------");
-                            console.log(args);
-                            console.log("--------------------------------------");
-
                             that.metricsProbeEnd(method, methodArgs, am);
                             that.requestProbeEnd(method, methodArgs);
                         });
@@ -97,7 +91,7 @@ PostgresProbe.prototype.attach = function( name, target, am ) {
 };
 
 /*
- * Lightweight metrics probe for MySQL queries
+ * Lightweight metrics probe for Postgres queries
  * 
  * These provide:
  * 		time:		time event started
@@ -109,7 +103,7 @@ PostgresProbe.prototype.metricsEnd = function(method, methodArgs, am) {
 };
 
 /*
- * Heavyweight request probes for MySQL queries
+ * Heavyweight request probes for Postgres queries
  */
 PostgresProbe.prototype.requestStart = function (method, methodArgs) {
 	 req = request.startRequest( 'DB', "query" );
