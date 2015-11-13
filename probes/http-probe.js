@@ -58,10 +58,21 @@ HttpProbe.prototype.attach = function(name, target, am) {
 };
 
 /*
+ * Custom req.url parser that strips out any trailing query
+ */
+var parse = function (url) {
+	['?','#'].forEach(function (separator)  {
+		var index = url.indexOf(separator);
+		if (index !== -1) url = url.substring(0, index);
+	});
+	return url;
+};
+
+/*
  * Ignore requests for URLs which we've been configured via regex to ignore
  */
 HttpProbe.prototype.filterUrl = function(req) {
-    var resultUrl = url.parse( req.url, true ).pathname;
+    var resultUrl = parse(req.url);
     var filters = this.config.filters;
     if (filters.length == 0) return resultUrl;
     
