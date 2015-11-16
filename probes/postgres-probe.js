@@ -90,6 +90,7 @@ PostgresProbe.prototype.attach = function( name, target, am ) {
     return target;
 };
 
+
 /*
  * Lightweight metrics probe for Postgres queries
  * 
@@ -99,7 +100,7 @@ PostgresProbe.prototype.attach = function( name, target, am ) {
  * 		duration:	the time for the request to respond
  */
 PostgresProbe.prototype.metricsEnd = function(method, methodArgs, am) {
-	am.emit('postgres', {time: start, query: JSON.stringify(methodArgs[0]), duration: this.getDuration()});
+	am.emit('postgres', {time: start, query: methodArgs[0], duration: this.getDuration()});
 };
 
 /*
@@ -107,11 +108,11 @@ PostgresProbe.prototype.metricsEnd = function(method, methodArgs, am) {
  */
 PostgresProbe.prototype.requestStart = function (method, methodArgs) {
 	 req = request.startRequest( 'DB', "query" );
-	 req.setContext({sql: JSON.stringify(methodArgs[0])});
+	 req.setContext({sql: methodArgs[0]});
 };
 
 PostgresProbe.prototype.requestEnd = function (method, methodArgs) {
-	req.stop({sql: JSON.stringify(methodArgs[0])});
+	req.stop({sql: methodArgs[0]});
 };
 
 module.exports = PostgresProbe;

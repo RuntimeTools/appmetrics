@@ -18,6 +18,7 @@ Node Application Metrics provides the following built-in data collection sources
  HTTP               | HTTP request calls made of the application
  MySQL              | MySQL queries made by the application
  MongoDB            | MongoDB queries made by the application
+ PostgreSQL         | PostgreSQL queries made by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
 
@@ -155,14 +156,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'postgresql', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mysql`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mysql`, `postgresql`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -264,6 +265,13 @@ Emitted when a request is made of the application that involves one or more moni
         * `children` (Array) An array of child request events that occurred as part of the overall request event. Child request events may include function trace entries, which will have a `type` of null.
         * `duration` (Number) the time taken for the request to complete in ms.
     * `duration` (Number) the time taken for the overall request to complete in ms.
+
+### Event: 'postgres'
+Emitted when a PostgreSQL query is made to the `pg` module.
+* `data` (Object) the data from the PostgreSQL query:
+    * `time` (Number) the milliseconds when the PostgreSQL query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the PostgreSQL database.
+    * `duration` (Number) the time taken for the PostgreSQL query to be responded to in ms.
 
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
