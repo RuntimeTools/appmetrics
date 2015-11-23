@@ -53,7 +53,9 @@ files.forEach(function (fileName) {
  * Patch the module require function to run the probe attach function
  * for any matching module. This loads the monitoring probes into the modules
  */
-aspect.after(module.__proto__, 'require', function(obj, args, ret) {
+var data = {};
+
+aspect.after(module.__proto__, 'require', data, function(obj, methodName, args, context, ret) {
 	for (var i = 0; i < probes.length; i++) {
 		if (probes[i].name === args[0]) {
 			probes[i].attach(args[0], ret, module.exports);

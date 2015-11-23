@@ -17,37 +17,38 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
+var am = require('appmetrics');
 
 function MongoProbe() {
 	Probe.call(this, 'mongodb');
 }
 util.inherits(MongoProbe, Probe);
 
-MongoProbe.prototype.aspectCollectionMethod = function(coll, method, am) {
+MongoProbe.prototype.aspectCollectionMethod = function(coll, method) {
 	var that = this;
     var req;
     aspect.around( coll, method,
-        function(target, methodArgs) {
-			that.metricsProbeStart(target, method, methodArgs);
-			that.requestProbeStart(target, method, methodArgs);
+        function(target, methodName, methodArgs, probeData) {
+			that.metricsProbeStart(probeData, target, method, methodArgs);
+			that.requestProbeStart(probeData, target, method, methodArgs);
             if (aspect.findCallbackArg(methodArgs) != undefined) {
-                aspect.aroundCallback( methodArgs, function(target,args){
-                	that.metricsProbeEnd(method, methodArgs, am);
-                	that.requestProbeEnd(method, methodArgs);
+                aspect.aroundCallback( methodArgs, probeData, function(target,args, probeData){
+                	that.metricsProbeEnd(probeData, method, methodArgs);
+                	that.requestProbeEnd(probeData, method, methodArgs);
                 } );
             } 
-    },
-        function(target, methodArgs, rc) {
+    	},
+        function(target, methodName, methodArgs, probeData, rc) {
             if (aspect.findCallbackArg(methodArgs) == undefined) {
-            	that.metricsProbeEnd(method, methodArgs, am);
-            	that.requestProbeEnd(method, methodArgs);
+            	that.metricsProbeEnd(probeData, method, methodArgs);
+            	that.requestProbeEnd(probeData, method, methodArgs);
             }
             return rc;
     	}
     );
 }
 
-MongoProbe.prototype.attach = function( name, target, am ) {
+MongoProbe.prototype.attach = function(name, target) {
 	var that = this;
     if( name != "mongodb" ) return target;
     if(target.__ddProbeAttached__) return target;
@@ -56,34 +57,34 @@ MongoProbe.prototype.attach = function( name, target, am ) {
     var coll = target['Collection'].prototype;
     var method = 'find';
     aspect.around( coll, "find",
-        function(target, methodArgs){
-    		that.metricsProbeStart(target, method, methodArgs, am);
-    		that.requestProbeStart(target, method, methodArgs, am);
+        function(target, methodName, methodArgs, probeData){
+    		that.metricsProbeStart(probeData, target, method, methodArgs);
+    		that.requestProbeStart(probeData, target, method, methodArgs);
     	},
-        function(target, findArgs, rc){
+        function(target, methodName, findArgs, probeData, rc){
             if (rc == undefined) {
-            	that.metricsProbeEnd(method, findArgs, am);
-            	that.requestProbeEnd(method, findArgs, am);
+            	that.metricsProbeEnd(probeData, method, findArgs);
+            	that.requestProbeEnd(probeData, method, findArgs);
             } else {
-                aspect.before( rc, "toArray", function(target, args){
-                    aspect.aroundCallback( args, function(target, args){
-                    	that.metricsProbeEnd(method, findArgs, am);
-                    	that.requestProbeEnd(method, findArgs, am);
+                aspect.before( rc, "toArray", function(target, methodName, args, context){
+                    aspect.aroundCallback( args, probeData, function(target, args, probeData){
+                    	that.metricsProbeEnd(probeData, method, findArgs);
+                    	that.requestProbeEnd(probeData, method, findArgs);
                     });
                 });
             }
             return rc;
       });
 
-    that.aspectCollectionMethod(coll, "insert", am);
-    that.aspectCollectionMethod(coll, "save", am);
-    that.aspectCollectionMethod(coll, "update", am);
-    that.aspectCollectionMethod(coll, "remove", am);
-    that.aspectCollectionMethod(coll, "findOne", am);
-    that.aspectCollectionMethod(coll, "count", am);
-    that.aspectCollectionMethod(coll, "findAndModify", am);
-    that.aspectCollectionMethod(coll, "findAndRemove", am);
-    that.aspectCollectionMethod(coll, "aggregate", am);
+    that.aspectCollectionMethod(coll, "insert");
+    that.aspectCollectionMethod(coll, "save");
+    that.aspectCollectionMethod(coll, "update");
+    that.aspectCollectionMethod(coll, "remove");
+    that.aspectCollectionMethod(coll, "findOne");
+    that.aspectCollectionMethod(coll, "count");
+    that.aspectCollectionMethod(coll, "findAndModify");
+    that.aspectCollectionMethod(coll, "findAndRemove");
+    that.aspectCollectionMethod(coll, "aggregate");
 
     return target;
 
@@ -97,20 +98,21 @@ MongoProbe.prototype.attach = function( name, target, am ) {
  * 		query:		the query itself
  * 		duration:	the time for the request to respond
  */
-MongoProbe.prototype.metricsEnd = function(method, methodArgs, am) {
-	am.emit('mongo', {time: start, query: JSON.stringify(methodArgs[0]), duration: this.getDuration()});
+MongoProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
+	probeData.timer.stop();
+	am.emit('mongo', {time: probeData.timer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: probeData.timer.timeDelta});
 };
 
 /*
  * Heavyweight request probes for MongoDB queries
  */
-MongoProbe.prototype.requestStart = function (target, method, methodArgs, am) {
-	req = request.startRequest( 'DB', method + "("+target.collectionName+")" );
-	req.setContext( { query: JSON.stringify(methodArgs[0]) } );
+MongoProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
+	probeData.req = request.startRequest( 'DB', method + "("+target.collectionName+")", false, probeData.timer );
+	probeData.req.setContext( { query: JSON.stringify(methodArgs[0]) } );
 };
 
-MongoProbe.prototype.requestEnd = function (method, methodArgs, am) {
-	req.stop( { query: JSON.stringify(methodArgs[0]) } );
+MongoProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
+	probeData.req.stop( { query: JSON.stringify(methodArgs[0]) } );
 };
 
 module.exports = MongoProbe;
