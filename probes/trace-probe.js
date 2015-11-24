@@ -15,7 +15,6 @@
  *******************************************************************************/
 var Probe = require('../lib/probe.js');
 var request = require('../lib/request.js');
-var aspect = require('../lib/aspect');
 var util = require('util');
 var path = require('path');
 

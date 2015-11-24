@@ -17,27 +17,29 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
+var am = require('appmetrics');
 
 function MySqlProbe() {
 	Probe.call(this, 'mysql');
 }
 util.inherits(MySqlProbe, Probe);
 
-MySqlProbe.prototype.attach = function( name, target, am ) {
+MySqlProbe.prototype.attach = function(name, target) {
 	var that = this;
     if( name != "mysql" ) return target;
     target.__ddProbeAttached__ = true;
     
-	aspect.after(target, 'createConnection', function(target, args, rc) {
+    var data = {};
+	aspect.after(target, 'createConnection', data, function(target, methodName, args, probeData, rc ) {
         aspect.before( rc, 'query',
-            function(target, methodArgs) {
+            function(target, methodName, methodArgs, probeData) {
         		var method = 'query';
-        		that.metricsProbeStart(method, methodArgs);
-        		that.requestProbeStart(method, methodArgs);
+        		that.metricsProbeStart(probeData, method, methodArgs);
+        		that.requestProbeStart(probeData, method, methodArgs);
             	if (aspect.findCallbackArg(methodArgs) != undefined) {
-            		aspect.aroundCallback( methodArgs, function(target,args){
-            			that.metricsProbeEnd(method, methodArgs, am);
-            			that.requestProbeEnd(method, methodArgs);
+            		aspect.aroundCallback( methodArgs, probeData, function(target,args){
+            			that.metricsProbeEnd(probeData, method, methodArgs);
+            			that.requestProbeEnd(probeData, method, methodArgs);
             		});
             	};
             }
@@ -55,20 +57,22 @@ MySqlProbe.prototype.attach = function( name, target, am ) {
  * 		query:		The SQL executed
  * 		duration:	the time for the request to respond
  */
-MySqlProbe.prototype.metricsEnd = function(method, methodArgs, am) {
-	am.emit('mysql', {time: start, query: JSON.stringify(methodArgs[0]), duration: this.getDuration()});
+MySqlProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
+	probeData.timer.stop();
+	eventTimer = probeData.timer;
+	am.emit('mysql', {time: eventTimer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: eventTimer.timeDelta});
 };
 
 /*
  * Heavyweight request probes for MySQL queries
  */
-MySqlProbe.prototype.requestStart = function (method, methodArgs) {
-	req = request.startRequest( 'DB', "query" );
-	req.setContext({sql: JSON.stringify(methodArgs[0])});
+MySqlProbe.prototype.requestStart = function (probeData, method, methodArgs) {
+	probeData.req = request.startRequest( 'DB', "query", false, probeData.timer );
+	probeData.req.setContext({sql: JSON.stringify(methodArgs[0])});
 };
 
-MySqlProbe.prototype.requestEnd = function (method, methodArgs) {
-	req.stop({sql: JSON.stringify(methodArgs[0])});
+MySqlProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
+	probeData.req.stop({sql: JSON.stringify(methodArgs[0])});
 };
 
 module.exports = MySqlProbe;

@@ -18,6 +18,7 @@ var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
 var url = require('url');
+var am = require('appmetrics');
 
 function HttpProbe() {
 	Probe.call(this, 'http');
@@ -27,43 +28,53 @@ function HttpProbe() {
 }
 util.inherits(HttpProbe, Probe);
 
-HttpProbe.prototype.attach = function(name, target, am) {
+HttpProbe.prototype.attach = function(name, target) {
 	var that = this;
 	if( name == 'http' ) {
 		if(target.__probeAttached__) return;
 	    target.__probeAttached__ = true;
 	    var methods = ['on', 'addListener'];
+	    
 	    aspect.before(target.Server.prototype, methods,
-	      function(obj, args) {
+	      function(obj, methodName, args, probeData) {
 	        if(args[0] !== 'request') return;
 	        if(obj.__httpProbe__) return;
 	        obj.__httpProbe__ = true;
-	        aspect.aroundCallback(args, function(obj, args) {
-	            var req = args[0];
+	        aspect.aroundCallback(args, probeData, function(obj, args, probeData) {
+	            var httpReq = args[0];
 	            var res = args[1];
 	            // Filter out urls where filter.to is ''
-	            var traceUrl = that.filterUrl(req);
+	            var traceUrl = that.filterUrl(httpReq);
 	            if (traceUrl !== '') {
-	            	that.metricsProbeStart(req, res);
-	            	that.requestProbeStart(traceUrl, res);
-	            	aspect.after(res, 'end',function(obj, args, ret) {
-	            		if (traceUrl !== '') {
-	            			that.metricsProbeEnd(req, res, am);
-	            			that.requestProbeEnd(req, res);
-	            		}
+	            	that.metricsProbeStart(probeData, httpReq.method, traceUrl);
+	            	that.requestProbeStart(probeData, httpReq.method, traceUrl);
+	                aspect.after(res, 'end', probeData, function(obj, methodName, args, probeData, ret) {
+	            		that.metricsProbeEnd(probeData, httpReq.method, traceUrl);
+	            		that.requestProbeEnd(probeData, httpReq.method, traceUrl);
 	            	});
 	            }
 	        });
-	    });		
+	    });
 	}	
 	return target;
+};
+
+/*
+ * Custom req.url parser that strips out any trailing query
+ */
+var parse = function (url) {
+	['?','#'].forEach(function (separator)  {
+		var index = url.indexOf(separator);
+		if (index !== -1) url = url.substring(0, index);
+	});
+	return url;
 };
 
 /*
  * Ignore requests for URLs which we've been configured via regex to ignore
  */
 HttpProbe.prototype.filterUrl = function(req) {
-    var resultUrl = url.parse( req.url, true ).pathname;
+    var resultUrl = parse(req.url);
     var filters = this.config.filters;
     if (filters.length == 0) return resultUrl;
     
@@ -87,23 +98,23 @@ HttpProbe.prototype.filterUrl = function(req) {
  * 		duration:	the time for the request to respond
  */
 
-HttpProbe.prototype.metricsEnd = function(req, res, am) {
-	am.emit('http', {time: start, method: req.method, url: req.url, duration: this.getDuration()});
+HttpProbe.prototype.metricsEnd = function(probeData, method, url) {
+	probeData.timer.stop();
+	am.emit('http', {time: probeData.timer.startTimeMillis, method: method, url: url, duration: probeData.timer.timeDelta});
 };
 
 /*
  * Heavyweight request probes for HTTP requests
  */
 
-HttpProbe.prototype.requestStart = function (traceUrl, res, am) {
+HttpProbe.prototype.requestStart = function (probeData, method, url) {
     var reqType = 'HTTP';
     // Mark as a root request as this happens due to an external event
-    tr = request.startRequest(reqType, traceUrl, true);
+    probeData.req = request.startRequest(reqType, url, true, probeData.timer);
 };
 
-HttpProbe.prototype.requestEnd = function (req, res, am) {
-	var reqUrl = url.parse( req.url, true ).pathname;
-    tr.stop({url: reqUrl });
+HttpProbe.prototype.requestEnd = function (probeData, method, url) {
+    probeData.req.stop({url: url });
 };
 	
 /*
