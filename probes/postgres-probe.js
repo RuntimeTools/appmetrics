@@ -17,6 +17,7 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
+var am = require('appmetrics');
 
 function PostgresProbe() {
 	Probe.call(this, 'pg');
@@ -62,24 +63,25 @@ PostgresProbe.prototype.attach = function( name, target, am ) {
     target.__ddProbeAttached__ = true;
 
     //After the client has been instantiated
-    aspect.after(target, 'Client', function(clientTarget, args, rc, methodName) {
+    var data = {};
+    aspect.after(target, 'Client', data, function(clientTarget, methodName, methodArgs, probeData, rc) {
 
         //After a connection has been established on the client
-        aspect.after(clientTarget, 'connect', function(connectionTarget, args, rc, methodName) {
+        aspect.after(clientTarget, 'connect', data, function(connectionTarget, methodName, args, probeData, rc) {
                        
             //Before the query hits, start monitoring
             aspect.before(connectionTarget, 'query',
-                function(target, methodArgs, methodName) {
+                function(target, methodName, methodArgs, probeData) {
                     var method = 'query';
-                    that.metricsProbeStart(method, methodArgs);
-                    that.requestProbeStart(method, methodArgs);
+                    that.metricsProbeStart(probeData, target, method, methodArgs);
+                    that.requestProbeStart(probeData, target, method, methodArgs);
                     if (aspect.findCallbackArg(methodArgs) != undefined) {
-                        aspect.aroundCallback(methodArgs, function(target,args,methodName){
+                        aspect.aroundCallback(methodArgs, probeData, function(target,args,probeData){
 
                             //Here, the query has executed and returned it's callback. Then
                             //stop monitoring
-                            that.metricsProbeEnd(method, methodArgs, am);
-                            that.requestProbeEnd(method, methodArgs);
+                            that.metricsProbeEnd(probeData, method, methodArgs);
+                            that.requestProbeEnd(probeData, method, methodArgs);
                         });
                     };
                 }
@@ -99,20 +101,21 @@ PostgresProbe.prototype.attach = function( name, target, am ) {
  * 		query:		The SQL executed
  * 		duration:	the time for the request to respond
  */
-PostgresProbe.prototype.metricsEnd = function(method, methodArgs, am) {
-	am.emit('postgres', {time: start, query: methodArgs[0], duration: this.getDuration()});
+PostgresProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
+	probeData.timer.stop();
+    am.emit('postgres', {time: probeData.timer.startTimeMillis, query: methodArgs[0], duration: probeData.timer.timeDelta});
 };
 
 /*
  * Heavyweight request probes for Postgres queries
  */
-PostgresProbe.prototype.requestStart = function (method, methodArgs) {
-	 req = request.startRequest( 'DB', "query" );
-	 req.setContext({sql: methodArgs[0]});
+PostgresProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
+    probeData.req = request.startRequest( 'DB', "query", false, probeData.timer );
+    probeData.req.setContext({sql: methodArgs[0]});
 };
 
-PostgresProbe.prototype.requestEnd = function (method, methodArgs) {
-	req.stop({sql: methodArgs[0]});
+PostgresProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
+	probeData.req.stop({sql: methodArgs[0]});
 };
 
 module.exports = PostgresProbe;
