@@ -30,7 +30,6 @@ util.inherits(PostgresProbe, Probe);
 * ---------------
 * @param name - The name of the npm module
 * @param target - The instance of the target module
-* @param am - The appmetrics instance
 *
 * This method attaches our probe to the instance of the postgres module (target)
 * A sample postgres query has the following format:
@@ -55,7 +54,7 @@ util.inherits(PostgresProbe, Probe);
 * using the 'query' method.
 *
 */
-PostgresProbe.prototype.attach = function( name, target, am ) {
+PostgresProbe.prototype.attach = function( name, target ) {
 
 	var that = this;
     if( name != "pg" ) return target;
