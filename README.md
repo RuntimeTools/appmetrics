@@ -18,6 +18,7 @@ Node Application Metrics provides the following built-in data collection sources
  HTTP               | HTTP request calls made of the application
  MySQL              | MySQL queries made by the application
  MongoDB            | MongoDB queries made by the application
+ MQLight            | MQLight messages sent and received by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
 
@@ -155,14 +156,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'mqlight, 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mysql`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mqlight`, `mysql`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -249,6 +250,17 @@ Emitted when a MongoDB query is made using the `mongodb` module.
     * `time` (Number) the milliseconds when the MongoDB query was made. This can be converted to a Date using `new Date(data.time)`
     * `query` (String) the query made of the MongoDB database.
     * `duration` (Number) the time taken for the MongoDB query to be responded to in ms.
+
+### Event: 'mqlight'
+Emitted when a MQLight message is sent or received.
+* `data` (Object) the data from the MQLight event:
+    * `time` (Number) the time in milliseconds when the MQLight event occurred. This can be converted to a Date using new Date(data.time).
+    * `clientid` (String) the id of the client.
+    * `data` (String) the data sent if a 'send' or 'message', undefined for other calls.  Truncated if longer than 25 characters.
+    * `method` (String) the name of the call or event (will be one of 'send' or 'message').
+    * `topic` (String) the topic on which a message is sent/received.
+    * `qos` (Number) the QoS level for a 'send' call, undefined if not set.
+    * `duration` (Number) the time taken in milliseconds.
 
 ### Event: 'request'
 Emitted when a request is made of the application that involves one or more monitored application level events. Request events are disabled by default.
