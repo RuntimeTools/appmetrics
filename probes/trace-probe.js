@@ -116,26 +116,26 @@ if(lastMethodArg == '') lastMethodArg = 'undefined';
 
                 var sendCb = resArg.send;
                 resArg.send = function() {
-                    req.stop(cxtFunc);
+                    req.stop(cxtFunc());
                     return sendCb.apply(resArg, arguments);
                 }
 
                 var renderCb = resArg.render;
                 resArg.render = function() {
-                    req.stop(cxtFunc);
+                    req.stop(cxtFunc());
                     return renderCb.apply(resArg, arguments);
                 }
             } else {
                 var cb = arguments[arguments.length-1];
                 arguments[arguments.length-1] = function() {
-                    req.stop(cxtFunc);
+                    req.stop(cxtFunc());
                     cb.apply(this, arguments);
                 }
             }
         }
         var res = method.apply(this, arguments);
         if( !isCallback ) {
-            req.stop(cxtFunc);
+            req.stop(cxtFunc());
         }
         return res;
     };
