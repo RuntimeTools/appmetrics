@@ -45,7 +45,7 @@ TraceProbe.prototype.attach = function( moduleName, target ) {
         ret = target;
 		if(Object.keys(target.prototype).length==0 && Object.keys(target).length == 0){
 			ret = function () {
-				var rc = target.apply(null, arguments);
+				var rc = target.apply(this, arguments);
 				instrumentMethods(moduleName, rc);
 				return rc;
 			}
