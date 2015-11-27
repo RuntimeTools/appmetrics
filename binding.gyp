@@ -1,7 +1,7 @@
 {
   "variables": {
     "srcdir%": "./src",
-    "nandir%": "<!(node -e \"require('nan')\")",
+    "nandir%": "<!(node -e \"try {require('nan')}catch (e){console.log(e)}\")",
     'build_id%': '.<!(["python", "./generate_build_id.py"])',
     'appmetricsversion%':  '<!(["python", "./get_from_json.py", "./package.json", "version"])',
   },
