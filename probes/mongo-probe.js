@@ -108,7 +108,6 @@ MongoProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  */
 MongoProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
 	probeData.req = request.startRequest( 'DB', method + "("+target.collectionName+")", false, probeData.timer );
-	probeData.req.setContext( { query: JSON.stringify(methodArgs[0]) } );
 };
 
 MongoProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
