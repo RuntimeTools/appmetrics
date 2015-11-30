@@ -269,7 +269,6 @@ NAN_METHOD(start) {
 
 		// Force MQTT on for now
 		loaderApi->setProperty("com.ibm.diagnostics.healthcenter.mqtt", "on");
-
 		loaderApi->start();
 	}
 	if (!initMonitorApi()) {
@@ -562,7 +561,9 @@ void init(Handle<Object> exports, Handle<Object> module) {
 		loaderApi->logMessage(warning, "Failed to load appmetrics.properties file");
 	}
 	loaderApi->setLogLevels();
-	loaderApi->setProperty("agent.version", loaderApi->getAgentVersion().c_str()); // TODO(tunniclm): why is this set here, rather than in HCCore?
+	/* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
+	loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion().c_str());
+	loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
 	/*
 	 * Log startup message with version information
