@@ -120,8 +120,10 @@ function API(agent, appmetrics) {
          * MemorySource,1415976582652,totalphysicalmemory=16725618688,physicalmemory=52428800,privatememory=374747136,virtualmemory=374747136,freephysicalmemory=1591525376
          */
         var values = message.split(/[,=]+/);
-        var systemUsed = values[3] - values[11];
-        var memory = {time: parseInt(values[1]), physical_total: parseInt(values[3]), physical_used: parseInt(systemUsed), physical: parseInt(values[5]), private: parseInt(values[7]), virtual: parseInt(values[9]), physical_free: parseInt(values[11])};
+        var physicalTotal = parseInt(values[3]);
+        var physicalFree = parseInt(values[11]);
+        var physicalUsed = (physicalTotal >= 0 && physicalFree >= 0) ? (physicalTotal - physicalFree) : -1;
+        var memory = {time: parseInt(values[1]), physical_total: physicalTotal, physical_used: physicalUsed, physical: parseInt(values[5]), private: parseInt(values[7]), virtual: parseInt(values[9]), physical_free: physicalFree};
         that.emit('memory', memory);
     };
 
