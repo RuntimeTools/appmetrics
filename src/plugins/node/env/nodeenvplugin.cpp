@@ -51,6 +51,7 @@ namespace plugin {
 	std::string commandLineArguments;
 	size_t maxOldSpaceSizeGuess;
 	size_t maxSemiSpaceSizeGuess;
+	size_t maxHeapSizeGuess;
 	size_t heapSizeLimit;
 }
 
@@ -226,6 +227,7 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 	plugin::commandLineArguments = GetNodeArguments();
 	plugin::maxOldSpaceSizeGuess = GuessMaxOldSpaceSize();
 	plugin::maxSemiSpaceSizeGuess = GuessMaxSemiSpaceSize();
+	plugin::maxHeapSizeGuess = 2 * plugin::maxSemiSpaceSizeGuess + plugin::maxOldSpaceSizeGuess;
 	HeapStatistics hs;
 	Nan::GetHeapStatistics(&hs);
 	plugin::heapSizeLimit = hs.heap_size_limit();
@@ -258,6 +260,10 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 		if (plugin::maxOldSpaceSizeGuess > 0) {
 			contentss << "max.old.space.size=" << plugin::maxOldSpaceSizeGuess << '\n';
 		}
+		if (plugin::maxHeapSizeGuess > 0) {
+			contentss << "max.heap.size=" << plugin::maxHeapSizeGuess << '\n';
+		}
+
 
 		contentss << "command.line.arguments=" << plugin::commandLineArguments << '\n';
 		
