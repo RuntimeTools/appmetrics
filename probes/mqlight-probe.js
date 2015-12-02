@@ -127,7 +127,11 @@ MQLightProbe.prototype.metricsEnd = function(probeData, method, methodArgs, clie
  * Heavyweight request probes for MQLight messages
  */
 MQLightProbe.prototype.requestStart = function (probeData, method, methodArgs) {
-	probeData.req = request.startRequest('MQLight', method, true, probeData.timer);
+	if(method == 'message') {
+		probeData.req = request.startRequest('MQLight', method, true, probeData.timer);
+	} else {
+		probeData.req = request.startRequest('MQLight', method, false, probeData.timer);
+	}
 };
 
 MQLightProbe.prototype.requestEnd = function (probeData, method, methodArgs, client) {
