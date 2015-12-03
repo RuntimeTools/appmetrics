@@ -202,7 +202,7 @@ batchObject2.exec();
 var batchObject3 = client.batch();
 
 results['BATCH_TEST'] = false;
-var batchObject = client.batch();
+var batchObject = client.BATCH();
 addExpectedEvent('batch.exec');
 batchObject3.set('BATCHKEY', 'BATCHVALUE');
 batchObject3.get('BATCHKEY');
@@ -210,7 +210,7 @@ batchObject3.EXEC(function(err, reply) {
 	results['BATCH_TEST'] = true;
 });
 
-var batchObject4 = client.batch();
+var batchObject4 = client.BATCH();
 
 addExpectedEvent('batch.exec');
 batchObject4.set('BATCHKEY', 'BATCHVALUE2');
@@ -238,7 +238,7 @@ multiObject2.set('multikey', 'multivalue2');
 multiObject2.get('multikey');
 multiObject2.exec();
 
-var multiObject3 = client.multi();
+var multiObject3 = client.MULTI();
 
 results['MULTI_TEST'] = false;
 addExpectedEvent('multi.exec');
@@ -248,7 +248,7 @@ multiObject3.EXEC(function(err, reply) {
 	results['MULTI_TEST'] = true;
 });
 
-var multiObject4 = client.multi();
+var multiObject4 = client.MULTI();
 
 addExpectedEvent('multi.exec');
 multiObject4.set('MULTIKEY', 'MULTIVALUE2');

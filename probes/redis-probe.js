@@ -73,33 +73,7 @@ RedisProbe.prototype.attach = function(name, target) {
 		  methods.push(m.toLowerCase());
 	  });
 
-	/* Instrument the basic set of asynchronous calls.
-	 * Emit events before the callbacks are called, if no
-	 * callback is passed insert one to end the probe timings.
-	 */
-//	aspect.before(target.RedisClient.prototype, methods, function(target, method, methodArgs, probeData) {
-//		var eventName = method.toLowerCase();
-//		that.metricsProbeStart(probeData, eventName, methodArgs);
-//		that.requestProbeStart(probeData, eventName, methodArgs);
-//		/* REDIS commands don't have to have a callback.
-//		 * All redis calls are asynchronous so we need to instrument or add a
-//		 * callback to stop the timer.
-//		 */
-//		if (aspect.findCallbackArg(methodArgs) != undefined) {
-//			aspect.aroundCallback( methodArgs, probeData, function(target, args) {
-//				that.metricsProbeEnd(probeData, eventName, methodArgs);
-//				that.requestProbeEnd(probeData, eventName, methodArgs);
-//			});
-//		} else {
-//			// Use the array function push to append to arguments,
-//			// insert the probeEnd calls directly as the call back.
-//			[].push.call(methodArgs, function(target, args) {
-//				that.metricsProbeEnd(probeData, eventName, methodArgs);
-//				that.requestProbeEnd(probeData, eventName, methodArgs);
-//			});
-//		}
-//
-//	});
+	/* Instrument the basic set of asynchronous calls. */
 	aspect.around(target.RedisClient.prototype, methods, function(target, method, methodArgs, probeData) {
 		var eventName = method.toLowerCase();
 		that.metricsProbeStart(probeData, eventName, methodArgs);
@@ -108,12 +82,12 @@ RedisProbe.prototype.attach = function(name, target) {
 		 * All redis calls are asynchronous so we need to instrument or add a
 		 * callback to stop the timer.
 		 */
-		if (aspect.findCallbackArg(methodArgs) != undefined) {
+//		if (aspect.findCallbackArg(methodArgs) != undefined) {
 			aspect.aroundCallback( methodArgs, probeData, function(target, args) {
 				that.metricsProbeEnd(probeData, eventName, methodArgs);
 				that.requestProbeEnd(probeData, eventName, methodArgs);
 			});
-		}
+//		}
 //		else {
 			// Inserting a callback gives us consistent timings between calls that
 			// pass a callback and those that don't. All redis commands can take a
@@ -146,9 +120,9 @@ RedisProbe.prototype.attach = function(name, target) {
 	 * Instrument the exec method on the object returned from client.batch()
 	 * or client.multi()
 	 */
-	aspect.after(target.RedisClient.prototype, ['multi', 'batch'], {}, function(target, mode, args, probeData, client) {
+	aspect.after(target.RedisClient.prototype, ['multi', 'batch', 'MULTI', 'BATCH'], {}, function(target, mode, args, probeData, client) {
 		// Log the event name as batch.exec or multi.exec
-		var eventName = mode+'.exec';
+		var eventName = mode.toLowerCase() + '.exec';
 		aspect.around( client, ['exec', 'EXEC'],
 				function(target, method, methodArgs, probeData) {
 			that.metricsProbeStart(probeData, eventName, methodArgs);
@@ -157,13 +131,13 @@ RedisProbe.prototype.attach = function(name, target) {
 			 * All redis calls are asynchronous so we need to instrument or add a
 			 * callback to stop the timer.
 			 */
-			var callback = aspect.findCallbackArg(methodArgs);
-			if (callback != undefined) {
+//			var callback = aspect.findCallbackArg(methodArgs);
+//			if (callback != undefined) {
 				aspect.aroundCallback( methodArgs, probeData, function() {
 					that.metricsProbeEnd(probeData, eventName, methodArgs);
 					that.requestProbeEnd(probeData, eventName, methodArgs);
 				});
-			}
+//			}
 //			else {
 //				// Use the array function push to append to arguments,
 //				// insert the probeEnd calls directly as the call back.
@@ -183,57 +157,18 @@ RedisProbe.prototype.attach = function(name, target) {
 	return target;
 };
 
-function truncateArgsArray(methodArgs) {
-	var argCount = 0;
-	var argsArray = [];
-	/* Arguments to redis commands can be either an array of arguments followed by
-	 * a callback or a variable number of args followed by a callback.
-	 * The callback is optional.
-	 */
-	if(Array.isArray(methodArgs[0])) {
-		methodArgs = methodArgs[0];
-	}
-	for( var index in methodArgs ) {
-		var arg = methodArgs[index];
-		
-		// Have reached callback. (All preceding arguments *should* be strings.)
-		if( typeof arg === 'function' ) {
-			break;
-		}
-		// Truncate at 10 arguments.
-		if( argCount == 10 ) {
-			break;
-		}
-		
-		// Make sure we truncate strings.
-		if( typeof arg === 'string') {
-			if(arg.length > 25) {
-				arg = arg.substring(0, 22) + '...';
-			}
-		}
-		argsArray.push(arg);
-		argCount++;
-	}
-	if( methodArgs.length > 10 ) {
-		argsArray.push('...');
-	}
-	return argsArray;
-}
-
 /*
  * Lightweight metrics probe for REDIS requests
  * 
  * These provide:
  * 		time:		time event started
  * 		cmd:		REDIS method, eg. GET, SET, INCR, etc
- * 		args:		The args passed in (truncated)
  * 		duration:	the time for the request to respond
  */
 
 RedisProbe.prototype.metricsEnd = function(probeData, cmd, methodArgs) {
 	probeData.timer.stop();
-	probeData.argsArray = truncateArgsArray(methodArgs);
-	am.emit('redis', {time: probeData.timer.startTimeMillis, cmd: cmd, args: probeData.argsArray, duration: probeData.timer.timeDelta});
+	am.emit('redis', {time: probeData.timer.startTimeMillis, cmd: cmd, duration: probeData.timer.timeDelta});
 };
 
 /*
@@ -244,15 +179,9 @@ RedisProbe.prototype.requestStart = function (probeData, cmd, methodArgs) {
 	probeData.req = request.startRequest( 'redis', cmd, false, probeData.timer);
 };
 
-RedisProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
+RedisProbe.prototype.requestEnd = function (probeData, cmd, methodArgs) {
 	var context = {};
-	// Don't re-truncate if we've already done the work.
-	if( probeData.argsArray ) {
-		context.args = probeData.argsArray;
-	} else {
-		context.cmd = cmd;
-		context.args = truncateArgsArray(methodArgs);
-	}
+	context.cmd = cmd;
 	probeData.req.stop(context);
 };
 

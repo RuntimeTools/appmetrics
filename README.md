@@ -278,7 +278,6 @@ Emitted when a MQLight message is sent or received.
 Emitted when a Redis command is sent.
 * `data` (Object) the data from the Redis event:
     * `time` (Number) the time in milliseconds when the MQLight event occurred. This can be converted to a Date using new Date(data.time).
-    * `args` (Array) A truncated version of the arguments to the Redis command. No more than 10 arguments are returned and string arguments are truncated. Callbacks are not included in the arguments.
     * `cmd` (String) the Redis command sent to the server or 'batch.exec'/'multi.exec' for groups of command sent using batch/multi calls.
     * `duration` (Number) the time taken in milliseconds.
 
