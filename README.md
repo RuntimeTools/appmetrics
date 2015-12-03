@@ -21,6 +21,7 @@ Node Application Metrics provides the following built-in data collection sources
  PostgreSQL         | PostgreSQL queries made by the application
  MQTT               | MQTT messages sent and received by the application
  MQLight            | MQLight messages sent and received by the application
+ Redis              | Redis commands issued by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
 
@@ -158,14 +159,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'postgresql', 'mqtt', 'mqlight, 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'postgresql', 'mqtt', 'mqlight, 'redis', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -271,6 +272,13 @@ Emitted when a MQLight message is sent or received.
     * `method` (String) the name of the call or event (will be one of 'send' or 'message').
     * `topic` (String) the topic on which a message is sent/received.
     * `qos` (Number) the QoS level for a 'send' call, undefined if not set.
+    * `duration` (Number) the time taken in milliseconds.
+
+### Event: 'redis'
+Emitted when a Redis command is sent.
+* `data` (Object) the data from the Redis event:
+    * `time` (Number) the time in milliseconds when the MQLight event occurred. This can be converted to a Date using new Date(data.time).
+    * `cmd` (String) the Redis command sent to the server or 'batch.exec'/'multi.exec' for groups of command sent using batch/multi calls.
     * `duration` (Number) the time taken in milliseconds.
 
 ### Event: 'request'
