@@ -82,32 +82,10 @@ RedisProbe.prototype.attach = function(name, target) {
 		 * All redis calls are asynchronous so we need to instrument or add a
 		 * callback to stop the timer.
 		 */
-//		if (aspect.findCallbackArg(methodArgs) != undefined) {
-			aspect.aroundCallback( methodArgs, probeData, function(target, args) {
-				that.metricsProbeEnd(probeData, eventName, methodArgs);
-				that.requestProbeEnd(probeData, eventName, methodArgs);
-			});
-//		}
-//		else {
-			// Inserting a callback gives us consistent timings between calls that
-			// pass a callback and those that don't. All redis commands can take a
-			// callback so should be safe to do.
-			// However this is not true for other npm modules where inserting a callback
-			// may change behaviour and hence not for other probes so there is a choice
-			// between being consistent with the behaviour for other redis calls or other
-			// probes.
-			// We have chosen to be consistent with other probes but uncomment the code
-			// below, comment out the after function and change this from aspect.around
-			// to aspect.before to change the behaviour.
-			// TODO - Verify this metric is more use to end users.
-//			// Use the array function push to append to arguments,
-//			// insert the probeEnd calls directly as the call back.
-//			[].push.call(methodArgs, function(target, args) {
-//				that.metricsProbeEnd(probeData, eventName, methodArgs);
-//				that.requestProbeEnd(probeData, eventName, methodArgs);
-//			});
-//		}
-
+		aspect.aroundCallback( methodArgs, probeData, function(target, args) {
+			that.metricsProbeEnd(probeData, eventName, methodArgs);
+			that.requestProbeEnd(probeData, eventName, methodArgs);
+		});
 	}, function(target, method, methodArgs, probeData, rc) {
 		if (aspect.findCallbackArg(methodArgs) == undefined) {
 			var eventName = method.toLowerCase();
@@ -131,21 +109,10 @@ RedisProbe.prototype.attach = function(name, target) {
 			 * All redis calls are asynchronous so we need to instrument or add a
 			 * callback to stop the timer.
 			 */
-//			var callback = aspect.findCallbackArg(methodArgs);
-//			if (callback != undefined) {
-				aspect.aroundCallback( methodArgs, probeData, function() {
-					that.metricsProbeEnd(probeData, eventName, methodArgs);
-					that.requestProbeEnd(probeData, eventName, methodArgs);
-				});
-//			}
-//			else {
-//				// Use the array function push to append to arguments,
-//				// insert the probeEnd calls directly as the call back.
-//				[].push.call(methodArgs, function() {
-//					that.metricsProbeEnd(probeData, eventName, methodArgs);
-//					that.requestProbeEnd(probeData, eventName, methodArgs);
-//				});
-//			}
+			aspect.aroundCallback( methodArgs, probeData, function() {
+				that.metricsProbeEnd(probeData, eventName, methodArgs);
+				that.requestProbeEnd(probeData, eventName, methodArgs);
+			});
 		}, function(target, method, methodArgs, probeData, rc) {
 			if (aspect.findCallbackArg(methodArgs) == undefined) {
 				that.metricsProbeEnd(probeData, eventName, methodArgs);
