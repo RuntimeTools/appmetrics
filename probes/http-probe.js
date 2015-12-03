@@ -31,7 +31,7 @@ util.inherits(HttpProbe, Probe);
 HttpProbe.prototype.attach = function(name, target) {
 	var that = this;
 	if( name == 'http' ) {
-		if(target.__probeAttached__) return;
+		if(target.__probeAttached__) return target;
 	    target.__probeAttached__ = true;
 	    var methods = ['on', 'addListener'];
 	    
@@ -55,7 +55,7 @@ HttpProbe.prototype.attach = function(name, target) {
 	            }
 	        });
 	    });
-	}	
+	}
 	return target;
 };
 
