@@ -21,6 +21,7 @@ Node Application Metrics provides the following built-in data collection sources
  PostgreSQL         | PostgreSQL queries made by the application
  MQTT               | MQTT messages sent and received by the application
  MQLight            | MQLight messages sent and received by the application
+ Memcached          | Data that stored or manupulated in Memcached
  Redis              | Redis commands issued by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
@@ -159,14 +160,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'postgresql', 'mqtt', 'mqlight, 'redis', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'postgresql', 'memcached', 'mqtt', 'mqlight, 'redis', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -280,6 +281,14 @@ Emitted when a Redis command is sent.
     * `time` (Number) the time in milliseconds when the MQLight event occurred. This can be converted to a Date using new Date(data.time).
     * `cmd` (String) the Redis command sent to the server or 'batch.exec'/'multi.exec' for groups of command sent using batch/multi calls.
     * `duration` (Number) the time taken in milliseconds.
+
+### Event: 'memcached'
+Emitted when a data is stored, retrieved or modified in Memcached using the `memcached` module.
+* `data` (Object) the data from the memcached event:
+    * `time` (Number) the milliseconds when the memcached event occurred. This can be converted to a Date using `new Date(data.time)`
+    * `method` (String) the method used in the memcached client, eg `set`, `get`, `append`, `delete`, etc.
+    * `key` (String) the key associated with the data.
+    * `duration` (Number) the time taken for the operation on the memcached data to occur.
 
 ### Event: 'request'
 Emitted when a request is made of the application that involves one or more monitored application level events. Request events are disabled by default.
