@@ -58,7 +58,7 @@ var data = {};
 aspect.after(module.__proto__, 'require', data, function(obj, methodName, args, context, ret) {
 	for (var i = 0; i < probes.length; i++) {
 		if (probes[i].name === args[0]) {
-			probes[i].attach(args[0], ret, module.exports);
+			ret = probes[i].attach(args[0], ret, module.exports);
 		}
 		if (probes[i].name === 'trace') {
 			ret = probes[i].attach(args[0], ret);

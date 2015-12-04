@@ -37,7 +37,7 @@ util.inherits(RedisProbe, Probe);
 RedisProbe.prototype.attach = function(name, target) {
 	var that = this;
 	if( name != 'redis' ) return;
-	if(target.__probeAttached__) return;
+	if(target.__probeAttached__) return target;
 	target.__probeAttached__ = true;
 	var methods = [];
 	[ 'APPEND', 'AUTH', 'BGREWRITEAOF', 'BGSAVE', 'BITCOUNT',
