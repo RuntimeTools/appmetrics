@@ -26,11 +26,16 @@ util.inherits(SocketioProbe, Probe);
 
 SocketioProbe.prototype.attach = function(name, target) {
 	var that = this;
-	if( name != "socket.io" ) return target;
-	target.__ddProbeAttached__ = true;
+	if(name != "socket.io") return target;
+	/*
+	 * Don't set __ddProbeAttached__ = true as we need to probe and return
+	 * the constructor each time
+	 */
 
 	/*
-	 * Patch io.sockets.emit() calls to broadcast to clients
+	 * Patch the constructor so that we can patch io.sockets.emit() calls
+	 * to broadcast to clients. This also picks up calls to io.emit() as 
+	 * they map down to io.socket.emit()
 	 */
 	var newtarget = aspect.afterConstructor(target, {},
 		function(target, methodName, methodArgs, context, server) {
@@ -49,64 +54,57 @@ SocketioProbe.prototype.attach = function(name, target) {
 		}
 	)
 
-	/*
-	 * Patch io.emit() calls to broadcast to clients
+	/* 
+	 * We patch the constructor every time, but only want to patch prototype
+	 * functions once otherwise we'll generate multiple events
 	 */
-	var broadcast = 'broadcast';
-	aspect.around(target.prototype, 'emit',
-		function(target, methodName, methodArgs, context){
-			that.metricsProbeStart(context, broadcast, methodArgs);
-			that.requestProbeStart(context, broadcast, methodArgs);
-		},
-		function(target, methodName, methodArgs, context, rc){
-			that.metricsProbeEnd(context, broadcast, methodArgs);
-			that.requestProbeEnd(context, broadcast, methodArgs);
-		}
-	);
-	
-	aspect.before(target.prototype, ['on', 'addListener'],
-			function(target, methodName, methodArgs, context) {
-			if(methodArgs[0] !== 'connection') return;
-			if (aspect.findCallbackArg(methodArgs) != undefined) {
-				aspect.aroundCallback(methodArgs, context, function(target, methodArgs, context) {
-					var socket = methodArgs[0];
-					/*
-					 * Patch Socket#emit() calls
-					 */
-					aspect.around(socket, 'emit',
-						function(target, methodName, methodArgs, context){
-							that.metricsProbeStart(context, methodName, methodArgs);
-							that.requestProbeStart(context, methodName, methodArgs);
-						},
-						function(target, methodName, methodArgs, context, rc){
-							that.metricsProbeEnd(context, methodName, methodArgs);
-							that.requestProbeEnd(context, methodName, methodArgs);
-							return rc;
-						}
-					);
-					/*
-					 * Patch socket.on incoming events
-					 */
-					var receive = 'receive';
-					aspect.before(socket, ['on', 'addListener'],
-						function(target, methodName, methodArgs, context) {
-							aspect.aroundCallback(methodArgs, context,
-								function(target, callbackArgs, context){
-									that.metricsProbeStart(context, receive, methodArgs);
-									that.requestProbeStart(context, receive, methodArgs);
-								}, 
-								function (target, callbackArgs, context, rc) {
-									that.metricsProbeEnd(context, receive, methodArgs);
-									that.requestProbeEnd(context, receive, methodArgs);
-									return rc;
-								}
-							);
-						}
-					);
-				}
-			);
-		}
-	});
+	if (!target.__prototypeProbeAttached__) {
+		target.__prototypeProbeAttached__ = true;
+		
+		aspect.before(target.prototype, ['on', 'addListener'],
+				function(target, methodName, methodArgs, context) {
+				if(methodArgs[0] !== 'connection') return;
+				if (aspect.findCallbackArg(methodArgs) != undefined) {
+					aspect.aroundCallback(methodArgs, context, function(target, methodArgs, context) {
+						var socket = methodArgs[0];
+						/*
+						 * Patch Socket#emit() calls
+						 */
+						aspect.around(socket, 'emit',
+							function(target, methodName, methodArgs, context){
+								that.metricsProbeStart(context, methodName, methodArgs);
+								that.requestProbeStart(context, methodName, methodArgs);
+							},
+							function(target, methodName, methodArgs, context, rc){
+								that.metricsProbeEnd(context, methodName, methodArgs);
+								that.requestProbeEnd(context, methodName, methodArgs);
+								return rc;
+							}
+						);
+						/*
+						 * Patch socket.on incoming events
+						 */
+						var receive = 'receive';
+						aspect.before(socket, ['on', 'addListener'],
+							function(target, methodName, methodArgs, context) {
+								aspect.aroundCallback(methodArgs, context,
+									function(target, callbackArgs, context){
+										that.metricsProbeStart(context, receive, methodArgs);
+										that.requestProbeStart(context, receive, methodArgs);
+									}, 
+									function (target, callbackArgs, context, rc) {
+										that.metricsProbeEnd(context, receive, methodArgs);
+										that.requestProbeEnd(context, receive, methodArgs);
+										return rc;
+									}
+								);
+							}
+						);
+					}
+				);
+			}
+		});
+	}
 	return newtarget;
 };
 
