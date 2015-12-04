@@ -16,6 +16,7 @@ Node Application Metrics provides the following built-in data collection sources
  GC                 | Node/V8 garbage collection statistics
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
+ socket.io          | WebSocket data sent and received by the application
  MySQL              | MySQL queries made by the application
  MongoDB            | MongoDB queries made by the application
  PostgreSQL         | PostgreSQL queries made by the application
@@ -160,14 +161,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'postgresql', 'memcached', 'mqtt', 'mqlight, 'redis', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'socket.io', 'postgresql', 'memcached', 'mqtt', 'mqlight, 'redis', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `socket.io`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -240,6 +241,14 @@ Emitted when a HTTP request is made of the application.
     * `method` (String) the HTTP method used for the request.
     * `url` (String) the URL on which the request was made.
     * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
+    
+### Event: 'socket.io'
+Emitted when WebSocket data is sent or received by the application using socket.io.
+* `data` (Object) the data from the socket.io request:
+    * `time` (Number) the milliseconds when the event occurred. This can be converted to a Date using `new Date(data.time)`.
+    * `method` (String) whether the event is a `broadcast` or `emit` from the application, or a `receive` from a client  .
+    * `event` (String) the name used for the event.
+    * `duration` (Number) the time taken for event to be sent or for a received event to be handled.
 
 ### Event: 'mysql'
 Emitted when a MySQL query is made using the `mysql` module.
