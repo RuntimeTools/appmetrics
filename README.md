@@ -17,6 +17,7 @@ Node Application Metrics provides the following built-in data collection sources
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
  socket.io          | WebSocket data sent and received by the application
+ LevelDB          	| LevelDB queries made by the application
  MySQL              | MySQL queries made by the application
  MongoDB            | MongoDB queries made by the application
  PostgreSQL         | PostgreSQL queries made by the application
@@ -284,6 +285,17 @@ Emitted when a MQLight message is sent or received.
     * `qos` (Number) the QoS level for a 'send' call, undefined if not set.
     * `duration` (Number) the time taken in milliseconds.
 
+### Event: 'leveldown'
+Emitted when a LevelDB query is made using the `leveldown` module.
+* `data` (Object) the data from the LevelDB query:
+    * `time` (Number) the time in milliseconds when the LevelDB query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `method` (String) The leveldown method being used.
+	* `key` (Object) The key being used for a call to `get`, `put` or `del` (Undefined for other methods)
+	* `value` (Object) The value being added to the LevelDB database using the `put` method (Undefined for other methods) 
+	* `opCount` (Number) The number of operations carried out by a `batch` method (Undefined for other methods) 
+    * `duration` (Number) the time taken for the LevelDB query to be responded to in ms.
+	
+	
 ### Event: 'redis'
 Emitted when a Redis command is sent.
 * `data` (Object) the data from the Redis event:
