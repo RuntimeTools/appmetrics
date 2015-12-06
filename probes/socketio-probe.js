@@ -119,7 +119,7 @@ SocketioProbe.prototype.attach = function(name, target) {
  */
 SocketioProbe.prototype.metricsEnd = function(context, methodName, methodArgs) {
 	context.timer.stop();
-	am.emit('socket.io', {time: context.timer.startTimeMillis, method: methodName, event: methodArgs[0], duration: context.timer.timeDelta});
+	am.emit('socketio', {time: context.timer.startTimeMillis, method: methodName, event: methodArgs[0], duration: context.timer.timeDelta});
 };
 
 /*
@@ -130,9 +130,9 @@ SocketioProbe.prototype.requestStart = function (context, methodName, methodArgs
 	 * method names are "broadcast", "receive" and "emit"
 	 */
 	if (methodName !== 'receive') {
-		context.req = request.startRequest('socket.io', methodName, false, context.timer);
+		context.req = request.startRequest('socketio', methodName, false, context.timer);
 	} else {
-		context.req = request.startRequest('socket.io', methodName, true, context.timer);
+		context.req = request.startRequest('socketio', methodName, true, context.timer);
 	}
 };
 
