@@ -17,7 +17,7 @@ Node Application Metrics provides the following built-in data collection sources
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
  socket.io          | WebSocket data sent and received by the application
- LevelDB          	| LevelDB queries made by the application
+ LevelDB            | LevelDB queries made by the application
  MySQL              | MySQL queries made by the application
  MongoDB            | MongoDB queries made by the application
  PostgreSQL         | PostgreSQL queries made by the application
@@ -162,7 +162,7 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of 'profiling', 'http', 'mongo', 'mysql', 'socket.io', 'postgresql', 'memcached', 'mqtt', 'mqlight, 'redis', 'requests' and 'trace' are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `profiling`, `http`, `mongo`, `socket.io`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
@@ -290,12 +290,11 @@ Emitted when a LevelDB query is made using the `leveldown` module.
 * `data` (Object) the data from the LevelDB query:
     * `time` (Number) the time in milliseconds when the LevelDB query was made. This can be converted to a Date using `new Date(data.time)`.
     * `method` (String) The leveldown method being used.
-	* `key` (Object) The key being used for a call to `get`, `put` or `del` (Undefined for other methods)
-	* `value` (Object) The value being added to the LevelDB database using the `put` method (Undefined for other methods) 
-	* `opCount` (Number) The number of operations carried out by a `batch` method (Undefined for other methods) 
+    * `key` (Object) The key being used for a call to `get`, `put` or `del` (Undefined for other methods)
+    * `value` (Object) The value being added to the LevelDB database using the `put` method (Undefined for other methods) 
+    * `opCount` (Number) The number of operations carried out by a `batch` method (Undefined for other methods) 
     * `duration` (Number) the time taken for the LevelDB query to be responded to in ms.
-	
-	
+
 ### Event: 'redis'
 Emitted when a Redis command is sent.
 * `data` (Object) the data from the Redis event:
@@ -385,10 +384,11 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.0.3
+1.0.4
 
 ## Release History
-`1.0.3` - Node.js v4 support
+`1.0.4` - Redis, Leveldown, Postgresql, Memcached, MQLight and MQTT support, higher precision timings, and improved performance.  
+`1.0.3` - Node.js v4 support  
 `1.0.2` - HTTP, MySQL, MongoDB, request tracking and function tracing support  
 `1.0.1` - Mac OS X support, io.js v2 support  
 `1.0.0` - First release
