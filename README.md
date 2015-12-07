@@ -14,6 +14,7 @@ Node Application Metrics provides the following built-in data collection sources
  CPU                | Process and system CPU
  Memory             | Process and system memory usage
  GC                 | Node/V8 garbage collection statistics
+ Event Loop         | Event loop latency information
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
  socket.io          | WebSocket data sent and received by the application
@@ -162,14 +163,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -222,6 +223,14 @@ Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime
     * `size` (Number) the size of the JavaScript heap in bytes.
     * `used` (Number) the amount of memory used on the JavaScript heap in bytes.
     * `duration` (Number) the duration of the GC cycle in milliseconds.
+
+### Event: 'eventloop'
+Emitted every 5 seconds, summarising sample based information of the event loop latency
+* `data` (Object) the data from the event loop sample:
+    * `time` (Number) the milliseconds when the event was emitted. This can be converted to a Date using `new Date(data.time)`.
+    * `latency.min` (Number) the shortest sampled latency, in milliseconds.
+    * `latency.max` (Number) the longest sampled latency, in milliseconds.
+    * `latency.avg` (Number) the average sampled latency, in milliseconds.
 
 ### Event: 'profiling'
 Emitted when a profiling sample is available from the underlying V8 runtime.

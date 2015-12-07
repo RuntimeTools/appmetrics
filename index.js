@@ -49,6 +49,47 @@ files.forEach(function (fileName) {
 	}
 });
 
+
+var latencyData = {
+	count: 0,
+	min: 1 * 60 * 1000,
+	max: 0,
+	total: 0
+}
+
+var latencyCheck = function() {
+	var start = process.hrtime();
+	setImmediate(function(start) {
+		var delta = process.hrtime(start);
+		var latency = (delta[0] * 1000) + (delta[1] / 1000000);
+		latencyData.count++;
+		latencyData.min = Math.min(latencyData.min, latency);
+		latencyData.max = Math.max(latencyData.max, latency);
+		latencyData.total = latencyData.total + latency;
+	}, start);
+}
+
+var latencyReport = function() {
+	if (latencyData.count == 0) return;
+	var latency = {
+		min:	latencyData.min,
+		max:	latencyData.max,
+		avg:	latencyData.total / latencyData.count
+	};
+	var avg = latencyData.total / latencyData.count;
+	exports.emit('eventloop', {time: Date.now(), latency: latency});
+	latencyData.count = 0;
+	latencyData.min = 1 * 60 * 1000;
+	latencyData.max = 0;
+	latencyData.total = 0;
+}
+
+var latencyCheckInterval = 500;
+var latencyReportInterval = 5000;
+var latencyRunning = true;
+var latencyCheckLoop = setInterval(latencyCheck, latencyCheckInterval);
+var latencyReportLoop = setInterval(latencyReport, latencyReportInterval);
+
 /*
  * Patch the module require function to run the probe attach function
  * for any matching module. This loads the monitoring probes into the modules
@@ -93,6 +134,12 @@ module.exports.enable = function (data, config) {
 			}
 			traceProbe.enable();
 			break;
+		case 'eventloop':
+			if (latencyRunning === true) break;
+			latencyRunning = true;
+			latencyCheckLoop = setInterval(latencyCheck, latencyCheckInterval);
+			latencyReportLoop = setInterval(latencyReport, latencyReportInterval);
+			break;
 		default:
 			probes.forEach(function (probe) {
 				if (probe.name == data) {
@@ -118,6 +165,12 @@ module.exports.disable = function (data) {
 		probes.forEach(function (probe) {
 			probe.disableRequests();
 		});
+		break;
+	case 'eventloop':
+		if (latencyRunning === false) break;
+		latencyRunning = false;
+		clearInterval(latencyCheckLoop);
+		clearInterval(latencyReportLoop);
 		break;
 	default:
 		probes.forEach(function (probe) {
