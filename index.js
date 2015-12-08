@@ -89,6 +89,8 @@ var latencyReportInterval = 5000;
 var latencyRunning = true;
 var latencyCheckLoop = setInterval(latencyCheck, latencyCheckInterval);
 var latencyReportLoop = setInterval(latencyReport, latencyReportInterval);
+latencyCheckLoop.unref();
+latencyReportLoop.unref();
 
 /*
  * Patch the module require function to run the probe attach function
