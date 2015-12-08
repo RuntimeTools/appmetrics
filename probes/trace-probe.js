@@ -129,7 +129,7 @@ if(lastMethodArg == '') lastMethodArg = 'undefined';
                 var cb = arguments[arguments.length-1];
                 arguments[arguments.length-1] = function() {
                     req.stop(cxtFunc());
-                    cb.apply(this, arguments);
+                    return cb.apply(this, arguments);
                 }
             }
         }
