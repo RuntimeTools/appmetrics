@@ -29,6 +29,10 @@ agent.start();
 
 var hcAPI = require("./appmetrics-api.js");
 
+// This is set by the property com.ibm.diagnostics.healthcenter.probes.transmit
+// at startup. Cache the value so we only make one native call.
+var transmitData = agent.nativeEmitCheck();
+
 /*
  * Load module probes into probes array by searching the probes directory.
  * We handle the 'trace' probe as a special case because we don't want to put
@@ -225,10 +229,12 @@ module.exports.emit = function (topic, data) {
 		// We have a listener, so fast path the notification to them
 		this.api.raiseLocalEvent(topic, data);
 	}
-	// Do not publish into the flight recorder
-	// This needs to be re-established once performance issues are fixed
-	//data = serializer.serialize(data);
-	//agent.nativeEmit(topic, String(data));
+	// Send data to any out of process connection.
+	// Controlled by the property com.ibm.diagnostics.healthcenter.probes.transmit
+	if( transmitData ) {
+		data = serializer.serialize(data);
+		agent.nativeEmit(topic, String(data));
+	}
 };
 
 // Export monitor() API for consuming data in-process
