@@ -41,6 +41,7 @@ using namespace ibmras::common::logging;
 static std::string* applicationDir;
 static std::string* appmetricsDir;
 static bool running = false;
+static bool doNativeEmit = false;
 static loaderCoreFunctions* loaderApi;
 
 #define PROPERTIES_FILE "appmetrics.properties"
@@ -241,6 +242,11 @@ static bool initMonitorApi() {
 	monitorApi::sendControl = (void (*)(std::string&, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
 	monitorApi::registerListener = (void (*)(void (*func)(const std::string&, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
 
+	std::string transmitStr = loaderApi->getProperty("appmetrics.probes.transmit");
+	if( "true" == transmitStr ) {
+		doNativeEmit = true;
+	}
+
 	return isMonitorApiValid();
 }
 
@@ -360,6 +366,10 @@ static void sendData(const std::string &sourceId, unsigned int size, void *data)
 
 	async->data = payload;
 	uv_async_send(async);
+}
+
+NAN_METHOD(nativeEmitCheck) {
+	info.GetReturnValue().Set(doNativeEmit);
 }
 
 NAN_METHOD(nativeEmit) {
@@ -545,6 +555,7 @@ void init(Handle<Object> exports, Handle<Object> module) {
 	exports->Set(Nan::New<String>("stop").ToLocalChecked(), Nan::New<FunctionTemplate>(stop)->GetFunction());
 	exports->Set(Nan::New<String>("localConnect").ToLocalChecked(), Nan::New<FunctionTemplate>(localConnect)->GetFunction());
 	exports->Set(Nan::New<String>("nativeEmit").ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmit)->GetFunction());
+	exports->Set(Nan::New<String>("nativeEmitCheck").ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmitCheck)->GetFunction());
 	exports->Set(Nan::New<String>("sendControlCommand").ToLocalChecked(), Nan::New<FunctionTemplate>(sendControlCommand)->GetFunction());
 
 	/*
