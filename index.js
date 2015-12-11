@@ -225,10 +225,11 @@ module.exports.emit = function (topic, data) {
 		// We have a listener, so fast path the notification to them
 		this.api.raiseLocalEvent(topic, data);
 	}
-	// Do not publish into the flight recorder
-	// This needs to be re-established once performance issues are fixed
-	//data = serializer.serialize(data);
-	//agent.nativeEmit(topic, String(data));
+	// Publish http data since this can be visualised.
+	if( topic == 'http' ) {
+		data = serializer.serialize(data);
+		agent.nativeEmit(topic, String(data));
+	}
 };
 
 // Export monitor() API for consuming data in-process
