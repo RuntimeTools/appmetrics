@@ -29,7 +29,7 @@ agent.start();
 
 var hcAPI = require("./appmetrics-api.js");
 
-// This is set by the property com.ibm.diagnostics.healthcenter.probes.transmit
+// This is set by the property appmetrics.probes.transmit
 // at startup. Cache the value so we only make one native call.
 var transmitData = agent.nativeEmitCheck();
 
@@ -230,7 +230,7 @@ module.exports.emit = function (topic, data) {
 		this.api.raiseLocalEvent(topic, data);
 	}
 	// Send data to any out of process connection.
-	// Controlled by the property com.ibm.diagnostics.healthcenter.probes.transmit
+	// Controlled by the property appmetrics.probes.transmit
 	if( transmitData ) {
 		data = serializer.serialize(data);
 		agent.nativeEmit(topic, String(data));

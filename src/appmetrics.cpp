@@ -242,7 +242,7 @@ static bool initMonitorApi() {
 	monitorApi::sendControl = (void (*)(std::string&, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
 	monitorApi::registerListener = (void (*)(void (*func)(const std::string&, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
 
-	std::string transmitStr = loaderApi->getProperty("com.ibm.diagnostics.healthcenter.probes.transmit");
+	std::string transmitStr = loaderApi->getProperty("appmetrics.probes.transmit");
 	if( "true" == transmitStr ) {
 		doNativeEmit = true;
 	}
