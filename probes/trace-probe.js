@@ -72,12 +72,13 @@ if(lastMethodArg == '') lastMethodArg = 'undefined';
             for( var i = 0; i<args.length; ++i ) {
                 var arg = args[i];
                 var value;
-                if( typeof(arg) == "function" && 
-			Object.keys(arg).length == 0 && 
-                            Object.keys(arg.prototype).length==0) {
+                if (typeof (arg) == "function"
+                    && Object.keys(arg).length == 0
+                    && arg.prototype
+                    && Object.keys(arg.prototype).length == 0) {
                     var fName = arg.name != 0 ? arg.name : '<anonymous>';
                     value = "function " + fName;
-                } else if( typeof(arg) == "object" ) {
+                } else if (typeof (arg) == "object") {
                     value = "object";
                 } else {
                     value = "" + arg;
@@ -85,53 +86,51 @@ if(lastMethodArg == '') lastMethodArg = 'undefined';
                 cxt["arg"+i] = value;
             }
             return cxt;
-        }
+        };
         var isCallback = false;
         /*
-        if( arguments.length > 0 && typeof(arguments[arguments.length-1]) == "function" && Object.keys(arguments[arguments.length-1]).length == 0) {
-        	console.log('Type is ' + typeof(arguments[arguments.length-1].prototype));
-        	if (typeof(arguments[arguments.length-1].prototype) === 'object') {
-        		console.log('Checking object');
-        		console.log(Object.keys(arguments[arguments.length-1].prototype));
-        	}
-        	else {
-        		console.log('Not object');
-        	}
-        	
-        }
-        */
-        if( arguments.length > 0 && 
-        	typeof(arguments[arguments.length-1]) == "function" && 
-        	Object.keys(arguments[arguments.length-1]).length == 0 && 
-        	// Add to deal with no prototype
-        	(!arguments[arguments.length-1].hasOwnProperty('prototype') ||
-        	Object.keys(arguments[arguments.length-1].prototype).length == 0) && 
-        	methodString.indexOf(lastMethodArg+'.call') < 0 && 
-        	methodString.indexOf(lastMethodArg+'.apply')<0 &&
-        	(''+arguments[arguments.length-1]).indexOf('instrumentedMethodKNJ')<0
-) {
+		 * if( arguments.length > 0 && typeof(arguments[arguments.length-1]) ==
+		 * "function" && Object.keys(arguments[arguments.length-1]).length == 0) {
+		 * console.log('Type is ' +
+		 * typeof(arguments[arguments.length-1].prototype)); if
+		 * (typeof(arguments[arguments.length-1].prototype) === 'object') {
+		 * console.log('Checking object');
+		 * console.log(Object.keys(arguments[arguments.length-1].prototype)); }
+		 * else { console.log('Not object'); }
+		 *  }
+		 */
+        if (arguments.length > 0
+            && typeof (arguments[arguments.length - 1]) == "function"
+            && Object.keys(arguments[arguments.length - 1]).length == 0
+            // Add to deal with no prototype
+            && (!arguments[arguments.length-1].hasOwnProperty('prototype')
+                || ( arguments[arguments.length - 1].prototype
+                && Object.keys(arguments[arguments.length - 1].prototype).length == 0) )
+            && methodString.indexOf(lastMethodArg + '.call') < 0
+            && methodString.indexOf(lastMethodArg + '.apply') < 0
+            && ('' + arguments[arguments.length - 1]).indexOf('instrumentedMethodKNJ') < 0) {
             isCallback = true;
             if (isResponseMethod(arguments)) {
-                var resArg = arguments[arguments.length-2];
+                var resArg = arguments[arguments.length - 2];
 
                 var sendCb = resArg.send;
                 resArg.send = function() {
                     req.stop(cxtFunc());
                     return sendCb.apply(resArg, arguments);
-                }
+                };
 
                 var renderCb = resArg.render;
-                resArg.render = function() {
-                    req.stop(cxtFunc());
-                    return renderCb.apply(resArg, arguments);
-                }
-            } else {
-                var cb = arguments[arguments.length-1];
-                arguments[arguments.length-1] = function() {
-                    req.stop(cxtFunc());
-                    return cb.apply(this, arguments);
-                }
-            }
+				resArg.render = function() {
+					req.stop(cxtFunc());
+					return renderCb.apply(resArg, arguments);
+				};
+			} else {
+				var cb = arguments[arguments.length - 1];
+				arguments[arguments.length - 1] = function() {
+					req.stop(cxtFunc());
+					return cb.apply(this, arguments);
+				};
+			}
         }
         var res = method.apply(this, arguments);
         if( !isCallback ) {
