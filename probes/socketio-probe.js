@@ -52,7 +52,11 @@ SocketioProbe.prototype.attach = function(name, target) {
 			);
 			return server;
 		}
-	)
+	);
+	/*
+	 * Remap the listen API to point to new constructor
+	 */
+	newtarget.listen = newtarget;
 
 	/* 
 	 * We patch the constructor every time, but only want to patch prototype
