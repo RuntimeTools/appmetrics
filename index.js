@@ -49,6 +49,49 @@ files.forEach(function (fileName) {
 	}
 });
 
+
+var latencyData = {
+	count: 0,
+	min: 1 * 60 * 1000,
+	max: 0,
+	total: 0
+}
+
+var latencyCheck = function() {
+	var start = process.hrtime();
+	setImmediate(function(start) {
+		var delta = process.hrtime(start);
+		var latency = (delta[0] * 1000) + (delta[1] / 1000000);
+		latencyData.count++;
+		latencyData.min = Math.min(latencyData.min, latency);
+		latencyData.max = Math.max(latencyData.max, latency);
+		latencyData.total = latencyData.total + latency;
+	}, start);
+}
+
+var latencyReport = function() {
+	if (latencyData.count == 0) return;
+	var latency = {
+		min:	latencyData.min,
+		max:	latencyData.max,
+		avg:	latencyData.total / latencyData.count
+	};
+	var avg = latencyData.total / latencyData.count;
+	exports.emit('eventloop', {time: Date.now(), latency: latency});
+	latencyData.count = 0;
+	latencyData.min = 1 * 60 * 1000;
+	latencyData.max = 0;
+	latencyData.total = 0;
+}
+
+var latencyCheckInterval = 500;
+var latencyReportInterval = 5000;
+var latencyRunning = true;
+var latencyCheckLoop = setInterval(latencyCheck, latencyCheckInterval);
+var latencyReportLoop = setInterval(latencyReport, latencyReportInterval);
+latencyCheckLoop.unref();
+latencyReportLoop.unref();
+
 /*
  * Patch the module require function to run the probe attach function
  * for any matching module. This loads the monitoring probes into the modules
@@ -56,15 +99,19 @@ files.forEach(function (fileName) {
 var data = {};
 
 aspect.after(module.__proto__, 'require', data, function(obj, methodName, args, context, ret) {
-	for (var i = 0; i < probes.length; i++) {
-		if (probes[i].name === args[0]) {
-			probes[i].attach(args[0], ret, module.exports);
+	if (ret.__ddProbeAttached__) {
+		return ret;
+	} else {
+		for (var i = 0; i < probes.length; i++) {
+			if (probes[i].name === args[0]) {
+				ret = probes[i].attach(args[0], ret, module.exports);
+			}
+			if (probes[i].name === 'trace') {
+				ret = probes[i].attach(args[0], ret);
+			}
 		}
-		if (probes[i].name === 'trace') {
-			ret = probes[i].attach(args[0], ret);
-		}
+		return ret;
 	}
-	return ret;
 });
 
 /*
@@ -88,6 +135,12 @@ module.exports.enable = function (data, config) {
 				probes.push(traceProbe);
 			}
 			traceProbe.enable();
+			break;
+		case 'eventloop':
+			if (latencyRunning === true) break;
+			latencyRunning = true;
+			latencyCheckLoop = setInterval(latencyCheck, latencyCheckInterval);
+			latencyReportLoop = setInterval(latencyReport, latencyReportInterval);
 			break;
 		default:
 			probes.forEach(function (probe) {
@@ -114,6 +167,12 @@ module.exports.disable = function (data) {
 		probes.forEach(function (probe) {
 			probe.disableRequests();
 		});
+		break;
+	case 'eventloop':
+		if (latencyRunning === false) break;
+		latencyRunning = false;
+		clearInterval(latencyCheckLoop);
+		clearInterval(latencyReportLoop);
 		break;
 	default:
 		probes.forEach(function (probe) {
@@ -166,10 +225,11 @@ module.exports.emit = function (topic, data) {
 		// We have a listener, so fast path the notification to them
 		this.api.raiseLocalEvent(topic, data);
 	}
-	// Do not publish into the flight recorder
-	// This needs to be re-established once performance issues are fixed
-	//data = serializer.serialize(data);
-	//agent.nativeEmit(topic, String(data));
+	// Publish http data since this can be visualised.
+	if( topic == 'http' ) {
+		data = serializer.serialize(data);
+		agent.nativeEmit(topic, String(data));
+	}
 };
 
 // Export monitor() API for consuming data in-process

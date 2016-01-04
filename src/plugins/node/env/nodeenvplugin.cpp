@@ -14,11 +14,20 @@
  * limitations under the License.
  *******************************************************************************/
 
+#define Megabytes(V) ((V) * 1024 * 1024)
+
+#if V8_HOST_ARCH_PPC && V8_TARGET_ARCH_PPC && V8_OS_LINUX
+#define HEAP_PAGE_SIZE 4
+#else
+#define HEAP_PAGE_SIZE 1
+#endif
+
 #include "AgentExtensions.h"
 #include "Typesdef.h"
 #include "uv.h"
 #include "v8.h"
 #include "nan.h"
+#include <cstdlib>
 #include <cstring>
 #include <string>
 #include <sstream>
@@ -40,6 +49,10 @@ namespace plugin {
 	std::string nodeVendor;
 	std::string nodeName;
 	std::string commandLineArguments;
+	size_t maxOldSpaceSizeGuess;
+	size_t maxSemiSpaceSizeGuess;
+	size_t maxHeapSizeGuess;
+	size_t heapSizeLimit;
 }
 
 using namespace v8;
@@ -111,6 +124,91 @@ static void cleanupHandle(uv_handle_t *handle) {
 	delete handle;
 }
 
+size_t GuessSpaceSizeFromArgs(std::string argName) {
+	size_t result = 0;
+
+	Local<Object> process = GetProcessObject();
+	Local<Object> nodeArgv = process->Get(Nan::New<String>("execArgv").ToLocalChecked())->ToObject();
+	int64 nodeArgc = nodeArgv->Get(Nan::New<String>("length").ToLocalChecked())->ToInteger()->Value();
+
+	for (int i = 0; i < nodeArgc; i++) {
+		std::string arg = ToStdString(nodeArgv->Get(i)->ToString());
+		if (arg.length() > argName.length()) {
+			if (arg[0] == '-' && arg[1] == '-') {
+				unsigned int idx;
+				for (idx=2; idx < argName.length() && idx < arg.length(); idx++) {
+					if (argName[idx] != arg[idx]) {
+						if (!(argName[idx] == '-' && arg[idx] == '_')) {
+							break;
+						}
+					}
+				}
+				if (idx == argName.length()) {
+					// match
+					result = Megabytes(strtol(arg.c_str() + idx, NULL, 10));
+				}
+			}
+		}
+	}
+	return result;
+}
+
+static size_t GuessDefaultMaxOldSpaceSize() {
+	return Megabytes(700ul * (v8::internal::kApiPointerSize / 4));
+}
+
+static size_t GuessDefaultMaxSemiSpaceSize() {
+	return Megabytes(8ul * (v8::internal::kApiPointerSize / 4));
+}
+
+static size_t Align(size_t value, int alignment) {
+	size_t result = value;
+	if (value % alignment != 0) {
+		result = (1 + (value / alignment)) * alignment;
+	}
+	return result;
+}
+
+static size_t AlignToPowerOfTwo(size_t value) {
+	size_t result = value - 1;
+	result = result | (result >> 1);
+	result = result | (result >> 2);
+	result = result | (result >> 4);
+	result = result | (result >> 8);
+	result = result | (result >> 16);
+	if (sizeof(size_t) == 8) {
+		result = result | (result >> 32);
+	}
+	// We are assuming here that size_t is 64-bit at maximum
+	return result + 1;
+}
+
+static size_t GuessMaxOldSpaceSize() {
+	size_t result = GuessSpaceSizeFromArgs("--max-old-space-size=");
+	if (result <= 0) {
+		result = GuessDefaultMaxOldSpaceSize();
+	}
+	if (result <= 0) {
+		result = 0;
+	} else {
+		result = Align(result, Megabytes(HEAP_PAGE_SIZE));
+	}
+	return result;
+}
+
+static size_t GuessMaxSemiSpaceSize() {
+	size_t result = GuessSpaceSizeFromArgs("--max-semi-space-size=");
+	if (result <= 0) {
+		result = GuessDefaultMaxSemiSpaceSize();
+	}
+	if (result <= 0) {
+		result = 0;
+	} else {
+		result = AlignToPowerOfTwo(Align(result, Megabytes(HEAP_PAGE_SIZE)));
+	}
+	return result;
+}
+
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 static void GetNodeInformation(uv_async_t *async) {
 #else
@@ -127,24 +225,46 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 		plugin::nodeName = std::string("Node.js");
 	}
 	plugin::commandLineArguments = GetNodeArguments();
+	plugin::maxOldSpaceSizeGuess = GuessMaxOldSpaceSize();
+	plugin::maxSemiSpaceSizeGuess = GuessMaxSemiSpaceSize();
+	plugin::maxHeapSizeGuess = 2 * plugin::maxSemiSpaceSizeGuess + plugin::maxOldSpaceSizeGuess;
+	HeapStatistics hs;
+	Nan::GetHeapStatistics(&hs);
+	plugin::heapSizeLimit = hs.heap_size_limit();
 	uv_close((uv_handle_t*) async, cleanupHandle);
 	
 	if (plugin::nodeVersion != "") {
 		std::stringstream contentss;
 		contentss << "#EnvironmentSource\n";
-		
+
 		contentss << "runtime.version=" << plugin::nodeVersion;
 		if (plugin::nodeTag != "") {
 			contentss << plugin::nodeTag;
 		}
 		contentss << '\n';
 		
+		contentss << "appmetrics.version=" << plugin::api.getProperty("appmetrics.version") << '\n'; // eg "1.0.4"
+		contentss << "agentcore.version=" << plugin::api.getProperty("agentcore.version") << '\n'; // eg "3.0.7"
+
 		if (plugin::nodeVendor != "") {
 			contentss << "runtime.vendor=" << plugin::nodeVendor << '\n';
 		}
 		if (plugin::nodeName != "") {
 			contentss << "runtime.name=" << plugin::nodeName << '\n';
 		}
+
+		contentss << "heap.size.limit=" << plugin::heapSizeLimit << '\n';
+		if (plugin::maxSemiSpaceSizeGuess > 0) {
+			contentss << "max.semi.space.size=" << plugin::maxSemiSpaceSizeGuess << '\n';
+		}
+		if (plugin::maxOldSpaceSizeGuess > 0) {
+			contentss << "max.old.space.size=" << plugin::maxOldSpaceSizeGuess << '\n';
+		}
+		if (plugin::maxHeapSizeGuess > 0) {
+			contentss << "max.heap.size=" << plugin::maxHeapSizeGuess << '\n';
+		}
+
+
 		contentss << "command.line.arguments=" << plugin::commandLineArguments << '\n';
 		
 		std::string content = contentss.str();
@@ -182,7 +302,6 @@ extern "C" {
 		uv_async_t *async = new uv_async_t;
 		uv_async_init(uv_default_loop(), async, GetNodeInformation);
 		uv_async_send(async); // close and cleanup in call back
-		
 		return 0;
 	}
 	

@@ -68,7 +68,6 @@ MySqlProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  */
 MySqlProbe.prototype.requestStart = function (probeData, method, methodArgs) {
 	probeData.req = request.startRequest( 'DB', "query", false, probeData.timer );
-	probeData.req.setContext({sql: JSON.stringify(methodArgs[0])});
 };
 
 MySqlProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
