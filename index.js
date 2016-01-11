@@ -99,7 +99,7 @@ latencyReportLoop.unref();
 var data = {};
 
 aspect.after(module.__proto__, 'require', data, function(obj, methodName, args, context, ret) {
-	if (ret.__ddProbeAttached__) {
+	if (ret == null || ret.__ddProbeAttached__) {
 		return ret;
 	} else {
 		for (var i = 0; i < probes.length; i++) {
