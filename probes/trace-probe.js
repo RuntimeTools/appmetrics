@@ -65,16 +65,16 @@ function instrument( target, name, method, fullName ) {
 
     function generateF(expectedArgCount, fn) {
         switch (expectedArgCount) {
-            case 0: return function() { fn.apply(this,arguments);};
-            case 1: return function(a) { fn.apply(this,arguments);};
-            case 2: return function(a,b) { fn.apply(this,arguments);};
-            case 3: return function(a,b,c) {fn.apply(this, arguments);};
-            case 4: return function(a,b,c,d) {fn.apply(this, arguments);};
-            case 5: return function(a,b,c,d,e) {fn.apply(this, arguments);};
-            case 6: return function(a,b,c,d,e,f) {fn.apply(this, arguments);};
-            case 7: return function(a,b,c,d,e,f,g) {fn.apply(this, arguments);};
-            case 8: return function(a,b,c,d,e,f,g,h) {fn.apply(this, arguments);};
-            case 9: return function(a,b,c,d,e,f,g,h,i) {fn.apply(this, arguments);};
+            case 0: return function() {return fn.apply(this,arguments);};
+            case 1: return function(a) {return fn.apply(this,arguments);};
+            case 2: return function(a,b) {return fn.apply(this,arguments);};
+            case 3: return function(a,b,c) {return fn.apply(this, arguments);};
+            case 4: return function(a,b,c,d) {return fn.apply(this, arguments);};
+            case 5: return function(a,b,c,d,e) {return fn.apply(this, arguments);};
+            case 6: return function(a,b,c,d,e,f) {return fn.apply(this, arguments);};
+            case 7: return function(a,b,c,d,e,f,g) {return fn.apply(this, arguments);};
+            case 8: return function(a,b,c,d,e,f,g,h) {return fn.apply(this, arguments);};
+            case 9: return function(a,b,c,d,e,f,g,h,i) {return fn.apply(this, arguments);};
 
             //Slow case for functions with > 10 args
             default:
@@ -84,7 +84,7 @@ function instrument( target, name, method, fullName ) {
                     argumentList[i] = ident;
                     ident = incrementIdentifier(ident);
                 }
-                result = eval('x = function(' + (argumentList.join(',')) + ') { fn.apply(this,arguments);};');
+                result = eval('x = function(' + (argumentList.join(',')) + ') {return fn.apply(this,arguments);};');
                 return result;
         }
 
@@ -202,12 +202,11 @@ function traceMethod( moduleName, target, name ) {
 
         var p = target[name].prototype;
         for (var item in p) {
-            var isFunction = typeof(p[item]) == "function";
-            var hasNoProperties = Object.keys(p[item]).length == 0;
-            var protoHasNoProperties = Object.keys(p[item].prototype).length == 0;
-            if (isFunction && hasNoProperties && protoHasNoProperties) {
-                var itemName = fullName + "." + item;
-                instrument(p, item, p[item], itemName);
+            if ((typeof(p[item]) == "function") && 
+                (Object.keys(p[item]).length == 0) && 
+                (Object.keys(p[item].prototype).length == 0)) {
+                    var itemName = fullName + "." + item;
+                    instrument(p, item, p[item], itemName);
             }
         }
     }
