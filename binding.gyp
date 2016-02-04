@@ -59,6 +59,7 @@
       "target_name": "appmetrics",
       "sources": [
         "<(INTERMEDIATE_DIR)/appmetrics.cpp",
+        "<(srcdir)/objecttracker.cpp",
       ],
       'variables': {
         'appmetricslevel%':'<(appmetricsversion)<(build_id)',
