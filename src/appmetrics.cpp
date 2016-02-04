@@ -22,6 +22,7 @@
 #include "nan.h"
 #include "uv.h"
 #include "AgentExtensions.h"
+#include "objecttracker.hpp"
 #include <string>
 #include <iostream>
 #include <cstring>
@@ -546,6 +547,8 @@ void init(Handle<Object> exports, Handle<Object> module) {
 	exports->Set(Nan::New<String>("localConnect").ToLocalChecked(), Nan::New<FunctionTemplate>(localConnect)->GetFunction());
 	exports->Set(Nan::New<String>("nativeEmit").ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmit)->GetFunction());
 	exports->Set(Nan::New<String>("sendControlCommand").ToLocalChecked(), Nan::New<FunctionTemplate>(sendControlCommand)->GetFunction());
+
+	exports->Set(Nan::New<String>("getObjectHistogram").ToLocalChecked(), Nan::New<FunctionTemplate>(getObjectHistogram)->GetFunction());
 
 	/*
 	 * Initialize healthcenter core library
