@@ -145,19 +145,31 @@ function API(agent, appmetrics) {
     };
 
 	var formatProfiling = function (message) {
-		var lines = message.trim().split('\n');
-		var prof = {
-			date: 0,
-			functions: [],
-		};
-		lines.forEach(function (line) {
-			var values = line.split(',');
-			if (values[1] == 'Node') {
-				prof.functions.push({self: parseInt(values[2]), parent: parseInt(values[3]), file: values[4], name: values[5], line: parseInt(values[6]), count: parseInt(values[7])});
-			} else if (values[1] == 'Start') {
-				prof.time = parseInt(values[2]);
-			}
-		});
+		
+		var prof;
+		
+		//Message may already be in JSON format
+		if (message[0] == "{"){
+			prof = JSON.parse(message);
+		}
+		
+		//If not, format it
+		else {
+			prof = {
+				date: 0,
+				functions: [],
+			};
+			
+			var lines = message.trim().split('\n');
+			lines.forEach(function (line) {
+				var values = line.split(',');
+				if (values[1] == 'Node') {
+					prof.functions.push({self: parseInt(values[2]), parent: parseInt(values[3]), file: values[4], name: values[5], line: parseInt(values[6]), count: parseInt(values[7])});
+				} else if (values[1] == 'Start') {
+					prof.time = parseInt(values[2]);
+				}
+			});
+		}
 	 	that.emit('profiling', prof);	
 	};
 

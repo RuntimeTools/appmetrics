@@ -66,6 +66,18 @@ namespace plugin {
 
 using namespace v8;
 using namespace ibmras::common::logging;
+using namespace std;
+
+bool jsonEnabled = false;
+int profilingInterval = 5000;
+
+static void setProfilingInterval(int interval){
+	profilingInterval = interval;
+}
+
+static int getProfilingInterval(){
+	return profilingInterval;
+}
 
 static char* NewCString(const std::string& s) {
 	char *result = new char[s.length() + 1];
@@ -100,10 +112,29 @@ static void ConstructNodeData(const CpuProfileNode *node, int id, int parentId, 
 		delete[] function;
 		return;
 	}
-
-	result << "NodeProfData,Node," << id << ',' << parentId << ',';
-	result << script << ',' << function << ',' << line << ',' << selfSamples << '\n';
-
+	
+	if (jsonEnabled){
+		//Path needs to have all \ replaced with /
+		string strScript (script);
+		size_t pos = strScript.find("\\");
+		while(pos != string::npos){
+			strScript.replace(pos, 1, "/");
+			pos = strScript.find("\\");
+		}
+		
+		result << "{" << "\"functionName\":\"" << function << "\",";
+		result << "\"url\":\"" << strScript << "\",";
+		result << "\"lineNumber\":" << line << ",";
+		result << "\"hitCount\":" << selfSamples << ",";
+		result << "\"id\":" << id << ",";
+		result << "\"children\":[";
+	}
+	
+	else{
+		result << "NodeProfData,Node," << id << ',' << parentId << ',';
+		result << script << ',' << function << ',' << line << ',' << selfSamples << '\n';
+	}
+	
 	// clean up
 	delete[] script;
 	delete[] function;
@@ -118,6 +149,13 @@ static void visit(const CpuProfileNode *current, visit_callback *cb, int parentI
 	int children = current->GetChildrenCount();
 	for (int i=0; i<children; i++) {
 		visit(current->GetChild(i), cb, id, result);
+		if (i != children-1 && jsonEnabled){
+			result << ",";
+		}
+	}
+	if(jsonEnabled){
+		result << "]";
+		result << "}";
 	}
 }
 
@@ -125,9 +163,16 @@ static char * ConstructData(const CpuProfile *profile) {
 	const CpuProfileNode *topRoot = profile->GetTopDownRoot();
 
 	std::stringstream result;
-	result << "NodeProfData,Start," << GetRealTime() << '\n';
+	if (jsonEnabled){
+		result << "{\"date\":" << GetRealTime() << ",";
+		result << "\"head\":";
+	}
+	else result << "NodeProfData,Start," << GetRealTime() << '\n';	
 	visit(topRoot, ConstructNodeData, 0, result);
-	result << "NodeProfData,End" << '\n';
+	if (jsonEnabled){
+		result << "}";
+	}
+	else result << "NodeProfData,End" << '\n';
 	return NewCString(result.str());
 }
 
@@ -285,7 +330,7 @@ static void enableOnV8Thread(uv_async_t *async, int status) {
 	
 	StartTheProfiler();
 
-	uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, PROFILING_INTERVAL, PROFILING_INTERVAL);
+	uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, getProfilingInterval(), getProfilingInterval());
 		
 	uv_close((uv_handle_t*) async, cleanupHandle);
 }
@@ -373,7 +418,7 @@ extern "C" {
 			StartTheProfiler();
 		
 			plugin::api.logMessage(debug, "[profiling_node] Starting timer");
-			uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, PROFILING_INTERVAL, PROFILING_INTERVAL);
+			uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, getProfilingInterval(), getProfilingInterval());
 		}
 	
 		return 0;
@@ -417,6 +462,16 @@ extern "C" {
 				//std::string msg = "Setting [" + rest + "] to " + (enabled ? "enabled" : "disabled");
 				//plugin::api.logMessage(debug, msg.c_str());
 				setEnabled(enabled);
+			}
+			
+			if (rest == "profiling_node_v8json"){
+				jsonEnabled = (command == "on");
+				if (jsonEnabled){
+					//set interval to 60000
+					setProfilingInterval(60000);
+				}
+				else setProfilingInterval(5000);
+				
 			}
 		} 
 	}
