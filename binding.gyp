@@ -59,6 +59,7 @@
       "target_name": "appmetrics",
       "sources": [
         "<(INTERMEDIATE_DIR)/appmetrics.cpp",
+        "<(srcdir)/objecttracker.cpp",
       ],
       'variables': {
         'appmetricslevel%':'<(appmetricsversion)<(build_id)',
@@ -85,6 +86,14 @@
         "<(srcdir)/plugins/node/env/nodeenvplugin.cpp",
       ],
     },
+    {
+      "target_name": "nodeheapplugin",
+      "type": "shared_library",
+      "sources": [
+        "<(srcdir)/plugins/node/heap/nodeheapplugin.cpp",
+      ],
+    },
+
     {
       "target_name": "nodeprofplugin",
       "type": "shared_library",
@@ -120,6 +129,7 @@
           "destination": "./plugins",
           "files": [
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeenvplugin<(SHARED_LIB_SUFFIX)",
+            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeheapplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeprofplugin<(SHARED_LIB_SUFFIX)",
           ],
