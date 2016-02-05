@@ -18,6 +18,7 @@
 #define BUILDING_NODE_EXTENSION
 #endif
 
+#include "node.h"
 #include "v8.h"
 #include "v8-profiler.h"
 #include "nan.h"
@@ -36,7 +37,27 @@ NAN_METHOD(getObjectHistogram) {
 
 	HeapProfiler *heapProfiler = isolate->GetHeapProfiler();
 
-	const HeapSnapshot* snapshot = heapProfiler->TakeHeapSnapshot();
+	
+#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v0.11+
+	// Title field removed in Node 4.x
+#else
+	Local<String> snapshotName = String::NewFromUtf8(isolate, "snapshot");
+#endif
+
+	/* TakeHeapSnapshot used to be called TakeSnapshot
+	 * It's arguments changed so the latest versions don't need a title param.
+	 */
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+	const HeapSnapshot* snapshot = heapProfiler->TakeHeapSnapshot(
+#else
+	const HeapSnapshot* snapshot = heapProfiler->TakeSnapshot(snapshotName);
+#endif
+#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v0.11+
+	// Title field removed in Node 4.x
+#else
+	snapshotName
+#endif
+	);
 
 	/* Build a simple histogram from the heap snapshot. */
 	Local<Object> histogram = Object::New(isolate);
