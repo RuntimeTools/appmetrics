@@ -40,6 +40,8 @@ function API(agent, appmetrics) {
                 formatMemory(message);
         } else if (topic === 'gc_node') {
                 formatGC(message);
+        } else if (topic === 'heap_node') {
+                formatHeap(message); 
         } else if (topic === 'profiling_node') {
         		formatProfiling(message);
         } else if (topic === 'api') {
@@ -143,6 +145,24 @@ function API(agent, appmetrics) {
             that.emit('gc', gc);
         });
     };
+
+    var formatHeap = function(message) {
+        /* heap_node: NodeHeapData,9472608,4934136
+        *                         ,total heap size, used heap size
+        *
+        * Heap data can come in batches of multiple lines like the one in the example,
+        * so first separate the lines, followed by the normal parsing.
+        *
+        */
+        var lines = message.trim().split('\n');
+        /* Split each line into the comma-separated values. */
+        lines.forEach(function (line) {
+            var values = line.split(/[,]+/);
+            var heap = {total: parseInt(values[1]), used: parseInt(values[2])};
+            that.emit('heap', heap);
+        });
+
+    }
 
 	var formatProfiling = function (message) {
 		
