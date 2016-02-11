@@ -41,7 +41,7 @@ AxonProbe.prototype.attach = function(name, target) {
 
 	aspect.after(target, ['socket'], {}, function(target, methodName, methodArgs, context, client) {
 		var socketType = methodArgs[0];
-		methods = typeToMethods[socketType];
+		var methods = typeToMethods[socketType];
 		aspect.around(client, methods,
 			function(target, methodName, methodArgs, context){
 				that.metricsProbeStart(context, methodName, methodArgs);
