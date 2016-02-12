@@ -27,12 +27,19 @@ util.inherits(AxonProbe, Probe);
 /*
  * Select the methods we want to instrument for each type of socket.
  */
-var typeToMethods = { push: ['send'], pull : ['on', 'addListener'],
-		pub: ['send'], sub : ['on', 'addListener'],
-		req: ['send'], rep : ['on', 'addListener'] };
+var sendTypeToMethod = { push: 'send',
+		pub: 'send',
+		req: 'send'};
 
-typeToMethods['pub-emitter'] = ['emit'];
-typeToMethods['sub-emitter'] = ['on', 'addListener'];
+sendTypeToMethod['pub-emitter'] = 'emit';
+
+function isSendMethod(type) {
+	if( sendTypeToMethod[type] ) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 AxonProbe.prototype.attach = function(name, target) {
 	var that = this;
@@ -41,16 +48,17 @@ AxonProbe.prototype.attach = function(name, target) {
 
 	aspect.after(target, ['socket'], {}, function(target, methodName, methodArgs, context, client) {
 		var socketType = methodArgs[0];
-		var methods = typeToMethods[socketType];
-		aspect.around(client, methods,
-			function(target, methodName, methodArgs, context){
+		if( isSendMethod(socketType) ) {
+			var methods = sendTypeToMethod[socketType];
+			aspect.around(client, methods,
+					function(target, methodName, methodArgs, context){
 				that.metricsProbeStart(context, methodName, methodArgs);
 				that.requestProbeStart(context, methodName, methodArgs);
 				aspect.aroundCallback(methodArgs, context,
-					function(target, args, context){
-						that.metricsProbeEnd(context, methodName, methodArgs, socketType);
-						that.requestProbeEnd(context, methodName, methodArgs, socketType);
-					}
+						function(target, args, context) {
+					that.metricsProbeEnd(context, methodName, methodArgs, socketType);
+					that.requestProbeEnd(context, methodName, methodArgs, socketType);
+				}
 				);
 			},
 			function (target, methodName, methodArgs, context, rc) {
@@ -60,7 +68,28 @@ AxonProbe.prototype.attach = function(name, target) {
 				}
 				return rc;
 			}
-		);
+			);
+		} else {
+			var methods = ['on', 'addListener'];
+			aspect.before(client, methods,
+					function(target, methodName, methodArgs, context) {
+				var eventName = methodArgs[0];
+				if (aspect.findCallbackArg(methodArgs) != undefined) {
+					aspect.aroundCallback(methodArgs, context,
+							function(target, args, context){
+						that.metricsProbeStart(context, eventName, methodArgs, socketType);
+						that.requestProbeStart(context, eventName, methodArgs, socketType);
+					}, 
+					function (target, methodArgs, context, rc) {
+						that.metricsProbeEnd(context, eventName, methodArgs, socketType);
+						that.requestProbeEnd(context, eventName, methodArgs, socketType);
+						return rc;
+					}
+					);
+				};
+			}
+			);
+		}
 		return client;
 	});
 	return target;
@@ -79,7 +108,11 @@ AxonProbe.prototype.attach = function(name, target) {
 AxonProbe.prototype.metricsEnd = function(context, methodName, methodArgs, socketType) {
 	context.timer.stop();
 	// default to quality of service (qos) 0, as that's what the axon module does
-	am.emit('axon', {time: context.timer.startTimeMillis, method: methodName, topic: methodArgs[0], duration: context.timer.timeDelta, type: socketType});
+	if( isSendMethod(socketType) ) {
+		am.emit('axon', {time: context.timer.startTimeMillis, method: methodName, duration: context.timer.timeDelta, type: socketType})
+	} else {
+		am.emit('axon', {time: context.timer.startTimeMillis, event: methodName, duration: context.timer.timeDelta, type: socketType})
+	};
 };
 
 /*
