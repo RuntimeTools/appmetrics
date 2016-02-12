@@ -225,8 +225,8 @@ module.exports.emit = function (topic, data) {
 		// We have a listener, so fast path the notification to them
 		this.api.raiseLocalEvent(topic, data);
 	}
-	// Publish http data since this can be visualised.
-	if( topic == 'http' ) {
+	// Publish data that can be visualised in Health Center
+	if ((topic == 'http') || (topic == 'mqlight') || (topic == 'mongo') || (topic == 'mysql')) {
 		data = serializer.serialize(data);
 		agent.nativeEmit(topic, String(data));
 	}

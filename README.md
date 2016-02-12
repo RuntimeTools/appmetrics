@@ -26,6 +26,7 @@ Node Application Metrics provides the following built-in data collection sources
  MQLight            | MQLight messages sent and received by the application
  Memcached          | Data that stored or manupulated in Memcached
  OracleDB           | OracleDB queries made by the application
+ StrongOracle       | StrongOracle database queries made by the application
  Redis              | Redis commands issued by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
@@ -164,14 +165,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `strong-oracle`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -308,7 +309,7 @@ Emitted when a LevelDB query is made using the `leveldown` module.
 ### Event: 'redis'
 Emitted when a Redis command is sent.
 * `data` (Object) the data from the Redis event:
-    * `time` (Number) the time in milliseconds when the MQLight event occurred. This can be converted to a Date using new Date(data.time).
+    * `time` (Number) the time in milliseconds when the redis event occurred. This can be converted to a Date using new Date(data.time).
     * `cmd` (String) the Redis command sent to the server or 'batch.exec'/'multi.exec' for groups of command sent using batch/multi calls.
     * `duration` (Number) the time taken in milliseconds.
 
@@ -326,6 +327,13 @@ Emitted when a query is executed using the `oracledb` module.
     * `time` (Number) the milliseconds when the OracleDB query was made. This can be converted to a Date using `new Date(data.time)`.
     * `query` (String) the query made of the OracleDB database.
     * `duration` (Number) the time taken for the OracleDB query to be responded to in ms.
+
+### Event: 'strong-oracle'
+Emitted when a query is executed using the `strong-oracle` module.
+* `data` (Object) the data from the Strong Oracle query:
+    * `time` (Number) the milliseconds when the Strong Oracle query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the database.
+    * `duration` (Number) the time taken for the Strong Oracle query to be responded to in ms.
 
 ### Event: 'request'
 Emitted when a request is made of the application that involves one or more monitored application level events. Request events are disabled by default.
@@ -401,9 +409,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.0.6
+1.0.7
 
 ## Release History
+`1.0.7` - Support for installing with a proxy.  
 `1.0.6` - OracleDB support and bug fixes.  
 `1.0.5` - Expose HTTP events to connectors (including MQTT).  
 `1.0.4` - Redis, Leveldown, Postgresql, Memcached, MQLight and MQTT support, higher precision timings, and improved performance.  
