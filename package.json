@@ -1,6 +1,6 @@
 {
   "name": "appmetrics",
-  "version": "1.0.7-dev.0",
+  "version": "1.0.7",
   "description": "Node Application Metrics",
   "bin": {
     "node-hc": "bin/appmetrics-cli.js"
@@ -8,7 +8,8 @@
   "dependencies": {
     "nan": "2.x",
     "node-gyp": "2.x",
-    "tar": "2.x"
+    "tar": "2.x",
+    "request":"2.x"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
