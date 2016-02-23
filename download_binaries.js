@@ -96,27 +96,27 @@ var getAgentCorePlatformVersionDownloadURL = function() {
 };
 
 var downloadAndExtractTGZ = function(downloadURL, destDir) {
-	/* Downloading the binaries */
-	request(downloadURL, function(error, response, body) {
-		if (error) {
-			console.log('Got an error: ' + error.message);
-	 		process.exit(1);
-		} else {
-			console.log('Downloading and extracting tgz from ' + downloadURL + ' to ' + destDir);
-			if (response.statusCode != 200) {
-				console.log('ERROR: Unable to download ' + downloadURL);
-				process.exit(1);
-			}
-			response.pipe(zlib.createGunzip()).on('error', function(e) { 
-				console.log("Failed to gunzip: " + e.message);
-
-			}).pipe(tar.Extract({path: destDir})).on('error', function(e) { 
-				console.log("Failed to untar: " + e.message); 
-
-			}).on('close', function() {
-			    console.log('Download and extract of ' + downloadURL + ' finished.');
-			});
+        request(downloadURL)
+	.on('response', function(response) {
+		if (response.statusCode != 200) {
+			console.log('ERROR: Failed to download ' + downloadURL + ': HTTP ' + response.statusCode);
+			process.exit(1);
 		}
+	})
+	.on('error', function(err) {
+		console.log('ERROR: Failed to download ' + downloadURL + ': ' + err.message);
+		process.exit(1);
+	})
+	.pipe(zlib.createGunzip()).on('error', function(err) {
+		console.log('ERROR: Failed to gunzip ' + downloadURL + ': ' + err.message);
+		process.exit(1);
+	})
+	.pipe(tar.Extract({path: destDir})).on('error', function(err) {
+		console.log('ERROR: Failed to untar ' + downloadURL + ': ' + err.message);
+		process.exit(1);
+	})
+	.on('close', function() {
+		console.log('Download and extract of ' + downloadURL + ' finished.');
 	});
 };
 
