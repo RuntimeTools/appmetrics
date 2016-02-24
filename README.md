@@ -26,6 +26,7 @@ Node Application Metrics provides the following built-in data collection sources
  MQLight            | MQLight messages sent and received by the application
  Memcached          | Data that stored or manupulated in Memcached
  OracleDB           | OracleDB queries made by the application
+ Oracle             | Oracle queries made by the application
  StrongOracle       | StrongOracle database queries made by the application
  Redis              | Redis commands issued by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
@@ -165,14 +166,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `strong-oracle`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -327,6 +328,13 @@ Emitted when a query is executed using the `oracledb` module.
     * `time` (Number) the milliseconds when the OracleDB query was made. This can be converted to a Date using `new Date(data.time)`.
     * `query` (String) the query made of the OracleDB database.
     * `duration` (Number) the time taken for the OracleDB query to be responded to in ms.
+
+### Event: 'oracle'
+Emitted when a query is executed using the `oracle` module.
+* `data` (Object) the data from the Oracle query:
+    * `time` (Number) the milliseconds when the Oracle query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the Oracle database.
+    * `duration` (Number) the time taken for the Oracle query to be responded to in ms.
 
 ### Event: 'strong-oracle'
 Emitted when a query is executed using the `strong-oracle` module.
