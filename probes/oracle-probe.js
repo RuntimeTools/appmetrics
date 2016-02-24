@@ -33,11 +33,10 @@ OracleProbe.prototype.attach = function(name, target) {
 	if( name != 'oracle' ) return target;
 	if(target.__probeAttached__) return;
 	target.__probeAttached__ = true;
-	
-	console.log("attaching probe to: ");
+
 	console.dir(target);
 
-	// After 'getConnection' (single-user connection model)
+	// After 'connect' (single-user connection model)
 	aspect.before(target, 'connect', function(target, methodName, args, probeData) {
 		aspect.aroundCallback(args, {}, function(target, callbackArgs, probeData) {
 			var err = callbackArgs[0];
@@ -45,13 +44,11 @@ OracleProbe.prototype.attach = function(name, target) {
 				var connection = callbackArgs[1];
 				// Add monitoring
 				addMonitoring(connection, that);
-				
+
 				// Add monitoring to prepared statements
 				aspect.after(connection, 'prepare', function(target, methodName, arguments, context, ret){
 					addMonitoring(ret, that);
 				});
-				
-				// TODO: readers
 			}
 		});
 	});
