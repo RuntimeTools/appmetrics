@@ -50,9 +50,7 @@ LeveldownProbe.prototype.attach = function(name, target){
 	var newTarget = function() {
 		var lvldownObj = target.apply(null, arguments);
 		lvldownObj._ddProbeAttached_=true;
-		aspect.after(lvldownObj, 'open', {}, function(dbTarget, methodName, args, probeData,rc){
-			aspectLvldownMethod(dbTarget, methods, that);
-		})
+		aspectLvldownMethod(dbTarget, methods, that);
 		return lvldownObj;
 	};
 	return newTarget;
