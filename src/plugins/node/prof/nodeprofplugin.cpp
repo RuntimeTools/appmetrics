@@ -240,28 +240,20 @@ static void ReleaseProfile(const CpuProfile *profile) {
 	}
 }
 
-// NOTE(tunniclm): Must be called from the V8/Node/uv thread
-//                 since it calls V8 APIs
-//                 and accesses non thread-safe fields
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-void OnGatherDataOnV8Thread(uv_timer_s *data) {
-#else
-void OnGatherDataOnV8Thread(uv_timer_s *data, int status) {
-#endif
-
+void collectData() {
 	// Check if we just got disabled and the profiler
 	// isn't running
-	if (!plugin::enabled) return;
-	
+	if (!plugin::enabled)
+		return;
+
 	Nan::HandleScope scope;
-	
+
 	// Get profile
 	const CpuProfile *profile = StopTheProfiler();
 
 	if (profile != NULL) {
 		char *serialisedProfile = ConstructData(profile);
 		ReleaseProfile(profile);
-		StartTheProfiler();
 		if (serialisedProfile != NULL) {
 			// Send data to agent
 			monitordata data;
@@ -271,16 +263,51 @@ void OnGatherDataOnV8Thread(uv_timer_s *data, int status) {
 			data.size = static_cast<uint32>(strlen(serialisedProfile));
 			data.data = serialisedProfile;
 			plugin::api.agentPushData(&data);
-			
+
 			delete[] serialisedProfile;
 		} else {
-			plugin::api.logMessage(debug, "[profiling_node] Failed to serialise method profile"); // CHECK(tunniclm): Should this be a warning?
+			plugin::api.logMessage(debug,
+					"[profiling_node] Failed to serialise method profile"); // CHECK(tunniclm): Should this be a warning?
 		}
 	} else {
-		plugin::api.logMessage(debug, "[profiling_node] No method profile found"); // CHECK(tunniclm): Should this be a warning?
-		StartTheProfiler();
+		plugin::api.logMessage(debug,
+				"[profiling_node] No method profile found"); // CHECK(tunniclm): Should this be a warning?
 	}
+
 }
+
+
+
+// NOTE(tunniclm): Must be called from the V8/Node/uv thread
+//                 since it calls V8 APIs
+//                 and accesses non thread-safe fields
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+void OnGatherDataOnV8Thread(uv_timer_s *data) {
+#else
+void OnGatherDataOnV8Thread(uv_timer_s *data, int status) {
+#endif
+
+	collectData();
+	StartTheProfiler();
+}
+
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+static void StartProfilerWithoutTiming(uv_async_t *async) {
+#else
+static void StartProfilerWithoutTiming(uv_async_t *async, int status) {
+#endif
+	StartTheProfiler();
+}
+
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+static void StopProfilerWithoutTiming(uv_async_t *async) {
+#else
+static void StopProfilerWithoutTiming(uv_async_t *async, int status) {
+#endif
+	collectData();
+}
+
+
 
 pushsource* createPushSource(uint32 srcid, const char* name) {
 	pushsource *src = new pushsource();
@@ -361,15 +388,29 @@ static void disableOnV8Thread(uv_async_t *async, int status) {
 //                 thread. uv_async_send() is thread-safe.
 void setEnabled(bool value) {
 	if (value) {
-		plugin::api.logMessage(fine, "[profiling_node] Enabling");
-		uv_async_t *async = new uv_async_t;
-		uv_async_init(uv_default_loop(), async, enableOnV8Thread);
-		uv_async_send(async); // close and cleanup in call back
+		if (jsonEnabled) {
+			uv_async_t *async = new uv_async_t;
+			uv_async_init(uv_default_loop(), async, StartProfilerWithoutTiming);
+			uv_async_send(async); // close and cleanup in call back
+		} else {
+			uv_async_t *async = new uv_async_t;
+			uv_async_init(uv_default_loop(), async, enableOnV8Thread);
+			uv_async_send(async); // close and cleanup in call back
+		}
 	} else {
 		plugin::api.logMessage(fine, "[profiling_node] Disabling");
-		uv_async_t *async = new uv_async_t;
-		uv_async_init(uv_default_loop(), async, disableOnV8Thread);
-		uv_async_send(async); // close and cleanup in call back
+		if (jsonEnabled) {
+
+			uv_async_t *async = new uv_async_t;
+			uv_async_init(uv_default_loop(), async, StopProfilerWithoutTiming);
+			uv_async_send(async); // close and cleanup in call back
+		} else {
+
+			uv_async_t *async = new uv_async_t;
+			uv_async_init(uv_default_loop(), async, disableOnV8Thread);
+			uv_async_send(async); // close and cleanup in call back
+
+		}
 	}
 }
 
