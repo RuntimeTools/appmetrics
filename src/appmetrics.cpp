@@ -310,13 +310,35 @@ struct Listener {
 
 Listener* listener;
 
+
+
+static void freePayload(MessageData* payload) {
+
+	/* Clear fields to guard against the same payload being freed twice. */
+	if( NULL == payload ) {
+		return;
+	}
+	if( NULL != payload->data ) {
+		free(payload->data);
+		payload->data = NULL;
+	}
+	if( NULL != payload->source ) {
+		delete payload->source;
+		payload->source = NULL;
+	}
+	delete payload;
+}
+
 static void cleanupData(uv_handle_t *handle) {
 
-	MessageData* payload = static_cast<MessageData*>(handle->data);
-	free(payload->data);
-	delete payload->source;
-	delete payload;
+	if( NULL != handle ) {
+		MessageData* payload = static_cast<MessageData*>(handle->data);
+		/* Guard against being called twice. */
+		handle->data = NULL;
+		freePayload(payload);
+	}
 	delete handle;
+
 }
 
 static void emitMessage(uv_async_t *handle, int status) {
@@ -345,20 +367,30 @@ static void emitMessage(uv_async_t *handle, int status) {
 }
 
 static void sendData(const std::string &sourceId, unsigned int size, void *data) {
-	uv_async_t *async = new uv_async_t;
-	uv_async_init(uv_default_loop(), async, (uv_async_cb)emitMessage);
+	if( size == 0 ) {
+		return;
+	}
 
 	MessageData* payload = new MessageData();
+	if( NULL == payload ) {
+		return;
+	}
 	/*
 	 * Make a copies of data and source as they will be freed when this function returns
 	 */
 	void* dataCopy = malloc(size);
-	memcpy(dataCopy, data, size);
 	payload->source = new std::string(sourceId);
+	uv_async_t *async = new uv_async_t;
+	if ( NULL == dataCopy || NULL == payload->source || NULL == async ) {
+		freePayload(payload);
+		return;
+	}
+	memcpy(dataCopy, data, size);
 	payload->data = dataCopy;
 	payload->size = size;
 
 	async->data = payload;
+	uv_async_init(uv_default_loop(), async, (uv_async_cb)emitMessage);
 	uv_async_send(async);
 }
 
