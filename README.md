@@ -24,11 +24,12 @@ Node Application Metrics provides the following built-in data collection sources
  PostgreSQL         | PostgreSQL queries made by the application
  MQTT               | MQTT messages sent and received by the application
  MQLight            | MQLight messages sent and received by the application
- Memcached          | Data that stored or manupulated in Memcached
+ Memcached          | Data that is stored or manipulated in Memcached
  OracleDB           | OracleDB queries made by the application
  Oracle             | Oracle queries made by the application
  StrongOracle       | StrongOracle database queries made by the application
  Redis              | Redis commands issued by the application
+ Riak               | Riak methods called by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
 
@@ -166,14 +167,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -312,6 +313,16 @@ Emitted when a Redis command is sent.
 * `data` (Object) the data from the Redis event:
     * `time` (Number) the time in milliseconds when the redis event occurred. This can be converted to a Date using new Date(data.time).
     * `cmd` (String) the Redis command sent to the server or 'batch.exec'/'multi.exec' for groups of command sent using batch/multi calls.
+    * `duration` (Number) the time taken in milliseconds.
+
+### Event: 'riak'
+Emitted when a Riak method is called using the `basho-riak-client` module.
+* `data` (Object) the data from the Riak event:
+    * `time` (Number) the time in milliseconds when the riak event occurred. This can be converted to a Date using new Date(data.time).
+    * `method` (String) the Riak method called.
+    * `options` (Object) the options parameter passed to Riak.
+    * `command` (Object) the command parameter used in the `execute` method.
+    * `query` (String) the query parameter used in the `mapReduce` method.
     * `duration` (Number) the time taken in milliseconds.
 
 ### Event: 'memcached'
