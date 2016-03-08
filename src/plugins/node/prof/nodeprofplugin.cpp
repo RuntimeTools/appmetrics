@@ -20,6 +20,7 @@
 #include "v8-profiler.h"
 #include "uv.h"
 #include "nan.h"
+#include <iostream>
 //#include "node_version.h"
 #include <cstring>
 #include <string>
@@ -213,6 +214,7 @@ static void StartTheProfiler() {
 
 	cpu->StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked(), false);
 #else
+	std::cout << "StartTheProfiler";
 	CpuProfiler::StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
 #endif
 }
@@ -243,11 +245,11 @@ static void ReleaseProfile(const CpuProfile *profile) {
 void collectData() {
 	// Check if we just got disabled and the profiler
 	// isn't running
+
 	if (!plugin::enabled)
 		return;
 
 	Nan::HandleScope scope;
-
 	// Get profile
 	const CpuProfile *profile = StopTheProfiler();
 
@@ -262,7 +264,9 @@ void collectData() {
 			data.sourceID = 0;
 			data.size = static_cast<uint32>(strlen(serialisedProfile));
 			data.data = serialisedProfile;
+
 			plugin::api.agentPushData(&data);
+
 
 			delete[] serialisedProfile;
 		} else {
@@ -286,25 +290,8 @@ void OnGatherDataOnV8Thread(uv_timer_s *data) {
 #else
 void OnGatherDataOnV8Thread(uv_timer_s *data, int status) {
 #endif
-
 	collectData();
 	StartTheProfiler();
-}
-
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-static void StartProfilerWithoutTiming(uv_async_t *async) {
-#else
-static void StartProfilerWithoutTiming(uv_async_t *async, int status) {
-#endif
-	StartTheProfiler();
-}
-
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-static void StopProfilerWithoutTiming(uv_async_t *async) {
-#else
-static void StopProfilerWithoutTiming(uv_async_t *async, int status) {
-#endif
-	collectData();
 }
 
 
@@ -337,6 +324,33 @@ static void publishEnabled() {
 	plugin::api.agentSendMessage(("configuration/" + sourceName).c_str(), msg.length(),
 								  (void*) msg.c_str());
 } 
+
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+static void StartProfilerWithoutTiming(uv_async_t *async) {
+#else
+static void StartProfilerWithoutTiming(uv_async_t *async, int status) {
+#endif
+	if (plugin::enabled) return;
+	plugin::enabled = true;
+	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+    publishEnabled();
+	StartTheProfiler();
+}
+
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+static void StopProfilerWithoutTiming(uv_async_t *async) {
+#else
+static void StopProfilerWithoutTiming(uv_async_t *async, int status) {
+#endif
+	collectData();
+	if (!plugin::enabled) return;
+	plugin::enabled = false;
+	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+    publishEnabled();
+}
+
+
+
 
 static void cleanupHandle(uv_handle_t *handle) {
 	delete handle;
@@ -400,12 +414,10 @@ void setEnabled(bool value) {
 	} else {
 		plugin::api.logMessage(fine, "[profiling_node] Disabling");
 		if (jsonEnabled) {
-
 			uv_async_t *async = new uv_async_t;
 			uv_async_init(uv_default_loop(), async, StopProfilerWithoutTiming);
 			uv_async_send(async); // close and cleanup in call back
 		} else {
-
 			uv_async_t *async = new uv_async_t;
 			uv_async_init(uv_default_loop(), async, disableOnV8Thread);
 			uv_async_send(async); // close and cleanup in call back
