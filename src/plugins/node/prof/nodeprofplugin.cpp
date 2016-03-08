@@ -214,7 +214,6 @@ static void StartTheProfiler() {
 
 	cpu->StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked(), false);
 #else
-	std::cout << "StartTheProfiler";
 	CpuProfiler::StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
 #endif
 }
