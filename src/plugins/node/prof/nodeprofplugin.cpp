@@ -65,6 +65,11 @@ namespace plugin {
 	uv_timer_t *timer;
 }
 
+static uv_async_t *asyncStartProfiler = NULL;
+static uv_async_t *asyncEnable = NULL;
+static uv_async_t *asyncStopProfiler = NULL;
+static uv_async_t *asyncDisable = NULL;
+
 using namespace v8;
 using namespace ibmras::common::logging;
 using namespace std;
@@ -371,8 +376,6 @@ static void enableOnV8Thread(uv_async_t *async, int status) {
 	StartTheProfiler();
 
 	uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, getProfilingInterval(), getProfilingInterval());
-		
-	uv_close((uv_handle_t*) async, cleanupHandle);
 }
 
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
@@ -392,8 +395,6 @@ static void disableOnV8Thread(uv_async_t *async, int status) {
 	
 	const CpuProfile *profile = StopTheProfiler();
 	ReleaseProfile(profile);
-
-	uv_close((uv_handle_t*) async, cleanupHandle);
 }
 
 // NOTE(tunniclm): Don't access plugin::enabled or plugin::profiling in here
@@ -402,25 +403,16 @@ static void disableOnV8Thread(uv_async_t *async, int status) {
 void setEnabled(bool value) {
 	if (value) {
 		if (jsonEnabled) {
-			uv_async_t *async = new uv_async_t;
-			uv_async_init(uv_default_loop(), async, StartProfilerWithoutTiming);
-			uv_async_send(async); // close and cleanup in call back
+			uv_async_send(asyncStartProfiler); // close and cleanup in call back
 		} else {
-			uv_async_t *async = new uv_async_t;
-			uv_async_init(uv_default_loop(), async, enableOnV8Thread);
-			uv_async_send(async); // close and cleanup in call back
+			uv_async_send(asyncEnable);
 		}
 	} else {
 		plugin::api.logMessage(fine, "[profiling_node] Disabling");
 		if (jsonEnabled) {
-			uv_async_t *async = new uv_async_t;
-			uv_async_init(uv_default_loop(), async, StopProfilerWithoutTiming);
-			uv_async_send(async); // close and cleanup in call back
+			uv_async_send(asyncStopProfiler); // close and cleanup in call back
 		} else {
-			uv_async_t *async = new uv_async_t;
-			uv_async_init(uv_default_loop(), async, disableOnV8Thread);
-			uv_async_send(async); // close and cleanup in call back
-
+			uv_async_send(asyncDisable);
 		}
 	}
 }
@@ -465,6 +457,23 @@ extern "C" {
 		uv_timer_init(uv_default_loop(), plugin::timer);
 		uv_unref((uv_handle_t*) plugin::timer); // don't prevent event loop exit
 		
+		// Create the handles for disable/enable events.
+		asyncStartProfiler = new uv_async_t;
+		uv_async_init(uv_default_loop(), asyncStartProfiler, StartProfilerWithoutTiming);
+		uv_unref((uv_handle_t*)asyncStartProfiler);
+
+		asyncEnable = new uv_async_t;
+		uv_async_init(uv_default_loop(), asyncEnable, enableOnV8Thread);
+		uv_unref((uv_handle_t*)asyncEnable);
+
+		asyncStopProfiler = new uv_async_t;
+		uv_async_init(uv_default_loop(), asyncStopProfiler, StopProfilerWithoutTiming);
+		uv_unref((uv_handle_t*)asyncStopProfiler);
+
+		asyncDisable = new uv_async_t;
+		uv_async_init(uv_default_loop(), asyncDisable, disableOnV8Thread);
+		uv_unref((uv_handle_t*)asyncDisable);
+
 		if (plugin::enabled) {	
 			plugin::api.logMessage(debug, "[profiling_node] Start profiling");
 			StartTheProfiler();
@@ -489,6 +498,11 @@ extern "C" {
 			ReleaseProfile(profile);
 		}
 	
+		uv_close((uv_handle_t*) asyncStartProfiler, cleanupHandle);
+		uv_close((uv_handle_t*) asyncEnable, cleanupHandle);
+		uv_close((uv_handle_t*) asyncStopProfiler, cleanupHandle);
+		uv_close((uv_handle_t*) asyncDisable, cleanupHandle);
+
 		return 0;
 	}
 	
