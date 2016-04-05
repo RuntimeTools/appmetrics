@@ -389,8 +389,7 @@ static void sendData(const std::string &sourceId, unsigned int size, void *data)
 	 */
 	void* dataCopy = malloc(size);
 	payload->source = new std::string(sourceId);
-	uv_async_t *async = new uv_async_t;
-	if ( NULL == dataCopy || NULL == payload->source || NULL == async ) {
+	if ( NULL == dataCopy || NULL == payload->source ) {
 		freePayload(payload);
 		return;
 	}
