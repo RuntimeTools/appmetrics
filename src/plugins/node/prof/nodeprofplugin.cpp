@@ -64,6 +64,11 @@ namespace plugin {
 	uv_timer_t *timer;
 }
 
+static uv_async_t _asyncEnable;
+static uv_async_t *asyncEnable = &_asyncEnable;
+static uv_async_t _asyncDisable;
+static uv_async_t *asyncDisable = &_asyncDisable;
+
 using namespace v8;
 using namespace ibmras::common::logging;
 
@@ -286,8 +291,6 @@ static void enableOnV8Thread(uv_async_t *async, int status) {
 	StartTheProfiler();
 
 	uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, PROFILING_INTERVAL, PROFILING_INTERVAL);
-		
-	uv_close((uv_handle_t*) async, cleanupHandle);
 }
 
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
@@ -307,8 +310,6 @@ static void disableOnV8Thread(uv_async_t *async, int status) {
 	
 	const CpuProfile *profile = StopTheProfiler();
 	ReleaseProfile(profile);
-
-	uv_close((uv_handle_t*) async, cleanupHandle);
 }
 
 // NOTE(tunniclm): Don't access plugin::enabled or plugin::profiling in here
@@ -317,14 +318,10 @@ static void disableOnV8Thread(uv_async_t *async, int status) {
 void setEnabled(bool value) {
 	if (value) {
 		plugin::api.logMessage(fine, "[profiling_node] Enabling");
-		uv_async_t *async = new uv_async_t;
-		uv_async_init(uv_default_loop(), async, enableOnV8Thread);
-		uv_async_send(async); // close and cleanup in call back
+		uv_async_send(asyncEnable);
 	} else {
 		plugin::api.logMessage(fine, "[profiling_node] Disabling");
-		uv_async_t *async = new uv_async_t;
-		uv_async_init(uv_default_loop(), async, disableOnV8Thread);
-		uv_async_send(async); // close and cleanup in call back
+		uv_async_send(asyncDisable);
 	}
 }
 
@@ -368,6 +365,13 @@ extern "C" {
 		uv_timer_init(uv_default_loop(), plugin::timer);
 		uv_unref((uv_handle_t*) plugin::timer); // don't prevent event loop exit
 		
+		// Create the handles for disable/enable events.
+		uv_async_init(uv_default_loop(), asyncEnable, enableOnV8Thread);
+		uv_unref((uv_handle_t*)asyncEnable);
+
+		uv_async_init(uv_default_loop(), asyncDisable, disableOnV8Thread);
+		uv_unref((uv_handle_t*)asyncDisable);
+
 		if (plugin::enabled) {	
 			plugin::api.logMessage(debug, "[profiling_node] Start profiling");
 			StartTheProfiler();
@@ -391,6 +395,9 @@ extern "C" {
 			const CpuProfile *profile = StopTheProfiler();
 			ReleaseProfile(profile);
 		}
+
+		uv_close((uv_handle_t*) asyncEnable, cleanupHandle);
+		uv_close((uv_handle_t*) asyncDisable, cleanupHandle);
 	
 		return 0;
 	}
