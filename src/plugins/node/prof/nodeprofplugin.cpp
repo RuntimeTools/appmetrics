@@ -396,8 +396,8 @@ extern "C" {
 			ReleaseProfile(profile);
 		}
 
-		uv_close((uv_handle_t*) asyncEnable, cleanupHandle);
-		uv_close((uv_handle_t*) asyncDisable, cleanupHandle);
+		uv_close((uv_handle_t*) asyncEnable, NULL);
+		uv_close((uv_handle_t*) asyncDisable, NULL);
 	
 		return 0;
 	}
