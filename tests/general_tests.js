@@ -278,9 +278,9 @@ function runNodeEnvTests(nodeEnvData)
 
   if (nodeEnvData['appmetrics.version'])
   {
-    assert(/^\d+\.\d+\.\d+\.\d{12}$/.test(nodeEnvData['appmetrics.version']),
+    assert(/^\d+\.\d+\.\d+(-dev\.\d+)?\.\d{12}$/.test(nodeEnvData['appmetrics.version']),
            "Appmetrics version format not recognised"
-            + nodeEnvData['appmetrics.version'] + ", expected 99.99.99.123456789012");
+            + nodeEnvData['appmetrics.version'] + ", expected 99.99.99.123456789012 (or 99.99.99-dev.99.12345678901)");
   }
 
   if (nodeEnvData['agentcore.version'])
