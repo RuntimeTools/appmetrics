@@ -43,6 +43,25 @@ static std::string* appmetricsDir;
 static bool running = false;
 static loaderCoreFunctions* loaderApi;
 
+struct MessageData {
+	const std::string* source;
+	void* data;
+	unsigned int size;
+	MessageData* next;
+};
+
+static MessageData* messageList = NULL;
+static uv_mutex_t _messageListMutex;
+static uv_mutex_t* messageListMutex = &_messageListMutex;
+static uv_async_t _messageAsync;
+static uv_async_t *messageAsync = &_messageAsync;
+
+struct Listener {
+	Nan::Callback *callback;
+};
+
+Listener* listener;
+
 #define PROPERTIES_FILE "appmetrics.properties"
 #define APPMETRICS_VERSION "99.99.99.29991231"
 
@@ -297,69 +316,102 @@ NAN_METHOD(spath) {
 
 }
 
-struct MessageData {
-	const std::string* source;
-	void* data;
-	unsigned int size;
-};
+static void freePayload(MessageData* payload) {
 
-struct Listener {
-	Nan::Callback *callback;
-};
-
-
-Listener* listener;
-
-static void cleanupData(uv_handle_t *handle) {
-
-	MessageData* payload = static_cast<MessageData*>(handle->data);
-	free(payload->data);
-	delete payload->source;
+	/* Clear fields to guard against the same payload being freed twice. */
+	if( NULL == payload ) {
+		return;
+	}
+	if( NULL != payload->data ) {
+		free(payload->data);
+		payload->data = NULL;
+	}
+	if( NULL != payload->source ) {
+		delete payload->source;
+		payload->source = NULL;
+	}
+	payload->next = NULL;
 	delete payload;
-	delete handle;
 }
 
 static void emitMessage(uv_async_t *handle, int status) {
 	Nan::HandleScope scope;
-	MessageData* payload = static_cast<MessageData*>(handle->data);
 
-	TryCatch try_catch;
-	const unsigned argc = 2;
-	Local<Value> argv[argc];
-	const char * source = (*payload->source).c_str();
+	// The event loop may coalesce multiple sends so the
+	// emitMessage function needs to clear the entire queue.
+	// Take the head of the queue and save it and mark the
+	// queue as NULL to hold the lock for as short a time as
+	// possible.
 
-	Local<Object> buffer = Nan::CopyBuffer((char*)payload->data, payload->size).ToLocalChecked();
-	argv[0] = Nan::New<String>(source).ToLocalChecked();
-	argv[1] = buffer;
+	uv_mutex_lock(messageListMutex);
 
-	listener->callback->Call(argc, argv);
-	if (try_catch.HasCaught()) {
+	MessageData* currentMessage = messageList;
+	messageList = NULL;
+
+	uv_mutex_unlock(messageListMutex);
+
+	while(currentMessage != NULL ) {
+		TryCatch try_catch;
+		const unsigned argc = 2;
+		Local<Value> argv[argc];
+		const char * source = (*currentMessage->source).c_str();
+
+		Local<Object> buffer = Nan::CopyBuffer((char*)currentMessage->data, currentMessage->size).ToLocalChecked();
+		argv[0] = Nan::New<String>(source).ToLocalChecked();
+		argv[1] = buffer;
+
+		listener->callback->Call(argc, argv);
+		if (try_catch.HasCaught()) {
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-		node::FatalException(v8::Isolate::GetCurrent(), try_catch);
+			node::FatalException(v8::Isolate::GetCurrent(), try_catch);
 #else
-	node::FatalException(try_catch);
+			node::FatalException(try_catch);
 #endif
-
+		}
+		MessageData* nextMessage = currentMessage->next;
+		freePayload(currentMessage);
+		currentMessage = nextMessage;
 	}
-	uv_close((uv_handle_t*) handle, cleanupData);
+
 }
 
 static void sendData(const std::string &sourceId, unsigned int size, void *data) {
-	uv_async_t *async = new uv_async_t;
-	uv_async_init(uv_default_loop(), async, (uv_async_cb)emitMessage);
+	if( size == 0 ) {
+		return;
+	}
 
 	MessageData* payload = new MessageData();
+	if( NULL == payload ) {
+		return;
+	}
 	/*
 	 * Make a copies of data and source as they will be freed when this function returns
 	 */
 	void* dataCopy = malloc(size);
-	memcpy(dataCopy, data, size);
 	payload->source = new std::string(sourceId);
+	if ( NULL == dataCopy || NULL == payload->source ) {
+		freePayload(payload);
+		return;
+	}
+	memcpy(dataCopy, data, size);
 	payload->data = dataCopy;
 	payload->size = size;
+	payload->next = NULL;
 
-	async->data = payload;
-	uv_async_send(async);
+	// Put the next message on the end of the queue.
+	// (So they are sent in the same order we added them.)
+	uv_mutex_lock(messageListMutex);
+	MessageData** tail = &messageList;
+	while( *tail != NULL ) {
+		tail = &((*tail)->next);
+	}
+	(*tail) = payload;
+	uv_mutex_unlock(messageListMutex);
+
+	// Notify the event loop that there is a new message.
+	// The event loop may coalesce multiple sends so the
+	// emitMessage function needs to clear the entire queue.
+	uv_async_send(messageAsync);
 }
 
 NAN_METHOD(nativeEmit) {
@@ -536,6 +588,13 @@ void init(Handle<Object> exports, Handle<Object> module) {
 		Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
 		return;
 	}
+
+	// Setup global data mutex
+	uv_mutex_init(messageListMutex);
+
+	// Setup message sending callback and sure it does not keep us alive.
+	uv_async_init(uv_default_loop(), messageAsync, (uv_async_cb)emitMessage);
+	uv_unref((uv_handle_t*) messageAsync);
 
 	/*
 	 * Set exported functions

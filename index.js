@@ -17,7 +17,7 @@
 var path = require("path")
 var module_dir = path.dirname(module.filename)
 var os = require("os")
-var serializer = require('./lib/serializer.js');
+//var serializer = require('./lib/serializer.js');
 var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
 var fs = require('fs');
@@ -227,7 +227,7 @@ module.exports.emit = function (topic, data) {
 	}
 	// Publish data that can be visualised in Health Center
 	if ((topic == 'http') || (topic == 'mqlight') || (topic == 'mongo') || (topic == 'mysql')) {
-		data = serializer.serialize(data);
+		data = JSON.stringify(data);
 		agent.nativeEmit(topic, String(data));
 	}
 };
