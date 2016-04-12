@@ -16,7 +16,7 @@
 
 var fs = require('fs');
 var util = require('util');
-var http = require('http');
+var request = require('request');
 var url = require('url');
 var path = require('path');
 var zlib = require('zlib');
@@ -25,29 +25,33 @@ var tar = require('tar');
 var INSTALL_DIR = process.cwd();
 var LICENSES_DIR = path.join(INSTALL_DIR, 'licenses');
 var BASE_DOWNLOAD_URL = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/runtimes/tools/healthcenter/agents/nodejs/licenses-tgz';
-var APPMETRICS_VERSION = '1.0.6'; /* TODO(tunniclm): Pick this up from the package.json */
+var APPMETRICS_VERSION = '1.0.8'; /* TODO(tunniclm): Pick this up from the package.json */
 
 var LOG_FILE = path.join(LICENSES_DIR, 'licenses.log');
 
 var downloadAndExtractTGZ = function(downloadURL, destDir) {
-	/* Downloading the binaries */
-	var req = http.get(downloadURL, function(response) {
-		console.log('Downloading and extracting tgz from ' + downloadURL + ' to ' + destDir);
-
+	request(downloadURL)
+	.on('response', function(response) {
 		if (response.statusCode != 200) {
-			console.log('ERROR: Unable to download ' + downloadURL);
+			console.log('ERROR: Failed to download ' + downloadURL + ': HTTP ' + response.statusCode);
 			process.exit(1);
 		}
-
-		response.pipe(zlib.createGunzip())         .on('error', function(e) { console.log("Failed to gunzip: " + e.message); })
-		        .pipe(tar.Extract({path: destDir})).on('error', function(e) { console.log("Failed to untar: " + e.message); })
-		        .on('close', function() {
-		        	console.log('Download and extract of ' + downloadURL + ' finished.');
-		        });
-	}).on('error', function(e) {
-		console.log('Got an error: ' + e.message);
+	})
+        .on('error', function(err) {
+		console.log('ERROR: Failed to download ' + downloadURL + ': ' + err.message);
 		process.exit(1);
-	});	
+	})
+	.pipe(zlib.createGunzip()).on('error', function(err) {
+		console.log('ERROR: Failed to gunzip ' + downloadURL + ': ' + err.message);
+		process.exit(1);
+	})
+	.pipe(tar.Extract({path: destDir})).on('error', function(err) {
+		console.log('ERROR: Failed to untar ' + downloadURL + ': ' + err.message);
+		process.exit(1);
+	})
+	.on('close', function() {
+		console.log('Download and extract of ' + downloadURL + ' finished.');
+	});
 };
 
 /*
