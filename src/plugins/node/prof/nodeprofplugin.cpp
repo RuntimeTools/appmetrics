@@ -66,9 +66,11 @@ namespace plugin {
 }
 
 static uv_async_t *asyncStartProfiler = NULL;
-static uv_async_t *asyncEnable = NULL;
 static uv_async_t *asyncStopProfiler = NULL;
-static uv_async_t *asyncDisable = NULL;
+static uv_async_t _asyncEnable;
+static uv_async_t *asyncEnable = &_asyncEnable;
+static uv_async_t _asyncDisable;
+static uv_async_t *asyncDisable = &_asyncDisable;
 
 using namespace v8;
 using namespace ibmras::common::logging;
@@ -402,6 +404,7 @@ static void disableOnV8Thread(uv_async_t *async, int status) {
 //                 thread. uv_async_send() is thread-safe.
 void setEnabled(bool value) {
 	if (value) {
+		plugin::api.logMessage(fine, "[profiling_node] Enabling");
 		if (jsonEnabled) {
 			uv_async_send(asyncStartProfiler); // close and cleanup in call back
 		} else {
@@ -497,6 +500,9 @@ extern "C" {
 			const CpuProfile *profile = StopTheProfiler();
 			ReleaseProfile(profile);
 		}
+
+		uv_close((uv_handle_t*) asyncEnable, NULL);
+		uv_close((uv_handle_t*) asyncDisable, NULL);
 	
 		uv_close((uv_handle_t*) asyncStartProfiler, NULL);
 		uv_close((uv_handle_t*) asyncEnable, NULL);
