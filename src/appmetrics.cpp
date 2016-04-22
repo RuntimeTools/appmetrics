@@ -36,7 +36,6 @@
 #endif
 
 using namespace v8;
-using namespace ibmras::common::logging;
 
 static std::string* applicationDir;
 static std::string* appmetricsDir;
@@ -69,7 +68,8 @@ Listener* listener;
 namespace monitorApi {
 	void (*pushData)(std::string&);
 	void (*sendControl)(std::string&, unsigned int, void*);
-	void (*registerListener)(void (*)(const std::string&, unsigned int, void*));
+	// void (*registerListener)(void (*)(const std::string&, unsigned int, void*));
+	void (*registerListener)(void (*)(const char*, unsigned int, void*));
 }
 
 static std::string toStdString(Local<String> s) {
@@ -258,7 +258,8 @@ static bool initMonitorApi() {
 
 	monitorApi::pushData = (void (*)(std::string&)) getMonitorApiFunction(pluginPath, std::string("pushData"));
 	monitorApi::sendControl = (void (*)(std::string&, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
-	monitorApi::registerListener = (void (*)(void (*func)(const std::string&, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
+	//monitorApi::registerListener = (void (*)(void (*func)(const std::string&, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
+	monitorApi::registerListener = (void (*)(void (*func)(const char*, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
 
 	return isMonitorApiValid();
 }
@@ -375,7 +376,8 @@ static void emitMessage(uv_async_t *handle, int status) {
 
 }
 
-static void sendData(const std::string &sourceId, unsigned int size, void *data) {
+//static void sendData(const std::string &sourceId, unsigned int size, void *data) {
+static void sendData(const char* sourceId, unsigned int size, void *data) {
 	if( size == 0 ) {
 		return;
 	}
@@ -621,7 +623,7 @@ void init(Handle<Object> exports, Handle<Object> module) {
 	}
 	loaderApi->setLogLevels();
 	/* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
-	loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion().c_str());
+	loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());
 	loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
 	/*
