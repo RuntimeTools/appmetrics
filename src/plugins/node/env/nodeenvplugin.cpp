@@ -244,7 +244,7 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 		contentss << '\n';
 		
 		contentss << "appmetrics.version=" << plugin::api.getProperty("appmetrics.version") << '\n'; // eg "1.0.4"
-		contentss << "agentcore.version=" << plugin::api.getProperty("agentcore.version") << '\n'; // eg "3.0.7"
+		contentss << "agentcore.version=" << std::string(plugin::api.getProperty("agent.version")) << '\n'; // eg "3.0.7"
 
 		if (plugin::nodeVendor != "") {
 			contentss << "runtime.vendor=" << plugin::nodeVendor << '\n';
