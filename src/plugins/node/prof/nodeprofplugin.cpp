@@ -70,7 +70,6 @@ static uv_async_t _asyncDisable;
 static uv_async_t *asyncDisable = &_asyncDisable;
 
 using namespace v8;
-using namespace ibmras::common::logging;
 
 static char* NewCString(const std::string& s) {
 	char *result = new char[s.length() + 1];
