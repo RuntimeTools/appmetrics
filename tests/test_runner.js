@@ -23,7 +23,7 @@ process.argv.forEach(function(elem) {
 var agent;
 if (!global)
 {
-  agent = require('appmetrics');
+  agent = require('../');
   agent.start();
 
   // Make agent visible for other script files.
