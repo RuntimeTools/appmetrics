@@ -259,7 +259,6 @@ static bool initMonitorApi() {
 
 	monitorApi::pushData = (void (*)(const char*)) getMonitorApiFunction(pluginPath, std::string("pushData"));
 	monitorApi::sendControl = (void (*)(const char*, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
-	//monitorApi::registerListener = (void (*)(void (*func)(const std::string&, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
 	monitorApi::registerListener = (void (*)(void (*func)(const char*, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
 
 	return isMonitorApiValid();
