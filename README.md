@@ -38,9 +38,17 @@ Node Application Metrics provides the following built-in data collection sources
 
 The Node Application Metrics agent supports the following runtime environments:
 
+* **Node.js v6** on:
+  * 64-bit or 32-bit runtime on Windows (x64 or x86)
+  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
+  * 64-bit runtime on Mac OS X (x64)
+* **Node.js v5** on:
+  * 64-bit or 32-bit runtime on Windows (x64 or x86)
+  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
+  * 64-bit runtime on Mac OS X (x64)
 * **Node.js v4 and io.js v2** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86)
+  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
   * 64-bit runtime on Mac OS X (x64)
 * **Node.js 0.10 and 0.12** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
