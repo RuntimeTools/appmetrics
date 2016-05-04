@@ -66,8 +66,8 @@ Listener* listener;
 
 
 namespace monitorApi {
-	void (*pushData)(std::string&);
-	void (*sendControl)(std::string&, unsigned int, void*);
+	void (*pushData)(const char*);
+	void (*sendControl)(const char*, unsigned int, void*);
 	// void (*registerListener)(void (*)(const std::string&, unsigned int, void*));
 	void (*registerListener)(void (*)(const char*, unsigned int, void*));
 }
@@ -246,6 +246,7 @@ static void* getMonitorApiFunction(std::string pluginPath, std::string functionN
 #else
 	std::string libname = "libhcapiplugin.so";
 #endif
+	std::cout << "DEBUG: libname = " << libname << "\n";
 	return getFunctionFromLibrary(fileJoin(pluginPath, libname), functionName);
 }
 
@@ -256,9 +257,8 @@ static bool isMonitorApiValid() {
 static bool initMonitorApi() {
 	std::string pluginPath = loaderApi->getProperty("com.ibm.diagnostics.healthcenter.plugin.path");
 
-	monitorApi::pushData = (void (*)(std::string&)) getMonitorApiFunction(pluginPath, std::string("pushData"));
-	monitorApi::sendControl = (void (*)(std::string&, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
-	//monitorApi::registerListener = (void (*)(void (*func)(const std::string&, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
+	monitorApi::pushData = (void (*)(const char*)) getMonitorApiFunction(pluginPath, std::string("pushData"));
+	monitorApi::sendControl = (void (*)(const char*, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
 	monitorApi::registerListener = (void (*)(void (*func)(const char*, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
 
 	return isMonitorApiValid();
@@ -438,6 +438,7 @@ NAN_METHOD(nativeEmit) {
 		String::Utf8Value str(info[1]->ToString());
 		char *c_arg = *str;
 		contentss << c_arg;
+		
 	} else {
 		/*
 		 *  Error handling as we don't have a valid parameter
@@ -448,7 +449,7 @@ NAN_METHOD(nativeEmit) {
 	contentss << '\n';
 	std::string content = contentss.str();
 
-	monitorApi::pushData(content);
+	monitorApi::pushData(content.c_str());
 
 }
 
@@ -465,7 +466,7 @@ NAN_METHOD(sendControlCommand) {
 		std::string topic = std::string(*topicArg);
 		std::string command = std::string(*commandArg);
 		unsigned int length = command.length();
-		monitorApi::sendControl(topic, length, (void*)command.c_str());
+		monitorApi::sendControl(topic.c_str(), length, (void*)command.c_str());
 	} else {
 		return Nan::ThrowError("Arguments must be strings containing the plugin name and control command");
 	}
