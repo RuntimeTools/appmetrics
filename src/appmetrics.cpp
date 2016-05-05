@@ -246,7 +246,6 @@ static void* getMonitorApiFunction(std::string pluginPath, std::string functionN
 #else
 	std::string libname = "libhcapiplugin.so";
 #endif
-	std::cout << "DEBUG: libname = " << libname << "\n";
 	return getFunctionFromLibrary(fileJoin(pluginPath, libname), functionName);
 }
 
