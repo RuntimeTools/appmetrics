@@ -73,6 +73,7 @@ static uv_async_t _asyncDisable;
 static uv_async_t *asyncDisable = &_asyncDisable;
 
 using namespace v8;
+
 using namespace ibmras::common::logging;
 using namespace std;
 
@@ -86,6 +87,7 @@ static void setProfilingInterval(int interval){
 static int getProfilingInterval(){
 	return profilingInterval;
 }
+
 
 static char* NewCString(const std::string& s) {
 	char *result = new char[s.length() + 1];

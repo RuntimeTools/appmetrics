@@ -24,11 +24,12 @@ Node Application Metrics provides the following built-in data collection sources
  PostgreSQL         | PostgreSQL queries made by the application
  MQTT               | MQTT messages sent and received by the application
  MQLight            | MQLight messages sent and received by the application
- Memcached          | Data that stored or manupulated in Memcached
+ Memcached          | Data that is stored or manipulated in Memcached
  OracleDB           | OracleDB queries made by the application
  Oracle             | Oracle queries made by the application
  StrongOracle       | StrongOracle database queries made by the application
  Redis              | Redis commands issued by the application
+ Riak               | Riak methods called by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
 
@@ -37,9 +38,17 @@ Node Application Metrics provides the following built-in data collection sources
 
 The Node Application Metrics agent supports the following runtime environments:
 
+* **Node.js v6** on:
+  * 64-bit or 32-bit runtime on Windows (x64 or x86)
+  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
+  * 64-bit runtime on Mac OS X (x64)
+* **Node.js v5** on:
+  * 64-bit or 32-bit runtime on Windows (x64 or x86)
+  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
+  * 64-bit runtime on Mac OS X (x64)
 * **Node.js v4 and io.js v2** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86)
+  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
   * 64-bit runtime on Mac OS X (x64)
 * **Node.js 0.10 and 0.12** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
@@ -166,14 +175,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -314,6 +323,16 @@ Emitted when a Redis command is sent.
     * `cmd` (String) the Redis command sent to the server or 'batch.exec'/'multi.exec' for groups of command sent using batch/multi calls.
     * `duration` (Number) the time taken in milliseconds.
 
+### Event: 'riak'
+Emitted when a Riak method is called using the `basho-riak-client` module.
+* `data` (Object) the data from the Riak event:
+    * `time` (Number) the time in milliseconds when the riak event occurred. This can be converted to a Date using new Date(data.time).
+    * `method` (String) the Riak method called.
+    * `options` (Object) the options parameter passed to Riak.
+    * `command` (Object) the command parameter used in the `execute` method.
+    * `query` (String) the query parameter used in the `mapReduce` method.
+    * `duration` (Number) the time taken in milliseconds.
+
 ### Event: 'memcached'
 Emitted when a data is stored, retrieved or modified in Memcached using the `memcached` module.
 * `data` (Object) the data from the memcached event:
@@ -417,9 +436,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.0.8
+1.0.9
 
 ## Release History
+`1.0.9` - Loopback and Riak support, bug fixes and update to agent core 3.0.9.  
 `1.0.8` - Oracle support, bug fixes and api tests runnable using 'npm test'.  
 `1.0.7` - StrongOracle support, support for installing with a proxy, expose MongoDB, MQLight and MySQL events to connectors.  
 `1.0.6` - OracleDB support and bug fixes.  

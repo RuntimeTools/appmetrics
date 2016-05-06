@@ -37,7 +37,6 @@
 #endif
 
 using namespace v8;
-using namespace ibmras::common::logging;
 
 static std::string* applicationDir;
 static std::string* appmetricsDir;
@@ -68,9 +67,10 @@ Listener* listener;
 
 
 namespace monitorApi {
-	void (*pushData)(std::string&);
-	void (*sendControl)(std::string&, unsigned int, void*);
-	void (*registerListener)(void (*)(const std::string&, unsigned int, void*));
+	void (*pushData)(const char*);
+	void (*sendControl)(const char*, unsigned int, void*);
+	// void (*registerListener)(void (*)(const std::string&, unsigned int, void*));
+	void (*registerListener)(void (*)(const char*, unsigned int, void*));
 }
 
 static std::string toStdString(Local<String> s) {
@@ -257,9 +257,9 @@ static bool isMonitorApiValid() {
 static bool initMonitorApi() {
 	std::string pluginPath = loaderApi->getProperty("com.ibm.diagnostics.healthcenter.plugin.path");
 
-	monitorApi::pushData = (void (*)(std::string&)) getMonitorApiFunction(pluginPath, std::string("pushData"));
-	monitorApi::sendControl = (void (*)(std::string&, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
-	monitorApi::registerListener = (void (*)(void (*func)(const std::string&, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
+	monitorApi::pushData = (void (*)(const char*)) getMonitorApiFunction(pluginPath, std::string("pushData"));
+	monitorApi::sendControl = (void (*)(const char*, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
+	monitorApi::registerListener = (void (*)(void (*func)(const char*, unsigned int, void*))) getMonitorApiFunction(pluginPath, std::string("registerListener"));
 
 	return isMonitorApiValid();
 }
@@ -378,7 +378,8 @@ static void emitMessage(uv_async_t *handle, int status) {
 
 }
 
-static void sendData(const std::string &sourceId, unsigned int size, void *data) {
+//static void sendData(const std::string &sourceId, unsigned int size, void *data) {
+static void sendData(const char* sourceId, unsigned int size, void *data) {
 	if( size == 0 ) {
 		return;
 	}
@@ -439,6 +440,7 @@ NAN_METHOD(nativeEmit) {
 		String::Utf8Value str(info[1]->ToString());
 		char *c_arg = *str;
 		contentss << c_arg;
+		
 	} else {
 		/*
 		 *  Error handling as we don't have a valid parameter
@@ -449,7 +451,7 @@ NAN_METHOD(nativeEmit) {
 	contentss << '\n';
 	std::string content = contentss.str();
 
-	monitorApi::pushData(content);
+	monitorApi::pushData(content.c_str());
 
 }
 
@@ -466,7 +468,7 @@ NAN_METHOD(sendControlCommand) {
 		std::string topic = std::string(*topicArg);
 		std::string command = std::string(*commandArg);
 		unsigned int length = command.length();
-		monitorApi::sendControl(topic, length, (void*)command.c_str());
+		monitorApi::sendControl(topic.c_str(), length, (void*)command.c_str());
 	} else {
 		return Nan::ThrowError("Arguments must be strings containing the plugin name and control command");
 	}
@@ -626,7 +628,7 @@ void init(Handle<Object> exports, Handle<Object> module) {
 	}
 	loaderApi->setLogLevels();
 	/* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
-	loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion().c_str());
+	loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());
 	loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
 	/*

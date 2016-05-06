@@ -1,6 +1,6 @@
 {
   "name": "appmetrics",
-  "version": "1.0.9-dev.0",
+  "version": "1.0.10-dev.0",
   "description": "Node Application Metrics",
   "bin": {
     "node-hc": "bin/appmetrics-cli.js"

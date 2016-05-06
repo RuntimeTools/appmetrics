@@ -13,24 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
 #ifndef ibmras_monitoring_monitoring_h
 #define ibmras_monitoring_monitoring_h
-
 #include <string>
+extern "C"{
 
 #ifndef PLUGIN_API_VERSION
 #define PLUGIN_API_VERSION "1.0"
 #endif
 
-#if defined(_WINDOWS)
-#define PLUGIN_API_DECL __declspec(dllexport)	/* required for DLLs to export the plugin functions */
-#else
-#define PLUGIN_API_DECL
+/* provide a default definition of DECL of the platform does not define one */
+#ifndef DECL
+#define DECL
 #endif
 
-
-
+#if defined(_WINDOWS)
+  #if defined(EXPORT)
+    #define DECL __declspec(dllexport)	/* required for DLLs to export the plugin functions */
+  #else
+    #define DECL __declspec(dllimport)
+  #endif
+  #define PLUGIN_API_DECL __declspec(dllexport)	/* required for DLLs to export the plugin functions */
+#else
+  #define PLUGIN_API_DECL
+#endif
 
 /*
  * API definitions for data sources to connect to the monitoring
@@ -63,7 +69,6 @@ typedef struct pushsource {
 	pushsource *next;			/* next source or null if this is the last one in the list */
 } pushsource;
 
-
 typedef struct pullsource{
 	srcheader header;			/* common source header */
 	pullsource *next;			/* the next source or null if this is the last one in the list */
@@ -78,46 +83,22 @@ typedef void* (*CONNECTOR_FACTORY)(const char* properties);	/* short cut for the
 /* definition for receivers */
 typedef void (*RECEIVE_MESSAGE)(const char* id, unsigned int size, void *data);	/* short cut for the function pointer to invoke in the receiver library */
 
-
-#if defined(_WINDOWS)
-#if defined(EXPORT)
-#define DECL __declspec(dllexport)	/* required for DLLs to export the plugin functions */
-#else
-#define DECL __declspec(dllimport)
-#endif
-#endif
-
-/* provide a default definition of DECL of the platform does not define one */
-#ifndef DECL
-#define DECL
-#endif
-
-namespace ibmras {
-namespace common {
-namespace logging {
 /*
  * Enumeration levels to set for the logger
  */
-enum Level {
+enum loggingLevel {
 	/* log levels are ranked with debug being the most verbose */
-	none, warning, info, fine, finest, debug
+	none=0, warning, info, fine, finest, debug
 };
-}
-}
-}
-
-
-
 
 typedef void (*pushData)(monitordata *data);
 typedef int (*sendMessage)(const char * sourceId, unsigned int size,void *data);
-typedef void (*exposedLogger)(ibmras::common::logging::Level lev, const char * message);
+typedef void (*exposedLogger)(loggingLevel lev, const char * message);
 typedef const char * (*agentProperty)(const char * key);
 typedef void (*setAgentProp)(const char* key, const char* value);
-
 typedef void (*lifeCycle)();
 typedef bool (*loadPropFunc)(const char* filename);
-typedef std::string (*getVer)();
+typedef const char* (*getVer)();
 typedef void (*setLogLvls)();
 
 typedef struct agentCoreFunctions {
@@ -141,34 +122,14 @@ typedef struct loaderCoreFunctions {
 
 } loaderCoreFunctions;
 
+
 typedef loaderCoreFunctions* (*LOADER_CORE)();
 
 typedef int (*PLUGIN_INITIALIZE)(const char* properties);
 typedef pushsource* (*PUSH_SOURCE_REGISTER)(agentCoreFunctions aCF, unsigned int provID);
 typedef void (*PUSH_CALLBACK)(monitordata* data);
 
-
-
-namespace ibmras {
-namespace monitoring {
-namespace agent {
-
-class DECL AgentLoader {
-	static AgentLoader* getInstance();		/* return the singleton instance of the agent */
-	virtual void init(){};							/* invoke to start the agent initialisation lifecycle event */
-	virtual void start(){};							/* invoke to start the agent start lifecycle event */
-	virtual void stop(){};							/* invoke to start the agent stop lifecycle event */
-	virtual void shutdown(){};						/* invoke to shutdown the agent, it cannot be restarted after this */
-	bool loadPropertiesFile(const std::string& filename);
-											/* the location of the appmetrics.properties file to load */
-};
-
-
 }
-}
-} /* end namespace agent */
-
-
 #endif /* ibmras_monitoring_monitoring_h */
 
 
