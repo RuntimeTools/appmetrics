@@ -25,7 +25,7 @@ var tar = require('tar');
 var INSTALL_DIR = process.cwd();
 var LICENSES_DIR = path.join(INSTALL_DIR, 'licenses');
 var BASE_DOWNLOAD_URL = 'http://public.dhe.ibm.com/ibmdl/export/pub/software/websphere/runtimes/tools/healthcenter/agents/nodejs/licenses-tgz';
-var APPMETRICS_VERSION = '1.0.9'; /* TODO(tunniclm): Pick this up from the package.json */
+var APPMETRICS_VERSION = '1.0.11'; /* TODO(tunniclm): Pick this up from the package.json */
 
 var LOG_FILE = path.join(LICENSES_DIR, 'licenses.log');
 
