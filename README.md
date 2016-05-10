@@ -436,9 +436,11 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.0.9
+1.0.11
 
 ## Release History
+`1.0.11` - Bug fixes    
+`1.0.10` - Bug fixes  
 `1.0.9` - Loopback and Riak support, bug fixes and update to agent core 3.0.9.  
 `1.0.8` - Oracle support, bug fixes and api tests runnable using 'npm test'.  
 `1.0.7` - StrongOracle support, support for installing with a proxy, expose MongoDB, MQLight and MySQL events to connectors.  
