@@ -44,7 +44,6 @@ namespace plugin {
 }
 
 using namespace v8;
-using namespace ibmras::common::logging;
 
 static char* NewCString(const std::string& s) {
 	char *result = new char[s.length() + 1];
