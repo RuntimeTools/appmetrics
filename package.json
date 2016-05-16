@@ -10,7 +10,7 @@
     "node-gyp": "2.x",
     "tar": "2.x",
     "request":"2.x",
-    "omr-agentcoredev": "git002@gitlab-polyglot.hursley.ibm.com:runtimetools/omr-agentcoredev.git"
+    "omr-agentcoredev": "git+git002@gitlab-polyglot.hursley.ibm.com:runtimetools/omr-agentcoredev.git"
   },
   "scripts": {
     "test": "node tests/test_runner.js",
