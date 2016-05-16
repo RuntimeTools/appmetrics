@@ -1,6 +1,7 @@
 {
   "variables": {
     "srcdir%": "./src",
+    "agentcoredir%": "./omr-agentcoredev",
     "nandir%": "<!(node -e \"try {require('nan')}catch (e){console.log(e)}\")",
     'build_id%': '.<!(["python", "./generate_build_id.py"])',
     'appmetricsversion%':  '<!(["python", "./get_from_json.py", "./package.json", "version"])',
@@ -55,6 +56,13 @@
   },
 
   "targets": [
+    {
+      "target_name": "agentcore",
+      "type": "none",
+      "dependencies": [
+        "<(agentcoredir)/binding.gyp:external",
+      ],
+    },
       {
       "target_name": "appmetrics",
       "sources": [
@@ -104,16 +112,19 @@
       "target_name": "install",
       "type": "none",
       "dependencies": [
+        "agentcore",
         "appmetrics",
         "nodeenvplugin",
         "nodegcplugin",
         "nodeprofplugin",
+        
      ],
       "copies": [
         {
           "destination": "./",
           "files": [
             "<(PRODUCT_DIR)/appmetrics.node",
+            "<(agentcoredir)/<(SHARED_LIB_PREFIX)agentcore<(SHARED_LIB_SUFFIX)",
           ],
         },
         {
@@ -122,10 +133,14 @@
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeenvplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeprofplugin<(SHARED_LIB_SUFFIX)",
+            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
+            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)cpuplugin<(SHARED_LIB_SUFFIX)",
+            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)envplugin<(SHARED_LIB_SUFFIX)",
+            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
+            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcapiplugin<(SHARED_LIB_SUFFIX)",            
           ],
         },
       ],
     },
   ],
 }
-
