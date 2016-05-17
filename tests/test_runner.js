@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
 var global = false;
 process.argv.forEach(function(elem) {
   if (elem == '-g')
@@ -28,26 +27,18 @@ if (!global)
 
   // Make agent visible for other script files.
   module.exports.agent = agent;
-  require('./api_tests');
 }
 
-// Set how long the tests will run for. Default: 30s.
-var duration_secs = process.argv[2] || 30;
-
-var t = null;
+//Every second, write a string to memory
+var test = null;
 var ih = setInterval(function() {
   var dummy = new Buffer(1024*1024);
   dummy.write("hello");
-  t = dummy.toString()[0];
+  test = dummy.toString()[0];
 }, 100);
 
-if (duration_secs != null)
-{
-  setTimeout(function() {
-    clearInterval(ih);
-    if (agent) {
-      agent.stop();
-      setTimeout(function() {}, 500);
-    }
-  }, duration_secs*1000);
+
+module.exports.endRun = function(){
+	agent.stop();
+	clearInterval(ih);
 }
