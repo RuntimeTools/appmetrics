@@ -13,7 +13,9 @@
   },
   "scripts": {
     "test": "node tests/test_runner.js",
+    "preinstall":"git submodule update",
     "install": "node-gyp rebuild"
+    
   },
   "directories": {
     "licenses": "licenses",
