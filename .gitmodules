@@ -1,3 +1,0 @@
-[submodule "omr-agentcoredev"]
-	path = omr-agentcoredev
-	url = git002@gitlab-polyglot.hursley.ibm.com:runtimetools/omr-agentcoredev.git

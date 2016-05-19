@@ -13,7 +13,7 @@
   },
   "scripts": {
     "test": "node tests/test_runner.js",
-    "preinstall":"git submodule update",
+    "preinstall":"git clone https://github.com/RuntimeTools/omr-agentcore.git",
     "install": "node-gyp rebuild"
     
   },
