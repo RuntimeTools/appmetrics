@@ -14,14 +14,14 @@
  * limitations under the License.
  *******************************************************************************/
  
-var runner = require('./test_runner');
-var monitor = runner.agent.monitor();
-runner.agent.enable("profiling");
+var app = require('./test_app');
+var monitor = app.agent.monitor();
+app.agent.enable("profiling");
 
 var tap = require('tap');
 tap.plan(6); // NOTE: This needs to be updated when tests are added/removed
 tap.tearDown(function(){
-	runner.endRun();
+	app.endRun();
 });
 
 var completedTests = {}; //Stores which tests have been run, ensures single run per test

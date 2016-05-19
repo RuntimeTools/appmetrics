@@ -29,7 +29,7 @@ if (!global)
   module.exports.agent = agent;
 }
 
-//Every second, write a string to memory
+//Write a string to memory on timer
 var test = null;
 var ih = setInterval(function() {
   var dummy = new Buffer(1024*1024);
