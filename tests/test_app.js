@@ -14,19 +14,30 @@
  * limitations under the License.
  *******************************************************************************/
 var global = false;
+
 process.argv.forEach(function(elem) {
-  if (elem == '-g')
+  if (elem == '-g'){
     global = true;
+  }
 });
 
 var agent;
-if (!global)
-{
-  agent = require('../');
-  agent.start();
 
-  // Make agent visible for other script files.
-  module.exports.agent = agent;
+//If running global test, run long enough to ensure the agent has loaded and process doesn't crash
+if (global) {
+	var duration_secs = process.argv[2] || 10; //Default 10 seconds for global tests
+	setTimeout(function(){
+		clearInterval(ih);
+	}, duration_secs*1000);
+}
+
+//If being run from other test, start the agent and make available
+else {
+	agent = require('../');
+	agent.start();
+
+	// Make agent visible for other script files.
+	module.exports.agent = agent;
 }
 
 //Write a string to memory on timer
