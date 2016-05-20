@@ -12,7 +12,7 @@
     "request":"2.x"
   },
   "scripts": {
-    "test": "tap --reporter tap tests/api_tests.js",
+    "test": "tap tests/api_tests.js",
     "install": "node download_licenses.js && node download_binaries.js && node-gyp rebuild"
   },
   "directories": {

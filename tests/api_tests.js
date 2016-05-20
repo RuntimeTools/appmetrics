@@ -14,19 +14,17 @@
  * limitations under the License.
  *******************************************************************************/
  
-var runner = require('./test_runner');
-var monitor = runner.agent.monitor();
-runner.agent.enable("profiling");
+var app = require('./test_app');
+var monitor = app.agent.monitor();
+app.agent.enable("profiling");
 
 var tap = require('tap');
 tap.plan(6); // NOTE: This needs to be updated when tests are added/removed
 tap.tearDown(function(){
-	runner.endRun();
+	app.endRun();
 });
 
-var completedTests = {}; //Stores which tests have been run, ensures single test per run
-
-
+var completedTests = {}; //Stores which tests have been run, ensures single run per test
 
 monitor.on('cpu', function(data) {
 	if (completedTests.cpu != true){
@@ -331,89 +329,50 @@ function runNodeEnvTests(nodeEnvData, t) {
 	
 }
 
-
-//TODO: Profiling test improvements
-// function runProfilingTests(profData, t){
-	// var functions = profData['functions']; 
+function runProfilingTests(profData, t){
+	var functions = profData['functions']; 
 	
-	// function testField(fieldName, t){
-		// var pass;
-		// We want to test every item
-		// t.test(fieldName, function(t1){
-			// for (var index in )
-				
-			// Cycle through all functions
-			// If field is fine, continue
-			// Else, fail the test with info, end test, set flag and bail out of for loop
-			
-			// If we reach the end of the end of the loop, we passed and end
-		// });
-			
-	// };
-	
-	// test the same field in every function is ok
-	
-	
-	
-// }
-
-
-
-function runProfilingTests(profData, t) {
-
-	var prefix = prefix || 'Profiling message ';
-
 	t.ok(isInteger(profData.time), "Timestamp is an integer");
 	t.ok(isReasonableTimestamp(parseInt(profData.time)), "Timestamp is a reasonable value (expected to contain current year)");
-
-	var functions = profData['functions'];
 	
-	for (var index in functions){
-		var currentFunction = functions[index];
-		
-		
-		if (!isInteger(currentFunction.self)){ 
-			t.fail(prefix + "does not have an integer id (" + currentFunction.self + ")");
-		}
-		
-		if (!isInteger(currentFunction.parent)){ 
-			t.fail(prefix + "does not have an integer parent id (" + currentFunction.parent + ")");
-		}
-		
-		if (!isInteger(currentFunction.line)){ 
-			t.fail(prefix + "does not have an integer line number(" + currentFunction.line + ")");
-		}
-
-		if (!isInteger(currentFunction.count)){
-			t.fail(isInteger(currentFunction.count),
-			   prefix + "does not have an integer sample count (" + currentFunction.count + ")");
-		}
-
-
-		for (var entry in currentFunction)
-		{
-		  if (entry != 'file' || entry != 'name')
+	testValuesAreIntegers("self");
+	testValuesAreIntegers("parent");
+	testValuesAreIntegers("line");
+	testValuesAreIntegers("count");
+	
+	//Parse values of all functions for next tests
+	for (var currentFunction in functions){
+		for (var entry in currentFunction){
+			if (entry != 'file' || entry != 'name')
 			currentFunction[entry] = parseInt(currentFunction[entry]);
 		}
-
-		if (currentFunction.self <= 0){ 
-			t.fail(prefix + "does not have a positive id (" + currentFunction.self + ")");
-		}
-		
-		if (currentFunction.parent < 0){ 
-			t.fail(prefix + "does not have a positive (or 0) parent id (" + currentFunction.parent + ")");
-		}
-		
-		if (currentFunction.line < 0){
-			t.fail(prefix + "does not have a positive (or 0) line number (" + currentFunction.line + ")");
-		}
-		
-		
-		if (currentFunction.count < 0){
-			t.fail(prefix + "does not have a positive (or 0) sample count (" + currentFunction.count + ")");
-		}
 	}
-
+	
+	testValuesAreGreaterThan("self", 0); //Self can't be 0 as the root can't be a function
+	testValuesAreGreaterThan("parent", -1);
+	testValuesAreGreaterThan("line", -1);
+	testValuesAreGreaterThan("count", -1);
+	
+	//Check the same key for all functions in data are integer
+	function testValuesAreIntegers(keyName){
+		for (var index in functions){
+			if(!isInteger(functions[index][keyName])){ 
+				t.fail("Value of "+keyName+" should be an integer ("+	functions[index][keyName]+")");
+				return;
+			}
+		}
+		t.pass("Value of '" + keyName + "' is an integer for all functions");
+	}
+	
+	function testValuesAreGreaterThan(keyName, val){
+		for (var index in functions){
+			if (!(functions[index][keyName] > val)) {
+				t.fail("Value of '" + keyName + "' should be greater than "+ val +" ("+functions[index][keyName]+")");
+				return;
+			}
+		}
+		t.pass("Value of '" + keyName + "' is greater than " + val + " for all functions");
+	}
 }
 
 function runEventLoopTests(elData, t){
@@ -433,6 +392,3 @@ function runEventLoopTests(elData, t){
 			   "Contains " + elem + " latency value less that 5 seconds");
 	}
 }
-
-// module.exports.testCount = testCount;
-	
