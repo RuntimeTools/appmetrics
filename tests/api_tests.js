@@ -348,10 +348,10 @@ function runProfilingTests(profData, t){
 		}
 	}
 	
-	testValuesAreNotNegative("self");
-	testValuesAreNotNegative("parent");
-	testValuesAreNotNegative("line");
-	testValuesAreNotNegative("count");
+	testValuesAreGreaterThan("self", 0); //Self can't be 0 as the root can't be a function
+	testValuesAreGreaterThan("parent", -1);
+	testValuesAreGreaterThan("line", -1);
+	testValuesAreGreaterThan("count", -1);
 	
 	//Check the same key for all functions in data are integer
 	function testValuesAreIntegers(keyName){
@@ -364,20 +364,14 @@ function runProfilingTests(profData, t){
 		t.pass("Value of '" + keyName + "' is an integer for all functions");
 	}
 	
-	//Check the same key for all functions in data aren't negative
-	function testValuesAreNotNegative(keyName){ 
+	function testValuesAreGreaterThan(keyName, val){
 		for (var index in functions){
-			//Self cannot be 0
-			if (keyName === 'self' && functions[index][keyName] <= 0) {
-				t.fail("Value of '" + keyName + "' should be positive ("+functions[index][keyName]+")")
-				return;
-			}
-			if (functions[index][keyName] < 0) {
-				t.fail("Value of '" + keyName + "' should be positive or 0 ("+functions[index][keyName]+")");
+			if (!functions[index][keyName] > val) {
+				t.fail("Value of '" + keyName + "' should be greater than "+ val +" ("+functions[index][keyName]+")");
 				return;
 			}
 		}
-		t.pass("Value of '" + keyName + "' is positive (or 0) for all functions");
+		t.pass("Value of '" + keyName + "' is greater than " + val + " for all functions");
 	}
 }
 
