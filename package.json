@@ -15,7 +15,6 @@
     "test": "node tests/test_runner.js",
     "preinstall":"git clone https://github.com/RuntimeTools/omr-agentcore.git",
     "install": "node-gyp rebuild"
-    
   },
   "directories": {
     "licenses": "licenses",
