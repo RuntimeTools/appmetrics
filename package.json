@@ -12,8 +12,9 @@
     "request":"2.x"
   },
   "scripts": {
-    "test": "tap tests/api_tests.js",
-    "install": "node download_licenses.js && node download_binaries.js && node-gyp rebuild"
+    "test": "node tests/test_runner.js",
+    "preinstall":"git clone https://github.com/RuntimeTools/omr-agentcore.git",
+    "install": "node-gyp rebuild"
   },
   "directories": {
     "licenses": "licenses",
