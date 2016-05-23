@@ -1,6 +1,8 @@
 # Node Application Metrics
 Node Application Metrics monitoring and profiling agent
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8caec03a401f4a37823ac547d7a0a272)](https://www.codacy.com/app/dancunnington/appmetrics?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RuntimeTools/appmetrics&amp;utm_campaign=Badge_Grade)
+
 Node Application Metrics instruments the Node.js runtime for performance monitoring, providing the monitoring data via an API. 
 Additionally the data can be visualized in an Eclipse IDE using the [IBM Monitoring and Diagnostics Tools - Health Center][1] client.
 
