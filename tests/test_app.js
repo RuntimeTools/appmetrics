@@ -62,6 +62,6 @@ var ih = setInterval(function() {
 
 
 module.exports.endRun = function(){
-	agent.stop();
+	appmetrics.stop();
 	clearInterval(ih);
 }
