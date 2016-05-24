@@ -102,6 +102,13 @@
       ],
     },
     {
+      "target_name": "nodeloopplugin",
+      "type": "shared_library",
+      "sources": [
+        "<(srcdir)/plugins/node/loop/nodeloopplugin.cpp",
+      ],
+    },
+    {
       "target_name": "nodegcplugin",
       "type": "shared_library",
       "sources": [
@@ -117,6 +124,7 @@
         "nodeenvplugin",
         "nodegcplugin",
         "nodeprofplugin",
+        "nodeloopplugin",
      ],
       "copies": [
         {
@@ -132,6 +140,7 @@
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeheapplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeprofplugin<(SHARED_LIB_SUFFIX)",
+            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeloopplugin<(SHARED_LIB_SUFFIX)",
           ],
         },
       ],

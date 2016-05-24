@@ -1,5 +1,4 @@
 /*******************************************************************************
- * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,12 +39,12 @@ function API(agent, appmetrics) {
                 formatMemory(message);
         } else if (topic === 'gc_node') {
                 formatGC(message);
-        } else if (topic === 'heap_node') {
-                formatHeap(message); 
         } else if (topic === 'profiling_node') {
         		formatProfiling(message);
         } else if (topic === 'api') {
                 formatApi(message);
+        } else if (topic === 'loop_node') {
+                formatLoop(message);
         } else {
         /*
          * Just raise any unknown message as an event so someone can parse it themselves
@@ -53,7 +52,7 @@ function API(agent, appmetrics) {
                 that.emit(topic, message);
         }
     };
-
+    
     var formatCPU = function(message) {
     	// cpu : startCPU@#1412609879696@#0.000499877@#0.137468
         var values = message.trim().split('@#'); // needs to be trimmed because of leading \n character
@@ -146,53 +145,38 @@ function API(agent, appmetrics) {
         });
     };
 
-    var formatHeap = function(message) {
-        /* heap_node: NodeHeapData,9472608,4934136
-        *                         ,total heap size, used heap size
-        *
-        * Heap data can come in batches of multiple lines like the one in the example,
-        * so first separate the lines, followed by the normal parsing.
-        *
-        */
-        var lines = message.trim().split('\n');
-        /* Split each line into the comma-separated values. */
-        lines.forEach(function (line) {
-            var values = line.split(/[,]+/);
-            var heap = {total: parseInt(values[1]), used: parseInt(values[2])};
-            that.emit('heap', heap);
-        });
-
-    }
-
 	var formatProfiling = function (message) {
-		
-		var prof;
-		
-		//Message may already be in JSON format
-		if (message[0] == "{"){
-			prof = JSON.parse(message);
-		}
-		
-		//If not, format it
-		else {
-			prof = {
-				date: 0,
-				functions: [],
-			};
-			
-			var lines = message.trim().split('\n');
-			lines.forEach(function (line) {
-				var values = line.split(',');
-				if (values[1] == 'Node') {
-					prof.functions.push({self: parseInt(values[2]), parent: parseInt(values[3]), file: values[4], name: values[5], line: parseInt(values[6]), count: parseInt(values[7])});
-				} else if (values[1] == 'Start') {
-					prof.time = parseInt(values[2]);
-				}
-			});
-		}
+		var lines = message.trim().split('\n');
+		var prof = {
+			date: 0,
+			functions: [],
+		};
+		lines.forEach(function (line) {
+			var values = line.split(',');
+			if (values[1] == 'Node') {
+				prof.functions.push({self: parseInt(values[2]), parent: parseInt(values[3]), file: values[4], name: values[5], line: parseInt(values[6]), count: parseInt(values[7])});
+			} else if (values[1] == 'Start') {
+				prof.time = parseInt(values[2]);
+			}
+		});
 	 	that.emit('profiling', prof);	
 	};
 
+  var formatLoop = function(message) {
+    
+    /* loop_node: NodeLoopData,min,max,num,sum
+    *
+    */
+    var lines = message.trim().split('\n');
+    /* Split each line into the comma-separated values. */
+    lines.forEach(function (line) {
+        var values = line.split(/[,]+/);
+        var loop = {minimum: parseInt(values[1]), maximum: parseInt(values[2]), count: parseInt(values[3]), average: parseInt(values[4])};
+        that.emit('loop', loop);
+    });
+
+}	
+	
     var formatApi = function (message) {
     	var lines = message.trim().split('\n');
     	lines.forEach(function (line) {
