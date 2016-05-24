@@ -13,7 +13,7 @@
     "request":"2.x"
   },
   "scripts": {
-    "test": "tap tests/api_tests.js",
+    "test": "tap --reporter tap tests/api_tests.js",
     "preinstall":"git clone https://github.com/RuntimeTools/omr-agentcore.git",
     "install": "node-gyp rebuild"
   },
