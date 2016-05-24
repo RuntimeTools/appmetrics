@@ -13,18 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-var global = false;
+
+//Default behaviour for npm test - app will be closed with endRun() so timeout not needed
+var timeout = false;
+var agent = true;
 
 process.argv.forEach(function(elem) {
-  if (elem == '-g'){
-    global = true;
-  }
+	
+	//Running globally with node-hc - testing agent runs and doesn't crash process
+	if (elem == '-g'){
+		timeout = true;
+		agent = false;
+	}
+	
+	//Running with node-hc and including agent - this should fail
+	if (elem == '-f'){
+		agent = true;
+		timeout = true;
+	}
 });
 
-var agent;
+var appmetrics;
 
 //If running global test, run long enough to ensure the agent has loaded and process doesn't crash
-if (global) {
+if (timeout) {
 	var duration_secs = process.argv[2] || 10; //Default 10 seconds for global tests
 	setTimeout(function(){
 		clearInterval(ih);
@@ -32,12 +44,12 @@ if (global) {
 }
 
 //If being run from other test, start the agent and make available
-else {
-	agent = require('../');
-	agent.start();
+if (agent) {
+	appmetrics = require('../');
+	appmetrics.start();
 
 	// Make agent visible for other script files.
-	module.exports.agent = agent;
+	module.exports.appmetrics = appmetrics;
 }
 
 //Write a string to memory on timer

@@ -15,8 +15,8 @@
  *******************************************************************************/
  
 var app = require('./test_app');
-var monitor = app.agent.monitor();
-app.agent.enable("profiling");
+var monitor = app.appmetrics.monitor();
+app.appmetrics.enable("profiling");
 
 var tap = require('tap');
 tap.plan(6); // NOTE: This needs to be updated when tests are added/removed
