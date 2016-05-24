@@ -15,6 +15,7 @@ Node Application Metrics provides the following built-in data collection sources
  Memory             | Process and system memory usage
  GC                 | Node/V8 garbage collection statistics
  Event Loop         | Event loop latency information
+ Loop               | Event loop timing metrics
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
  socket.io          | WebSocket data sent and received by the application
@@ -243,6 +244,14 @@ Emitted every 5 seconds, summarising sample based information of the event loop 
     * `latency.min` (Number) the shortest sampled latency, in milliseconds.
     * `latency.max` (Number) the longest sampled latency, in milliseconds.
     * `latency.avg` (Number) the average sampled latency, in milliseconds.
+
+### Event: 'loop'
+Emitted every 60 seconds, summarising event tick information in time interval
+* `data` (Object) the data from the event loop sample:
+    * `loop.count` (Number) the number of event loop ticks in the last interval.
+    * `loop.minimum` (Number) the shortest (i.e. fastest) tick in milliseconds.
+    * `loop.maximum` (Number) the longest (slowest) tick in milliseconds.
+    * `loop.average` (Number) the average tick time in milliseconds.
 
 ### Event: 'profiling'
 Emitted when a profiling sample is available from the underlying V8 runtime.
