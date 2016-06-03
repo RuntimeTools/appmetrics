@@ -70,6 +70,11 @@ NAN_METHOD(getObjectHistogram) {
 	for(int i = 0; i < snapshot->GetNodesCount(); i++ ) {
 
 		const HeapGraphNode* node = snapshot->GetNode(i);
+
+		if( node->GetType() != HeapGraphNode::kObject ) {
+			continue;
+		}
+
 		Local<String> name = node->GetName();
 
 		Local<Value> tupleval = histogram->Get(name);
