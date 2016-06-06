@@ -37,7 +37,6 @@ NAN_METHOD(getObjectHistogram) {
 
 	HeapProfiler *heapProfiler = isolate->GetHeapProfiler();
 
-	
 #if NODE_VERSION_AT_LEAST(4, 0, 0) // > v0.11+
 	// Title field removed in Node 4.x
 #else
@@ -66,11 +65,34 @@ NAN_METHOD(getObjectHistogram) {
 	Local<String> countName = String::NewFromUtf8(isolate, "count");
 	Local<String> sizeName = String::NewFromUtf8(isolate, "size");
 
+	/* v8-profiler.h says that kObject is "A JS object (except for arrays and strings)."
+	 * so we should include strings and arrays as objects in the histogram as they are
+	 * objects as the user understands them.
+	 * When you take a heap dump in Chrome dev tools and then view it the
+	 * names "(string)" and "(array)" are used for these, so that's what we'll show the user.
+	 */
+	Local<String> stringName = String::NewFromUtf8(isolate, "(string)");
+	Local<String> arrayName = String::NewFromUtf8(isolate, "(array)");
+
 	/* Walk every node by index (not id) */
 	for(int i = 0; i < snapshot->GetNodesCount(); i++ ) {
 
 		const HeapGraphNode* node = snapshot->GetNode(i);
-		Local<String> name = node->GetName();
+
+		Local<String> name;
+		switch( node->GetType() ) {
+		case HeapGraphNode::kObject:
+			name = node->GetName();
+			break;
+		case HeapGraphNode::kString:
+			name = stringName;
+			break;
+		case HeapGraphNode::kArray:
+			name = arrayName;
+			break;
+		default:
+			continue;
+		}
 
 		Local<Value> tupleval = histogram->Get(name);
 		Local<Object> tuple;
