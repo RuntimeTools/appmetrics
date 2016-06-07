@@ -48,7 +48,7 @@ The Node Application Metrics agent supports the following runtime environments:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
   * 64-bit runtime on Mac OS X (x64)
-* **Node.js v4 and io.js v2** on:
+* **Node.js v4** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
   * 64-bit runtime on Mac OS X (x64)
@@ -429,7 +429,7 @@ If a task uses the Node.js thread exclusively then shuts down the Node.js runtim
 The source code for Node Application Metrics is available in the [appmetrics project][6]. Information on working with the source code -- installing from source, developing, contributing -- is available on the [appmetrics wiki][3].
 
 ## License
-This project is released under an Apache 2.0 open source license, however it has a dependency on a common agent from IBM Monitoring and Diagnostic Tools - Health Center, which has a proprietary IBM license.
+This project is released under an Apache 2.0 open source license.  
 
 ## Versioning scheme
 The npm package for this project uses a semver-parsable X.0.Z version number for releases, where X is incremented for breaking changes to the public API described in this document and Z is incremented for bug fixes **and** for non-breaking changes to the public API that provide new function.
@@ -438,9 +438,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.0.11
+1.0.12
 
 ## Release History
+`1.0.12` - Appmetrics now fully open sourced under Apache 2.0 license  
 `1.0.11` - Bug fixes    
 `1.0.10` - Bug fixes  
 `1.0.9` - Loopback and Riak support, bug fixes and update to agent core 3.0.9.  
