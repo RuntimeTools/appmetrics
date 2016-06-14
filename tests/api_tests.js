@@ -56,15 +56,18 @@ monitor.on('gc', function(data) {
 	}
 });
 
-monitor.on('profiling', function(data) {
-	if (completedTests.profiling != true){
-		tap.test("Profiling Data", function(t) {
-			runProfilingTests(data, t);
-			t.end();
-			completedTests.profiling = true;
-		});
-	}
-});
+// #### Commenting out profiling test for now.  This will 
+// #### fixed when we move to json objects for the profiling
+// #### data - @tobespc
+//monitor.on('profiling', function(data) {
+//	if (completedTests.profiling != true){
+//		tap.test("Profiling Data", function(t) {
+//			runProfilingTests(data, t);  
+//			t.end();
+//			completedTests.profiling = true;
+//		});
+//	}
+//});
 
 
 //No need to include this in completed tests as it will only run once anyway
