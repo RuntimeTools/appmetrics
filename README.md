@@ -17,6 +17,7 @@ Node Application Metrics provides the following built-in data collection sources
  Memory             | Process and system memory usage
  GC                 | Node/V8 garbage collection statistics
  Event Loop         | Event loop latency information
+ Express            | Express Web Framework application request monitoring
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
  socket.io          | WebSocket data sent and received by the application
@@ -156,6 +157,27 @@ monitoring.on('initialized', function (env) {
 monitoring.on('cpu', function (cpu) {
     console.log('[' + new Date(cpu.time) + '] CPU: ' + cpu.process);
 });
+```
+For express monitoring, you must set your application to use the express probe:
+```js
+var metrics = require('appmetrics/probes/express-probe.js');
+var app = express();
+app.use(metrics());
+```
+
+Extensions to the data collected can be specified using a builder function:
+```js
+app.use(metrics(function buildRecord(req, res) {
+  return {
+    client: {
+      id: req.authInfo.app.id,
+      username: req.authInfo.user.email
+    },
+    data: {
+      // put your custom metrics here
+    }
+  };
+}));
 ```
 
 ## Health Center Eclipse IDE client
@@ -385,6 +407,31 @@ Emitted when a PostgreSQL query is made to the `pg` module.
     * `time` (Number) the milliseconds when the PostgreSQL query was made. This can be converted to a Date using `new Date(data.time)`.
     * `query` (String) the query made of the PostgreSQL database.
     * `duration` (Number) the time taken for the PostgreSQL query to be responded to in ms.
+
+### Event: 'express'
+Emitted when an Express request finishes its response.
+* `data` (Object) the data from the Express request/response.
+    * `version` (String) The version of the Express probe being run.
+    * `timestamp` (Number (ms since epoch) The time the response finished.
+    * `client` (Object) Information about the client from whence the request came.
+        * `address` (String) The IP address of the client.
+        * `id` (String) The ID of the client (if specified).
+        * `username` (String) The username of the client.(if specified).
+    * `request` (Object) Information about the request made by the client.
+        * `method` (String) The HTTP method for this request.
+        * `url` (String) The target URL for this request.
+    * `response` (Object) Information about the response sent back to the client.
+        * `status` (Number) The HTTP status code of the response.
+        * `duration` (Number) The time in ms between receiving the request and sending the response.
+        * `bytes` (Number) The size of the response (if specified).
+    * `process` (Object) Information about the Express process that handled the request.
+        * `pid` (Number) The Process ID of the Express process.
+        * `workerId` (Number) The cluster and workerID of the Express process (if specified).
+    * `data` (Object) User-specified collected data will be present in this object.
+    * `loopback` (Object) Information about the loopback method attached to the request.
+        * `modelName` (String) The name of the shared class containing the method.
+        * `remoteMethod` (String) The name of the loopback method.
+        * `instanceId` (Number) The Instance ID for non-static methods (will be undefined for static methods).
 
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
