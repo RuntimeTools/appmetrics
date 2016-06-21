@@ -643,7 +643,9 @@ void init(Handle<Object> exports, Handle<Object> module) {
     exports->Set(Nan::New<String>("localConnect").ToLocalChecked(), Nan::New<FunctionTemplate>(localConnect)->GetFunction());
     exports->Set(Nan::New<String>("nativeEmit").ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmit)->GetFunction());
     exports->Set(Nan::New<String>("sendControlCommand").ToLocalChecked(), Nan::New<FunctionTemplate>(sendControlCommand)->GetFunction());
-
+#if defined(_LINUX)
+    exports->Set(Nan::New<String>("lrtime").ToLocalChecked(), Nan::New<FunctionTemplate>(lrtime)->GetFunction());
+#endif
     exports->Set(Nan::New<String>("getObjectHistogram").ToLocalChecked(), Nan::New<FunctionTemplate>(getObjectHistogram)->GetFunction());
 
     /*
