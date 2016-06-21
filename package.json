@@ -1,6 +1,6 @@
 {
   "name": "appmetrics",
-  "version": "1.0.12-dev",
+  "version": "1.0.13-dev",
   "description": "Node Application Metrics",
   "bin": {
     "node-hc": "bin/appmetrics-cli.js"
@@ -8,12 +8,13 @@
   "dependencies": {
     "nan": "2.x",
     "node-gyp": "2.x",
+    "tap": "5.7.x",
     "tar": "2.x",
     "request":"2.x"
   },
   "scripts": {
-    "test": "node tests/test_runner.js",
-    "install": "node download_licenses.js && node download_binaries.js && node-gyp rebuild"
+    "test": "tap --reporter tap tests/api_tests.js",
+    "install": "node-gyp rebuild"
   },
   "directories": {
     "licenses": "licenses",
