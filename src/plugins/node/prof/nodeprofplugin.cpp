@@ -20,6 +20,7 @@
 #include "v8-profiler.h"
 #include "uv.h"
 #include "nan.h"
+#include <iostream>
 //#include "node_version.h"
 #include <cstring>
 #include <string>
@@ -64,12 +65,27 @@ namespace plugin {
 	uv_timer_t *timer;
 }
 
+static uv_async_t *asyncStartProfiler = NULL;
+static uv_async_t *asyncStopProfiler = NULL;
 static uv_async_t _asyncEnable;
 static uv_async_t *asyncEnable = &_asyncEnable;
 static uv_async_t _asyncDisable;
 static uv_async_t *asyncDisable = &_asyncDisable;
 
 using namespace v8;
+using namespace std;
+
+bool jsonEnabled = false;
+int profilingInterval = 5000;
+
+static void setProfilingInterval(int interval){
+	profilingInterval = interval;
+}
+
+static int getProfilingInterval(){
+	return profilingInterval;
+}
+
 
 static char* NewCString(const std::string& s) {
 	char *result = new char[s.length() + 1];
@@ -104,10 +120,29 @@ static void ConstructNodeData(const CpuProfileNode *node, int id, int parentId, 
 		delete[] function;
 		return;
 	}
-
-	result << "NodeProfData,Node," << id << ',' << parentId << ',';
-	result << script << ',' << function << ',' << line << ',' << selfSamples << '\n';
-
+	
+	if (jsonEnabled){
+		//Path needs to have all \ replaced with /
+		string strScript (script);
+		size_t pos = strScript.find("\\");
+		while(pos != string::npos){
+			strScript.replace(pos, 1, "/");
+			pos = strScript.find("\\");
+		}
+		
+		result << "{" << "\"functionName\":\"" << function << "\",";
+		result << "\"url\":\"" << strScript << "\",";
+		result << "\"lineNumber\":" << line << ",";
+		result << "\"hitCount\":" << selfSamples << ",";
+		result << "\"id\":" << id << ",";
+		result << "\"children\":[";
+	}
+	
+	else{
+		result << "NodeProfData,Node," << id << ',' << parentId << ',';
+		result << script << ',' << function << ',' << line << ',' << selfSamples << '\n';
+	}
+	
 	// clean up
 	delete[] script;
 	delete[] function;
@@ -122,6 +157,13 @@ static void visit(const CpuProfileNode *current, visit_callback *cb, int parentI
 	int children = current->GetChildrenCount();
 	for (int i=0; i<children; i++) {
 		visit(current->GetChild(i), cb, id, result);
+		if (i != children-1 && jsonEnabled){
+			result << ",";
+		}
+	}
+	if(jsonEnabled){
+		result << "]";
+		result << "}";
 	}
 }
 
@@ -129,9 +171,16 @@ static char * ConstructData(const CpuProfile *profile) {
 	const CpuProfileNode *topRoot = profile->GetTopDownRoot();
 
 	std::stringstream result;
-	result << "NodeProfData,Start," << GetRealTime() << '\n';
+	if (jsonEnabled){
+		result << "{\"date\":" << GetRealTime() << ",";
+		result << "\"head\":";
+	}
+	else result << "NodeProfData,Start," << GetRealTime() << '\n';	
 	visit(topRoot, ConstructNodeData, 0, result);
-	result << "NodeProfData,End" << '\n';
+	if (jsonEnabled){
+		result << "}";
+	}
+	else result << "NodeProfData,End" << '\n';
 	return NewCString(result.str());
 }
 
@@ -199,28 +248,20 @@ static void ReleaseProfile(const CpuProfile *profile) {
 	}
 }
 
-// NOTE(tunniclm): Must be called from the V8/Node/uv thread
-//                 since it calls V8 APIs
-//                 and accesses non thread-safe fields
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-void OnGatherDataOnV8Thread(uv_timer_s *data) {
-#else
-void OnGatherDataOnV8Thread(uv_timer_s *data, int status) {
-#endif
-
+void collectData() {
 	// Check if we just got disabled and the profiler
 	// isn't running
-	if (!plugin::enabled) return;
-	
+
+	if (!plugin::enabled)
+		return;
+
 	Nan::HandleScope scope;
-	
 	// Get profile
 	const CpuProfile *profile = StopTheProfiler();
 
 	if (profile != NULL) {
 		char *serialisedProfile = ConstructData(profile);
 		ReleaseProfile(profile);
-		StartTheProfiler();
 		if (serialisedProfile != NULL) {
 			// Send data to agent
 			monitordata data;
@@ -229,17 +270,37 @@ void OnGatherDataOnV8Thread(uv_timer_s *data, int status) {
 			data.sourceID = 0;
 			data.size = static_cast<uint32>(strlen(serialisedProfile));
 			data.data = serialisedProfile;
+
 			plugin::api.agentPushData(&data);
-			
+
+
 			delete[] serialisedProfile;
 		} else {
-			plugin::api.logMessage(debug, "[profiling_node] Failed to serialise method profile"); // CHECK(tunniclm): Should this be a warning?
+			plugin::api.logMessage(debug,
+					"[profiling_node] Failed to serialise method profile"); // CHECK(tunniclm): Should this be a warning?
 		}
 	} else {
-		plugin::api.logMessage(debug, "[profiling_node] No method profile found"); // CHECK(tunniclm): Should this be a warning?
-		StartTheProfiler();
+		plugin::api.logMessage(debug,
+				"[profiling_node] No method profile found"); // CHECK(tunniclm): Should this be a warning?
 	}
+
 }
+
+
+
+// NOTE(tunniclm): Must be called from the V8/Node/uv thread
+//                 since it calls V8 APIs
+//                 and accesses non thread-safe fields
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+void OnGatherDataOnV8Thread(uv_timer_s *data) {
+#else
+void OnGatherDataOnV8Thread(uv_timer_s *data, int status) {
+#endif
+	collectData();
+	StartTheProfiler();
+}
+
+
 
 pushsource* createPushSource(uint32 srcid, const char* name) {
 	pushsource *src = new pushsource();
@@ -270,6 +331,33 @@ static void publishEnabled() {
 								  (void*) msg.c_str());
 } 
 
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+static void StartProfilerWithoutTiming(uv_async_t *async) {
+#else
+static void StartProfilerWithoutTiming(uv_async_t *async, int status) {
+#endif
+	if (plugin::enabled) return;
+	plugin::enabled = true;
+	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+    publishEnabled();
+	StartTheProfiler();
+}
+
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+static void StopProfilerWithoutTiming(uv_async_t *async) {
+#else
+static void StopProfilerWithoutTiming(uv_async_t *async, int status) {
+#endif
+	collectData();
+	if (!plugin::enabled) return;
+	plugin::enabled = false;
+	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+    publishEnabled();
+}
+
+
+
+
 static void cleanupHandle(uv_handle_t *handle) {
 	delete handle;
 }
@@ -289,7 +377,7 @@ static void enableOnV8Thread(uv_async_t *async, int status) {
 	
 	StartTheProfiler();
 
-	uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, PROFILING_INTERVAL, PROFILING_INTERVAL);
+	uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, getProfilingInterval(), getProfilingInterval());
 }
 
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
@@ -317,10 +405,18 @@ static void disableOnV8Thread(uv_async_t *async, int status) {
 void setEnabled(bool value) {
 	if (value) {
 		plugin::api.logMessage(fine, "[profiling_node] Enabling");
-		uv_async_send(asyncEnable);
+		if (jsonEnabled) {
+			uv_async_send(asyncStartProfiler); // close and cleanup in call back
+		} else {
+			uv_async_send(asyncEnable);
+		}
 	} else {
 		plugin::api.logMessage(fine, "[profiling_node] Disabling");
-		uv_async_send(asyncDisable);
+		if (jsonEnabled) {
+			uv_async_send(asyncStopProfiler); // close and cleanup in call back
+		} else {
+			uv_async_send(asyncDisable);
+		}
 	}
 }
 
@@ -365,9 +461,19 @@ extern "C" {
 		uv_unref((uv_handle_t*) plugin::timer); // don't prevent event loop exit
 		
 		// Create the handles for disable/enable events.
+		asyncStartProfiler = new uv_async_t;
+		uv_async_init(uv_default_loop(), asyncStartProfiler, StartProfilerWithoutTiming);
+		uv_unref((uv_handle_t*)asyncStartProfiler);
+
+		asyncEnable = new uv_async_t;
 		uv_async_init(uv_default_loop(), asyncEnable, enableOnV8Thread);
 		uv_unref((uv_handle_t*)asyncEnable);
 
+		asyncStopProfiler = new uv_async_t;
+		uv_async_init(uv_default_loop(), asyncStopProfiler, StopProfilerWithoutTiming);
+		uv_unref((uv_handle_t*)asyncStopProfiler);
+
+		asyncDisable = new uv_async_t;
 		uv_async_init(uv_default_loop(), asyncDisable, disableOnV8Thread);
 		uv_unref((uv_handle_t*)asyncDisable);
 
@@ -376,7 +482,7 @@ extern "C" {
 			StartTheProfiler();
 		
 			plugin::api.logMessage(debug, "[profiling_node] Starting timer");
-			uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, PROFILING_INTERVAL, PROFILING_INTERVAL);
+			uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, getProfilingInterval(), getProfilingInterval());
 		}
 	
 		return 0;
@@ -398,6 +504,11 @@ extern "C" {
 		uv_close((uv_handle_t*) asyncEnable, NULL);
 		uv_close((uv_handle_t*) asyncDisable, NULL);
 	
+		uv_close((uv_handle_t*) asyncStartProfiler, NULL);
+		uv_close((uv_handle_t*) asyncEnable, NULL);
+		uv_close((uv_handle_t*) asyncStopProfiler, NULL);
+		uv_close((uv_handle_t*) asyncDisable, NULL);
+
 		return 0;
 	}
 	
@@ -423,6 +534,16 @@ extern "C" {
 				//std::string msg = "Setting [" + rest + "] to " + (enabled ? "enabled" : "disabled");
 				//plugin::api.logMessage(debug, msg.c_str());
 				setEnabled(enabled);
+			}
+			
+			if (rest == "profiling_node_v8json"){
+				jsonEnabled = (command == "on");
+				if (jsonEnabled){
+					//set interval to 60000
+					setProfilingInterval(60000);
+				}
+				else setProfilingInterval(5000);
+				
 			}
 		} 
 	}
