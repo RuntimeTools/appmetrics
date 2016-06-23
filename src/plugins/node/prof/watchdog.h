@@ -12,7 +12,6 @@
 #if defined(__linux__) && (defined(__i386) || defined(__x86_64__))
 
 #include "util.h"
-#include "util-inl.h"
 
 #include <dirent.h>
 #include <errno.h>

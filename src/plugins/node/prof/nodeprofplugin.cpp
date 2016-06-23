@@ -79,6 +79,7 @@ using namespace std;
 bool jsonEnabled = false;
 int profilingInterval = 5000;
 int watchdogThreshold = 0;
+int watchdogMaxCycles = 0;
 
 static void setProfilingInterval(int interval){
 	profilingInterval = interval;
@@ -94,6 +95,14 @@ static void setWatchdogThreshold(int threshold){
 
 static int getWatchdogThreshold(){
 	return watchdogThreshold;
+}
+
+static void setWatchdogMaxCycles(int cycles){
+	watchdogMaxCycles = cycles;
+}
+
+static int getWatchdogMaxCycles(){
+	return watchdogMaxCycles;
 }
 
 
@@ -554,7 +563,7 @@ extern "C" {
 				setEnabled(enabled);
 			}
 			
-			if (rest == "profiling_node_v8json"){
+			else if (rest == "profiling_node_v8json"){
 				jsonEnabled = (command == "on");
 				if (jsonEnabled){
 					//set interval to 60000
@@ -564,16 +573,30 @@ extern "C" {
 				
 			}
 
-            if(rest == "profiling_node_watchdog") {
-                if(command == "off") {
-                    setEnabled(false);
-                } else {
-                    // command should be an integer (timeout threshold)
-                    setWatchdogThreshold(50);
-                    setEnabled(true);
-                }
+            else if(rest == "profiling_node_threshold") {
+				std::string msg = "Setting [" + rest + "] to " + command;
+                plugin::api.logMessage(fine, msg.c_str());
+                // command should be an integer (timeout threshold)
+				int threshold;
+				std::stringstream ss(command);
+				if (!(ss >> threshold)) {
+					threshold = 0;
+				}
+                setWatchdogThreshold(threshold);
             }
-		} 
+
+			else if(rest == "profiling_node_maxCycles") {
+				std::string msg = "Setting [" + rest + "] to " + command;
+                plugin::api.logMessage(fine, msg.c_str());
+                // command should be an integer (maximum cycles to profile for)
+				int maxCycles;
+				std::stringstream ss(command);
+				if (!(ss >> maxCycles)) {
+					maxCycles = 0;
+				}
+                setWatchdogMaxCycles(maxCycles);
+			}
+		}
 	}
 	
 	NODEPROFPLUGIN_DECL const char* ibmras_monitoring_getVersion() {
