@@ -23,6 +23,7 @@
 #include "uv.h"
 #include "AgentExtensions.h"
 #include "objecttracker.hpp"
+#include "plugins/node/prof/watchdog.h"
 #include <string>
 #include <iostream>
 #include <cstring>
@@ -665,6 +666,10 @@ void init(Handle<Object> exports, Handle<Object> module) {
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
     loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());
     loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
+
+    /* Initialize watchdog directly so that bindings can be created */
+    Isolate* isolate = v8::Isolate::GetCurrent();
+    watchdog::Initialize(isolate, exports);
 
     /*
      * Log startup message with version information
