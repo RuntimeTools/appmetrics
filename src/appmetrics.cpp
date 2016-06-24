@@ -526,9 +526,9 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     clock_gettime(clock_id, &ts);
       
     v8::Isolate* isolate = info.GetIsolate();
-    v8::Local<v8::Array> result = Array::New(isolate, 2);
-    result->Set(0, Number::New(isolate, ts.tv_sec));
-    result->Set(1, Integer::NewFromUnsigned(isolate, ts.tv_nsec));
+    v8::Local<v8::Array> result = v8::Array::New(isolate, 2);
+    result->Set(0, v8::Number::New(isolate, ts.tv_sec));
+    result->Set(1, v8::Integer::NewFromUnsigned(isolate, ts.tv_nsec));
     info.GetReturnValue().Set(result);
 }
 #endif
