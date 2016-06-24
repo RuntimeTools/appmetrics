@@ -54,8 +54,6 @@ static unsigned long long GetRealTime() {
 }
 #endif
 
-#define PROFILING_INTERVAL 5000
-
 namespace plugin {
 	// NOTE(tunniclm): only access these variables from the V8/Node/uv thread
 	agentCoreFunctions api;
