@@ -22,7 +22,11 @@
 #include "nan.h"
 #include "uv.h"
 #include "AgentExtensions.h"
+
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 #include "objecttracker.hpp"
+#endif
+
 #include <string>
 #include <iostream>
 #include <cstring>
@@ -646,8 +650,9 @@ void init(Handle<Object> exports, Handle<Object> module) {
 #if defined(_LINUX)
     exports->Set(Nan::New<String>("lrtime").ToLocalChecked(), Nan::New<FunctionTemplate>(lrtime)->GetFunction());
 #endif
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
     exports->Set(Nan::New<String>("getObjectHistogram").ToLocalChecked(), Nan::New<FunctionTemplate>(getObjectHistogram)->GetFunction());
-
+#endif
     /*
      * Initialize healthcenter core library
      */

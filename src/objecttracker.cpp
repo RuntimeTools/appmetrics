@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 
 #ifndef BUILDING_NODE_EXTENSION
 #define BUILDING_NODE_EXTENSION
@@ -136,3 +137,4 @@ NAN_METHOD(getObjectHistogram) {
 	info.GetReturnValue().Set(histogram);
 
 }
+#endif
