@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 #ifndef objecttracker_hpp
 #define objecttracker_hpp
 
@@ -22,4 +21,3 @@
 NAN_METHOD(getObjectHistogram);
 
 #endif /* objecttracker_hpp */
-#endif
