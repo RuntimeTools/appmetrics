@@ -29,26 +29,38 @@ function API(agent, appmetrics) {
     var that = this;
 
     var raiseEvent = function (topic, message) {
-        if (topic === 'common_cpu' || topic === 'cpu') {
+        if ((typeof(topic) != 'string') || (typeof(message) != 'string')) {
+            return;
+        }
+        switch (topic) {
+            case 'common_cpu':
+            case 'cpu':
                 formatCPU(message);
-        } else if (topic === 'common_env') {
+                break;
+            case 'common_env':
                 formatOSEnv(message);
-        } else if (topic === 'environment_node') {
+                break;
+            case 'environment_node':
                 formatRuntimeEnv(message);
-        } else if (topic === 'common_memory' || topic === 'memory') {
+                break;
+            case 'common_memory':
+            case 'memory':
                 formatMemory(message);
-        } else if (topic === 'gc_node') {
+                break;
+            case 'gc_node':
                 formatGC(message);
-        } else if (topic === 'profiling_node') {
-        		formatProfiling(message);
-        } else if (topic === 'api') {
+                break;
+            case 'profiling_node':
+                formatProfiling(message);
+                break;
+            case 'api':
                 formatApi(message);
-        } else if (topic === 'loop_node') {
+                break;
+            case 'loop_node':
                 formatLoop(message);
-        } else {
-        /*
-         * Just raise any unknown message as an event so someone can parse it themselves
-         */
+                break;
+            default:
+                //Just raise any unknown message as an event so someone can parse it themselves
                 that.emit(topic, message);
         }
     };
