@@ -66,7 +66,7 @@ uint32_t& sum = statistics[3];
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 static void GetLoopInformation(uv_timer_s *data) {
 #else
-void static void GetLoopInformation(uv_timer_s *data, int status) {
+static void GetLoopInformation(uv_timer_s *data, int status) {
 #endif
 
 	std::stringstream contentss;

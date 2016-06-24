@@ -58,7 +58,7 @@ static void cleanupHandle(uv_handle_t *handle) {
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 static void GetHeapInformation(uv_timer_s *data) {
 #else
-void static void GetHeapInformation(uv_timer_s *data, int status) {
+static void GetHeapInformation(uv_timer_s *data, int status) {
 #endif
 
 	// Heap stats
