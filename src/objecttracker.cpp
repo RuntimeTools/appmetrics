@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-
 #ifndef BUILDING_NODE_EXTENSION
 #define BUILDING_NODE_EXTENSION
 #endif
@@ -25,7 +23,8 @@
 #include "nan.h"
 
 using namespace v8;
-
+//Only perform object tracking on node v0.11 +
+#if NODE_VERSION_AT_LEAST(0, 11, 0)
 /* Take a heap snapshot and convert it into a histogram giving the counts and sizes
  * of every type of object on the heap.
  */
