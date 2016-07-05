@@ -17,7 +17,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
-var am = require('appmetrics');
+var am = require('../');
 var util = require('util');
 
 function loopbackDJProbe(){

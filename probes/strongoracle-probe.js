@@ -18,7 +18,7 @@ var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
 var url = require('url');
-var am = require('appmetrics');
+var am = require('../');
 
 /**
  * Probe to instrument the Strong-Oracle npm client
