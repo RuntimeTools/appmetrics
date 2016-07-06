@@ -30,20 +30,30 @@ MySqlProbe.prototype.attach = function(name, target) {
     target.__ddProbeAttached__ = true;
     
     var data = {};
-	aspect.after(target, 'createConnection', data, function(target, methodName, args, probeData, rc ) {
-        aspect.before( rc, 'query',
-            function(target, methodName, methodArgs, probeData) {
-        		var method = 'query';
-        		that.metricsProbeStart(probeData, method, methodArgs);
-        		that.requestProbeStart(probeData, method, methodArgs);
-            	if (aspect.findCallbackArg(methodArgs) != undefined) {
-            		aspect.aroundCallback( methodArgs, probeData, function(target,args){
-            			that.metricsProbeEnd(probeData, method, methodArgs);
-            			that.requestProbeEnd(probeData, method, methodArgs);
-            		});
-            	};
-            }
-        );
+    queryMetrics = function(target, methodName, methodArgs, probeData) {
+        var method = 'query';
+        that.metricsProbeStart(probeData, method, methodArgs);
+        that.requestProbeStart(probeData, method, methodArgs);
+        if (aspect.findCallbackArg(methodArgs) != undefined) {
+                aspect.aroundCallback( methodArgs, probeData, function(target,args){
+                        that.metricsProbeEnd(probeData, method, methodArgs);
+                        that.requestProbeEnd(probeData, method, methodArgs);
+                });
+        };
+    }
+    aspect.after(target, 'createPool', data, function(target, methodName, args, probeData, rc1 ) {
+        aspect.before(rc1, 'getConnection', function(obj, methodName, args, probeData) {
+            aspect.aroundCallback(args, probeData, function(obj, args, probeData) {
+                //error present in callback
+                if(args[0]) { return; }
+                aspect.before(args[1], 'query', queryMetrics);
+            });
+        });
+        return rc1;
+    });
+
+    aspect.after(target, 'createConnection', data, function(target, methodName, args, probeData, rc ) {
+        aspect.before( rc, 'query', queryMetrics);
         return rc;
     });
     return target;
