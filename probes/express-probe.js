@@ -17,7 +17,7 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var am = require('appmetrics');
+var am = require('../');
 var cluster = require('cluster');
 var extend = require('util')._extend;
 

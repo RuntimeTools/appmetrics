@@ -17,7 +17,7 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var am = require('appmetrics');
+var am = require('../');
 
 //Riak methods can have different arguments.
 //Methods which only have a 'callback' parameter

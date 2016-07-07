@@ -516,11 +516,8 @@ extern "C" {
 
 		uv_close((uv_handle_t*) asyncEnable, NULL);
 		uv_close((uv_handle_t*) asyncDisable, NULL);
-	
 		uv_close((uv_handle_t*) asyncStartProfiler, NULL);
-		uv_close((uv_handle_t*) asyncEnable, NULL);
 		uv_close((uv_handle_t*) asyncStopProfiler, NULL);
-		uv_close((uv_handle_t*) asyncDisable, NULL);
 
 		return 0;
 	}
