@@ -62,7 +62,7 @@ AxonProbe.prototype.attach = function(name, target) {
 					if (typeof(callbackPosition) != 'undefined') { 
 						aspect.strongTraceTransactionLink('axon', methodName, methodArgs[callbackPosition]);
 					}
-					
+
 					that.metricsProbeEnd(context, methodName, methodArgs, socketType);
 					that.requestProbeEnd(context, methodName, methodArgs, socketType);
 				}
@@ -86,8 +86,10 @@ AxonProbe.prototype.attach = function(name, target) {
 							function(target, args, context){
 
 						//Call the transaction link with a name and the callback for strong trace
-						var callbackPosition = aspect.findCallbackArg(methodArgs); 
-						aspect.strongTraceTransactionLink('axon', eventName, args[callbackPosition]);
+						var callbackPosition = aspect.findCallbackArg(methodArgs);
+						if (typeof(callbackPosition) != 'undefined') { 
+							aspect.strongTraceTransactionLink('axon', eventName, args[callbackPosition]);
+						}
 
 						that.metricsProbeStart(context, eventName, methodArgs, socketType);
 						that.requestProbeStart(context, eventName, methodArgs, socketType);
