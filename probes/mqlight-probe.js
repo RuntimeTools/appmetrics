@@ -47,6 +47,13 @@ MQLightProbe.prototype.attach = function(name, target) {
 			// Advise the callback for the method.  Will do nothing if no callback is registered
 			aspect.aroundCallback(args, probeData, function(target, callbackArgs, probeData){
 				// method has completed and the callback has been called, so end the monitoring
+
+				//Call the transaction link with a name and the callback for strong trace
+                var callbackPosition = aspect.findCallbackArg(methodArgs);
+                if (typeof(callbackPosition) != 'undefined') {
+                    aspect.strongTraceTransactionLink('mqlight', methodName, methodArgs[callbackPosition]);
+                }
+
 				that.metricsProbeEnd(probeData, methodName, args, thisClient);
 				that.requestProbeEnd(probeData, methodName, args, thisClient);
 			});
@@ -70,6 +77,13 @@ MQLightProbe.prototype.attach = function(name, target) {
 					that.requestProbeStart(probeData, 'message', callbackArgs);
 				}, function (target, callbackArgs, probeData, ret) {
 					// method has completed and the callback has been called, so end the monitoring
+
+					//Call the transaction link with a name and the callback for strong trace
+	                var callbackPosition = aspect.findCallbackArg(callbackArgs);
+	                if (typeof(callbackPosition) != 'undefined') {
+	                    aspect.strongTraceTransactionLink('mqlight', methodName, callbackArgs[callbackPosition]);
+	                }
+
 					that.metricsProbeEnd(probeData, 'message', callbackArgs, thisClient);
 					that.requestProbeEnd(probeData, 'message', callbackArgs, thisClient);
 					return ret;

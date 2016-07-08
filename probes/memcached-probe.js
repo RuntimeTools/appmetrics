@@ -54,6 +54,13 @@ MemcachedProbe.prototype.attach = function(name, target) {
 			that.requestProbeStart(context, methodName, methodArgs);
 			aspect.aroundCallback(methodArgs, context,
 				function(target, callbackArgs, context) {
+
+					//Call the transaction link with a name and the callback for strong trace
+					var callbackPosition = aspect.findCallbackArg(methodArgs);
+					if (typeof(callbackPosition) != 'undefined') {
+						aspect.strongTraceTransactionLink('memcached', methodName, methodArgs[callbackPosition]);
+					}
+					
 					that.metricsProbeEnd(context, methodName, methodArgs);
 					that.requestProbeEnd(context, methodName, methodArgs);
 				}

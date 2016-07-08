@@ -254,17 +254,3 @@ module.exports.transactionLink = function(linkName, callback) {
   if (!this.strongTracerInstrument) return callback;
   return this.strongTracerInstrument.transactionLink(linkName, callback);
 };
-
-module.exports.strongTraceLink = function(dbId, query, args){
-  var linkName = dbId + ' ' + query;
-  var callbackIndex = -1;
-  for(callbackIndex = args.length - 1; callbackIndex >= 0; callbackIndex--){
-    if (typeof args[callbackIndex] === 'function') {
-      args[callbackIndex] = this.transactionLink(linkName, args[callbackIndex]);
-      break;
-    }
-  }
-  if (callbackIndex === -1) {
-    [].push.call(args, this.transactionLink(linkName, function(){}));
-  }
-}

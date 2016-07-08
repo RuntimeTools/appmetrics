@@ -37,6 +37,13 @@ MqttProbe.prototype.attach = function(name, target) {
 				that.requestProbeStart(context, methodName, methodArgs);
 				aspect.aroundCallback(methodArgs, context,
 					function(target, args, context){
+
+						//Call the transaction link with a name and the callback for strong trace
+		                var callbackPosition = aspect.findCallbackArg(methodArgs);
+		                if (typeof(callbackPosition) != 'undefined') {
+		                    aspect.strongTraceTransactionLink('mqtt', methodName, methodArgs[callbackPosition]);
+		                }
+
 						that.metricsProbeEnd(context, methodName, methodArgs);
 						that.requestProbeEnd(context, methodName, methodArgs);
 					}
@@ -63,6 +70,13 @@ MqttProbe.prototype.attach = function(name, target) {
 							that.requestProbeStart(context, eventName, methodArgs);
 						}, 
 						function (target, methodArgs, context, rc) {
+
+							//Call the transaction link with a name and the callback for strong trace
+			                var callbackPosition = aspect.findCallbackArg(methodArgs);
+			                if (typeof(callbackPosition) != 'undefined') {
+			                    aspect.strongTraceTransactionLink('mqtt', methodName, methodArgs[callbackPosition]);
+			                }
+							
 							that.metricsProbeEnd(context, eventName, methodArgs);
 							that.requestProbeEnd(context, eventName, methodArgs);
 							return rc;
