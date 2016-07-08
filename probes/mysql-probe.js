@@ -42,7 +42,7 @@ MySqlProbe.prototype.attach = function(name, target) {
                         //Call the transaction link with a name and the callback for strong trace
                         var callbackPosition = aspect.findCallbackArg(methodArgs);
                         if (typeof(callbackPosition) != 'undefined') {
-                            aspect.strongTraceTransactionLink('mysql', method, methodArgs[callbackPosition]);
+                            aspect.strongTraceTransactionLink('mysql: ', method, methodArgs[callbackPosition]);
                         }
                         
             			that.metricsProbeEnd(probeData, method, methodArgs);

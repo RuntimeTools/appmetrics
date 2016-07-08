@@ -70,7 +70,7 @@ RiakProbe.prototype.attach = function(name, target) {
                         //Call the transaction link with a name and the callback for strong trace
                         var callbackPosition = aspect.findCallbackArg(methodArgs);
                         if (typeof(callbackPosition) != 'undefined') {
-                            aspect.strongTraceTransactionLink('basho-riak-client', methodName, methodArgs[callbackPosition]);
+                            aspect.strongTraceTransactionLink('basho-riak-client: ', methodName, methodArgs[callbackPosition]);
                         }
 
                         that.metricsProbeEnd(probeData, methodName, methodArgs);

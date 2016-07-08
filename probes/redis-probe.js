@@ -86,7 +86,7 @@ RedisProbe.prototype.attach = function(name, target) {
 
 			//Call the transaction link with a name and the callback for strong trace
 			var callbackPosition = aspect.findCallbackArg(methodArgs); 
-			aspect.strongTraceTransactionLink('redis', eventName, methodArgs[callbackPosition]);
+			aspect.strongTraceTransactionLink('redis: ', eventName, methodArgs[callbackPosition]);
 
 			that.metricsProbeEnd(probeData, eventName, methodArgs);
 			that.requestProbeEnd(probeData, eventName, methodArgs);

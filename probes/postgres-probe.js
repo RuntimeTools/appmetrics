@@ -93,7 +93,7 @@ function monitorQuery(client,that) {
           //Call the transaction link with a name and the callback for strong trace
           var callbackPosition = aspect.findCallbackArg(methodArgs);
           if (typeof(callbackPosition) != 'undefined') {
-              aspect.strongTraceTransactionLink('pg', method, methodArgs[callbackPosition]);
+              aspect.strongTraceTransactionLink('pg: ', method, methodArgs[callbackPosition]);
           }
 
           that.metricsProbeEnd(probeData, method, methodArgs);

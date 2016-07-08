@@ -56,7 +56,7 @@ Strong_MQProbe.prototype.attach = function(name, target) {
 					//Call the transaction link with a name and the callback for strong trace
 		            var callbackPosition = aspect.findCallbackArg(methodArgs);
 		            if (typeof(callbackPosition) != 'undefined') {
-		            	aspect.strongTraceTransactionLink('strong-mq', methodName, methodArgs[callbackPosition]);
+		            	aspect.strongTraceTransactionLink('strong-mq: ', methodName, methodArgs[callbackPosition]);
 		            }
 
 					that.metricsProbeEnd(context, methodName, methodArgs);
@@ -89,7 +89,7 @@ Strong_MQProbe.prototype.attach = function(name, target) {
 						//Call the transaction link with a name and the callback for strong trace
 			            var callbackPosition = aspect.findCallbackArg(methodArgs);
 			            if (typeof(callbackPosition) != 'undefined') {
-			            	aspect.strongTraceTransactionLink('strong-mq', methodName, methodArgs[callbackPosition]);
+			            	aspect.strongTraceTransactionLink('strong-mq: ', methodName, methodArgs[callbackPosition]);
 			            }
 						
 						that.metricsProbeEnd(context, eventName, methodArgs, typeToEventType[socketType]);

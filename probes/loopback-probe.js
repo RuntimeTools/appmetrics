@@ -35,7 +35,7 @@ function aspectJugglerMethod (target, methods, probe){
 				//Call the transaction link with a name and the callback for strong trace
 				var callbackPosition = aspect.findCallbackArg(methodArgs);
 				if (typeof(callbackPosition) != 'undefined') {
-					aspect.strongTraceTransactionLink('loopback-datasource-juggler', methodName, methodArgs[callbackPosition]);
+					aspect.strongTraceTransactionLink('loopback-datasource-juggler: ', methodName, methodArgs[callbackPosition]);
 				}
 				
 				probe.metricsProbeEnd(probeData, methodName, methodArgs);

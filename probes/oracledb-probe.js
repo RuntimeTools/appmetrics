@@ -85,7 +85,7 @@ function addMonitoring(connection, probe) {
 			//Call the transaction link with a name and the callback for strong trace
             var callbackPosition = aspect.findCallbackArg(args);
             if (typeof(callbackPosition) != 'undefined') {
-                aspect.strongTraceTransactionLink('oracledb', methodName, args[callbackPosition]);
+                aspect.strongTraceTransactionLink('oracledb: ', methodName, args[callbackPosition]);
             }
 
 			probe.metricsProbeEnd(probeData, methodName, args);
