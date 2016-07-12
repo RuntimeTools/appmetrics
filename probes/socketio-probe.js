@@ -80,6 +80,12 @@ SocketioProbe.prototype.attach = function(name, target) {
 								that.requestProbeStart(context, methodName, methodArgs);
 							},
 							function(target, methodName, methodArgs, context, rc){
+								//Call the transaction link with a name and the callback for strong trace
+					            var callbackPosition = aspect.findCallbackArg(methodArgs);
+					            if (typeof(callbackPosition) != 'undefined') {
+					            	aspect.strongTraceTransactionLink('socket.io: ', methodName, methodArgs[callbackPosition]);
+					            }
+
 								that.metricsProbeEnd(context, methodName, methodArgs);
 								that.requestProbeEnd(context, methodName, methodArgs);
 								return rc;
@@ -97,6 +103,13 @@ SocketioProbe.prototype.attach = function(name, target) {
 										that.requestProbeStart(context, receive, methodArgs);
 									}, 
 									function (target, callbackArgs, context, rc) {
+
+										//Call the transaction link with a name and the callback for strong trace
+							            var callbackPosition = aspect.findCallbackArg(methodArgs);
+							            if (typeof(callbackPosition) != 'undefined') {
+							            	aspect.strongTraceTransactionLink('socket.io: ', methodName, methodArgs[callbackPosition]);
+							            }
+
 										that.metricsProbeEnd(context, receive, methodArgs);
 										that.requestProbeEnd(context, receive, methodArgs);
 										return rc;

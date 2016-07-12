@@ -83,6 +83,11 @@ RedisProbe.prototype.attach = function(name, target) {
 		 * callback to stop the timer.
 		 */
 		aspect.aroundCallback( methodArgs, probeData, function(target, args) {
+
+			//Call the transaction link with a name and the callback for strong trace
+			var callbackPosition = aspect.findCallbackArg(methodArgs); 
+			aspect.strongTraceTransactionLink('redis: ', eventName, methodArgs[callbackPosition]);
+
 			that.metricsProbeEnd(probeData, eventName, methodArgs);
 			that.requestProbeEnd(probeData, eventName, methodArgs);
 		});
