@@ -18,6 +18,7 @@ var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
 var url = require('url');
+var topFunctions = require('../lib/top-functions');
 var am = require('../');
 
 function HttpProbe() {
@@ -49,6 +50,7 @@ HttpProbe.prototype.attach = function(name, target) {
 	            	that.metricsProbeStart(probeData, httpReq.method, traceUrl);
 	            	that.requestProbeStart(probeData, httpReq.method, traceUrl);
 	                aspect.after(res, 'end', probeData, function(obj, methodName, args, probeData, ret) {
+
 	            		that.metricsProbeEnd(probeData, httpReq.method, traceUrl, res);
 	            		that.requestProbeEnd(probeData, httpReq.method, traceUrl);
 	            	});
@@ -100,6 +102,8 @@ HttpProbe.prototype.filterUrl = function(req) {
 
 HttpProbe.prototype.metricsEnd = function(probeData, method, url, res) {
 	probeData.timer.stop();
+    var graph = {nodes: [{name: url}], links: []};
+    topFunctions.add('httpCalls', url, probeData.timer.timeDelta, {}, graph);
 	am.emit('http', {time: probeData.timer.startTimeMillis, method: method, url: url, duration: probeData.timer.timeDelta, header: res._header, statusCode: res.statusCode, contentType: res.getHeader('content-type')});
 };
 

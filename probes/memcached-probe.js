@@ -16,6 +16,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
+var topFunctions = require('../top-functions');
 var util = require('util');
 var am = require('..');
 
@@ -87,6 +88,7 @@ MemcachedProbe.prototype.attach = function(name, target) {
  */
 MemcachedProbe.prototype.metricsEnd = function(context, method, methodArgs) {
 	context.timer.stop();
+	topFunctions.add('memcacheCalls', method, context.timer.timeDelta);
 	am.emit('memcached', {time: context.timer.startTimeMillis, method: method, key: methodArgs[0], duration: context.timer.timeDelta});
 };
 

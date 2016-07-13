@@ -16,6 +16,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
+var topFunctions = require('../top-functions');
 var util = require('util');
 var am = require('../');
 
@@ -107,6 +108,7 @@ MongoProbe.prototype.attach = function(name, target) {
  */
 MongoProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
 	probeData.timer.stop();
+    topFunctions.add('mongoCalls', JSON.stringify(methodArgs[0]), probeData.timer.timeDelta);
 	am.emit('mongo', {time: probeData.timer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: probeData.timer.timeDelta});
 };
 

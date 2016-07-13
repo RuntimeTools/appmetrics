@@ -16,6 +16,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
+var topFunctions = require('../top-functions');
 var am = require('../');
 var util = require('util');
 
@@ -140,6 +141,7 @@ RedisProbe.prototype.attach = function(name, target) {
 
 RedisProbe.prototype.metricsEnd = function(probeData, cmd, methodArgs) {
 	probeData.timer.stop();
+	topFunctions.add('redisCalls', cmd, probeData.timer.timeDelta);
 	am.emit('redis', {time: probeData.timer.startTimeMillis, cmd: cmd, duration: probeData.timer.timeDelta});
 };
 

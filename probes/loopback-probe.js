@@ -17,6 +17,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
+var topFunctions = require('../lib/top-functions');
 var am = require('../');
 var util = require('util');
 
@@ -37,7 +38,7 @@ function aspectJugglerMethod (target, methods, probe){
 				if (typeof(callbackPosition) != 'undefined') {
 					aspect.strongTraceTransactionLink('loopback-datasource-juggler: ', methodName, methodArgs[callbackPosition]);
 				}
-				
+
 				probe.metricsProbeEnd(probeData, methodName, methodArgs);
 				probe.requestProbeEnd(probeData, methodName, methodArgs);
 			});
@@ -74,6 +75,7 @@ loopbackDJProbe.prototype.attach = function(name, target){
 loopbackDJProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
 	probeData.timer.stop();
 	eventTimer = probeData.timer;
+	topFunctions.add('jugglerCall', method, eventTimer.timeDelta);
 	am.emit('loopback-datasource-juggler', {time: eventTimer.startTimeMillis, method: method, duration: eventTimer.timeDelta});
 }
 

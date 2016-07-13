@@ -17,6 +17,7 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
+var topFunctions = require('../lib/top-functions');
 var am = require('../');
 var cluster = require('cluster');
 var extend = require('util')._extend;
@@ -44,6 +45,12 @@ function createStatsHandler(recordBuilder) {
 
     res.on('finish', function() {
       res.durationInMs = new Date() - req.__start;
+
+      var methodName = req.remotingContext.method.name;
+      var route = (methodName + ' ' +
+          (res.app.route === '/' ? '' : res.app.route
+
+      topFunctions.add('expressCalls', route, res.durationInMs, req.tiers, req.graph);
 
      try {
         var record = createRecord(recordBuilder, req, res);
