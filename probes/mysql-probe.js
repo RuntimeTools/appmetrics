@@ -16,7 +16,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
-var topFunctions = require('../top-functions');
+var topFunctions = require('../lib/top-functions');
 var util = require('util');
 var am = require('../');
 
