@@ -48,7 +48,7 @@ function createStatsHandler(recordBuilder) {
 
       var methodName = req.remotingContext.method.name;
       var route = (methodName + ' ' +
-          (res.app.route === '/' ? '' : res.app.route
+          (res.app.route === '/' ? '' : res.app.route) + req.url);
 
       topFunctions.add('expressCalls', route, res.durationInMs, req.tiers, req.graph);
 
