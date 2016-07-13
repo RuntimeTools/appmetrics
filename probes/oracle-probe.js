@@ -18,7 +18,7 @@ var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
 var url = require('url');
-var am = require('appmetrics');
+var am = require('../');
 
 /**
  * Probe to instrument the Oracle npm client
@@ -64,6 +64,13 @@ function addMonitoring(connection, probe) {
 		// Advise the callback for 'execute'. Will do nothing if no callback is registered
 		aspect.aroundCallback(args, probeData, function(target, callbackArgs, probeData){
 			// 'execute' has completed and the callback has been called, so end the monitoring
+
+			//Call the transaction link with a name and the callback for strong trace
+            var callbackPosition = aspect.findCallbackArg(args);
+            if (typeof(callbackPosition) != 'undefined') {
+                aspect.strongTraceTransactionLink('oracle: ', methodName, args[callbackPosition]);
+            }
+
 			probe.metricsProbeEnd(probeData, methodName, args);
 			probe.requestProbeEnd(probeData, methodName, args);
 		});

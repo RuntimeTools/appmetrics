@@ -17,7 +17,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
-var am = require('appmetrics');
+var am = require('../');
 var util = require('util');
 
 function loopbackDJProbe(){
@@ -31,6 +31,13 @@ function aspectJugglerMethod (target, methods, probe){
 		probe.requestProbeStart(probeData, target, methodName, methodArgs);
 		if (aspect.findCallbackArg(methodArgs) != undefined){
 			aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData){
+
+				//Call the transaction link with a name and the callback for strong trace
+				var callbackPosition = aspect.findCallbackArg(methodArgs);
+				if (typeof(callbackPosition) != 'undefined') {
+					aspect.strongTraceTransactionLink('loopback-datasource-juggler: ', methodName, methodArgs[callbackPosition]);
+				}
+				
 				probe.metricsProbeEnd(probeData, methodName, methodArgs);
 				probe.requestProbeEnd(probeData, methodName, methodArgs);
 			});

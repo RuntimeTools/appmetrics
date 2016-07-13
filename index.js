@@ -249,3 +249,14 @@ module.exports.monitor = function() {
 module.exports.lrtime = function() {
     return agent.lrtime();
 };
+
+module.exports.configure = function(options) {
+    options = options || {};
+    this.strongTracerInstrument =
+      options.strongTracer ? options.strongTracer.tracer : null;
+};
+
+module.exports.transactionLink = function(linkName, callback) {
+  if (!this.strongTracerInstrument) return callback;
+  return this.strongTracerInstrument.transactionLink(linkName, callback);
+};

@@ -55,8 +55,6 @@ static unsigned long long GetRealTime() {
 }
 #endif
 
-#define PROFILING_INTERVAL 5000
-
 namespace plugin {
 	// NOTE(tunniclm): only access these variables from the V8/Node/uv thread
 	agentCoreFunctions api;
@@ -121,6 +119,16 @@ static bool ExtractV8String(const Handle<String> v8string, char **cstring) {
 	return true;
 }
 
+static string replaceInString(std::string characterToReplace, std::string replaceWith, string inputStr) {
+	std::string::size_type n = 0;
+	while ((n = inputStr.find(characterToReplace,n)) != std::string::npos) {
+		inputStr.replace(n, characterToReplace.size(), replaceWith);
+		n += replaceWith.size();
+	}
+	return inputStr;
+}
+
+
 static void ConstructNodeData(const CpuProfileNode *node, int id, int parentId, std::stringstream &result) {
 	int line = node->GetLineNumber();
 	double selfSamples = 0;
@@ -141,15 +149,21 @@ static void ConstructNodeData(const CpuProfileNode *node, int id, int parentId, 
 	}
 	
 	if (jsonEnabled){
-		//Path needs to have all \ replaced with /
 		string strScript (script);
-		size_t pos = strScript.find("\\");
-		while(pos != string::npos){
-			strScript.replace(pos, 1, "/");
-			pos = strScript.find("\\");
+		string strFunction (function);
+
+		//Escape all double quotes and backslashes in the string fields (script, function)
+		//Script path needs to have all \ replaced with /
+		if (strScript != "") {
+			strScript = replaceInString("\\","/",strScript);
+			strScript = replaceInString("\"","\\\"",strScript);
 		}
-		
-		result << "{" << "\"functionName\":\"" << function << "\",";
+		if (strFunction != "") {
+			strFunction = replaceInString("\\","\\\\",strFunction);
+			strFunction = replaceInString("\"","\\\"",strFunction);
+		}
+
+		result << "{" << "\"functionName\":\"" << strFunction << "\",";
 		result << "\"url\":\"" << strScript << "\",";
 		result << "\"lineNumber\":" << line << ",";
 		result << "\"hitCount\":" << selfSamples << ",";
@@ -403,7 +417,6 @@ static void enableOnV8Thread(uv_async_t *async, int status) {
     publishEnabled();
 	
 	StartTheProfiler();
-
 	uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, getProfilingInterval(), getProfilingInterval());
 }
 
@@ -530,11 +543,8 @@ extern "C" {
 
 		uv_close((uv_handle_t*) asyncEnable, NULL);
 		uv_close((uv_handle_t*) asyncDisable, NULL);
-	
 		uv_close((uv_handle_t*) asyncStartProfiler, NULL);
-		uv_close((uv_handle_t*) asyncEnable, NULL);
 		uv_close((uv_handle_t*) asyncStopProfiler, NULL);
-		uv_close((uv_handle_t*) asyncDisable, NULL);
 
 		return 0;
 	}
