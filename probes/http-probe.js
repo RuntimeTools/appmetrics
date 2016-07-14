@@ -103,6 +103,7 @@ HttpProbe.prototype.filterUrl = function(req) {
 HttpProbe.prototype.metricsEnd = function(probeData, method, url, res) {
 	probeData.timer.stop();
     var graph = {nodes: [{name: url}], links: []};
+    console.log("CALLING TOPFUNCTIONS.ADD in http probe, url="+url);
     topFunctions.add('httpCalls', url, probeData.timer.timeDelta, {}, graph);
 	am.emit('http', {time: probeData.timer.startTimeMillis, method: method, url: url, duration: probeData.timer.timeDelta, header: res._header, statusCode: res.statusCode, contentType: res.getHeader('content-type')});
 };
