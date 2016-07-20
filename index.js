@@ -257,5 +257,10 @@ module.exports.transactionLink = function(linkName, callback) {
 };
 
 module.exports.topCalls = function() {
-  return topFunctions.poll();  
+  var topFunctions = topFunctions.poll();  
+  if (topFunctions) {
+    return topFunctions
+  } else {
+    return {httpCalls: {}}
+  }
 }
