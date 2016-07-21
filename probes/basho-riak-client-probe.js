@@ -16,6 +16,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
+var topFunctions = require('../lib/top-functions');
 var util = require('util');
 var am = require('../');
 
@@ -122,6 +123,7 @@ RiakProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
     if (key != '') {
         jsonToEmit[key] = methodArgs[0];
     }
+    topFunctions.add('riakCalls', method, eventTimer.timeDelta);
     am.emit('riak', jsonToEmit);
 };
 

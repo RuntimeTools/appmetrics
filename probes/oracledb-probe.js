@@ -17,6 +17,7 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
+var topFunctions = require('../lib/top-functions');
 var url = require('url');
 var am = require('../');
 
@@ -108,6 +109,7 @@ function addMonitoring(connection, probe) {
 OracleDBProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
 	probeData.timer.stop();
 	var query = methodArgs[0];
+	topFunctions.add('oracleCalls', query, probeData.timer.timeDelta);
 	am.emit('oracledb', {
 		time : probeData.timer.startTimeMillis,
 		query : query,

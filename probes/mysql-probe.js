@@ -16,6 +16,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
+var topFunctions = require('../lib/top-functions');
 var util = require('util');
 var am = require('../');
 
@@ -67,6 +68,7 @@ MySqlProbe.prototype.attach = function(name, target) {
 MySqlProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
 	probeData.timer.stop();
 	eventTimer = probeData.timer;
+    topFunctions.add('mysqlCalls', JSON.stringify(methodArgs[0]), eventTimer.timeDelta);
 	am.emit('mysql', {time: eventTimer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: eventTimer.timeDelta});
 };
 

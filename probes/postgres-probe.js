@@ -16,6 +16,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
+var topFunctions = require('../lib/top-functions');
 var util = require('util');
 var am = require('../');
 
@@ -114,6 +115,7 @@ function monitorQuery(client,that) {
  */
 PostgresProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
   probeData.timer.stop();
+  topFunctions.add('postgresCalls', methodArgs[0], probeData.timer.timeDelta);
   am.emit('postgres', {time: probeData.timer.startTimeMillis, query: methodArgs[0], duration: probeData.timer.timeDelta});
 };
 
