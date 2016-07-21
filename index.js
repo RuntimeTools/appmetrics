@@ -257,6 +257,7 @@ module.exports.transactionLink = function(linkName, callback) {
 };
 
 module.exports.topCalls = function() {
+  topFunctions.initialise();
   var topFunctions = topFunctions.poll();  
   if (topFunctions) {
     return topFunctions
