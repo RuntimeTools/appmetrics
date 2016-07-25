@@ -158,21 +158,26 @@ function API(agent, appmetrics) {
     };
 
 	var formatProfiling = function (message) {
-		var lines = message.trim().split('\n');
-		var prof = {
-			date: 0,
-			functions: [],
-		};
-		lines.forEach(function (line) {
-			var values = line.split(',');
-			if (values[1] == 'Node') {
-				prof.functions.push({self: parseInt(values[2]), parent: parseInt(values[3]), file: values[4], name: values[5], line: parseInt(values[6]), count: parseInt(values[7])});
-			} else if (values[1] == 'Start') {
-				prof.time = parseInt(values[2]);
-			}
-		});
-	 	that.emit('profiling', prof);	
-	};
+        if (appmetrics.getJSONProfilingMode()) {
+            that.emit('profiling', JSON.parse(message));
+        } else {
+            var lines = message.trim().split('\n');
+            var prof = {
+                date: 0,
+                functions: [],
+            };
+            lines.forEach(function (line) {
+                var values = line.split(',');
+                if (values[1] == 'Node') {
+                    prof.functions.push({self: parseInt(values[2]), parent: parseInt(values[3]), file: values[4], name: values[5], line: parseInt(values[6]), count: parseInt(values[7])});
+                } else if (values[1] == 'Start') {
+                    prof.time = parseInt(values[2]);
+                }
+            });
+            that.emit('profiling', prof);
+        }
+            
+    };
 
   var formatLoop = function(message) {
     
