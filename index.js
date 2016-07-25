@@ -28,6 +28,7 @@ agent.spath(path.join(module_dir, "plugins"))
 agent.start();
 
 var hcAPI = require("./appmetrics-api.js");
+var jsonProfilingMode = false;
 
 /*
  * Load module probes into probes array by searching the probes directory.
@@ -254,3 +255,11 @@ module.exports.transactionLink = function(linkName, callback) {
   if (!this.strongTracerInstrument) return callback;
   return this.strongTracerInstrument.transactionLink(linkName, callback);
 };
+
+module.exports.setJSONProfilingMode = function(val) {
+    jsonProfilingMode = val;
+}
+
+module.exports.getJSONProfilingMode = function() {
+    return jsonProfilingMode;
+}
