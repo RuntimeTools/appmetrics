@@ -456,9 +456,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.0.12
+1.0.13
 
 ## Release History
+`1.0.13` - Express probe, strong-supervisor integration  
 `1.0.12` - Appmetrics now fully open sourced under Apache 2.0 license  
 `1.0.11` - Bug fixes    
 `1.0.10` - Bug fixes  
