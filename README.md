@@ -17,6 +17,7 @@ Node Application Metrics provides the following built-in data collection sources
  Memory             | Process and system memory usage
  GC                 | Node/V8 garbage collection statistics
  Event Loop         | Event loop latency information
+ Express            | Express Web Framework application request monitoring
  Loop               | Event loop timing metrics
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
@@ -158,6 +159,7 @@ monitoring.on('cpu', function (cpu) {
     console.log('[' + new Date(cpu.time) + '] CPU: ' + cpu.process);
 });
 ```
+
 ## Health Center Eclipse IDE client
 ### Connecting to the client
 Connecting to the Health Center client requires the additional installation of a MQTT broker. The Node Application Metrics agent sends data to the MQTT broker specified in the `appmetrics.properties` file. Installation and configuration documentation for the Health Center client is available from the [Health Center documentation in IBM Knowledge Center][2].
@@ -177,14 +179,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `express`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `express`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -393,6 +395,14 @@ Emitted when a PostgreSQL query is made to the `pg` module.
     * `time` (Number) the milliseconds when the PostgreSQL query was made. This can be converted to a Date using `new Date(data.time)`.
     * `query` (String) the query made of the PostgreSQL database.
     * `duration` (Number) the time taken for the PostgreSQL query to be responded to in ms.
+
+### Event: 'express'
+Emitted when an express request finishes its response.
+* `data` (Object) the data from the Express request/response.
+    * `method` (String) The HTTP method for this request.
+    * `url` (String) The target URL for this request.
+    * `statusCode` (Number) The HTTP status code of the response.
+    * `duration` (Number) The time in ms between receiving the request and sending the response.
 
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
