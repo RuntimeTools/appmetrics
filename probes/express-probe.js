@@ -41,26 +41,28 @@ ExpressProbe.prototype.attach = function(name, target) {
   var newTarget = aspect.afterConstructor(target, {});
 
   // Map the application object to the newTarget
-  newTarget = newTarget.application;
+  if (newTarget.application) {
+    newTarget = newTarget.application;
+    
+    // Ensure we are only attaching the probe to this target once
+    if (!newTarget.__ddProbeAttached__) {
+      newTarget.__ddProbeAttached__ = true;
 
-  // Ensure we are only attaching the probe to this target once
-  if (!newTarget.__ddProbeAttached__) {
-    newTarget.__ddProbeAttached__ = true;
+      // Before we make the call to an applicaton method
+      aspect.before(newTarget, applicationMethods, function(target, methodName, methodArgs, probeData) {
+        
+        // Patch the callback - i.e. the user's function when someone vists an application URL
+        aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
+          that.metricsProbeStart(probeData, methodName, methodArgs);
+          that.requestProbeStart(probeData, methodName, methodArgs);
 
-    // Before we make the call to an applicaton method
-    aspect.before(newTarget, applicationMethods, function(target, methodName, methodArgs, probeData) {
-      
-      // Patch the callback - i.e. the user's function when someone vists an application URL
-      aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
-        that.metricsProbeStart(probeData, methodName, methodArgs);
-        that.requestProbeStart(probeData, methodName, methodArgs);
-
-      }, function(target, args, probeData, ret) {
-          methodArgs.statusCode = args[1].statusCode;
-          that.metricsProbeEnd(probeData, methodName, methodArgs);
-          that.requestProbeEnd(probeData, methodName, methodArgs);
+        }, function(target, args, probeData, ret) {
+            methodArgs.statusCode = args[1].statusCode;
+            that.metricsProbeEnd(probeData, methodName, methodArgs);
+            that.requestProbeEnd(probeData, methodName, methodArgs);
+        });
       });
-    });
+    }
   }
   return target;
 }
