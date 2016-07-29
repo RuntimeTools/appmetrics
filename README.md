@@ -17,7 +17,7 @@ Node Application Metrics provides the following built-in data collection sources
  Memory             | Process and system memory usage
  GC                 | Node/V8 garbage collection statistics
  Event Loop         | Event loop latency information
- Express            | Express Web Framework application request monitoring
+ Express            | Express 4.x Web Framework application request monitoring
  Loop               | Event loop timing metrics
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
@@ -397,7 +397,7 @@ Emitted when a PostgreSQL query is made to the `pg` module.
     * `duration` (Number) the time taken for the PostgreSQL query to be responded to in ms.
 
 ### Event: 'express'
-Emitted when an express request finishes its response.
+Emitted when an express request finishes its response. Note. appmetrics has only been tested with express 4.x, support is not guaranteed for lower versions.
 * `data` (Object) the data from the Express request/response.
     * `method` (String) The HTTP method for this request.
     * `url` (String) The target URL for this request.
