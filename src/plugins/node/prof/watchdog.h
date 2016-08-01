@@ -220,6 +220,7 @@ inline void OnSignal(int signo) {
 }
 
 const char* StartCpuProfiling(v8::Isolate* isolate, uint64_t timeout_in_ms) {
+  printf("WATCHDOG: StartCpuProfiling");
   // Also call StartCpuProfiling() when the profiler is already running,
   // it makes it collect another sample.
   if (timeout_in_ms == 0 || profiler_tid != 0) {
@@ -253,6 +254,7 @@ const char* StartCpuProfiling(v8::Isolate* isolate, uint64_t timeout_in_ms) {
 }
 
 const v8::CpuProfile* StopCpuProfiling(v8::Isolate* isolate) {
+  printf("WATCHDOG: StopCpuProfiling");
   if (profiler_tid > 0) {
     // Unblock profiler thread, V8 is about to pthread_join() it.
     CHECK_EQ(0, ::syscall(SYS_tgkill, ::getpid(), profiler_tid, kResumeSignal));
@@ -269,6 +271,7 @@ C::ReturnType WatchdogActivationCount(const C::ArgumentType& args) {
 }
 
 void Initialize(v8::Isolate* isolate, v8::Local<v8::Object> binding) {
+  printf("WATCHDOG: Initialize");
   sigset_t mask;
   ::sigemptyset(&mask);
   ::sigaddset(&mask, kResumeSignal);

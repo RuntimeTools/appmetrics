@@ -553,9 +553,9 @@ extern "C" {
 		std::string idstring(id);
 	
 		if (idstring == "profiling_node") {
-			//std::stringstream ss;
-			//ss << "Received message with id [" << idstring << "], size [" << size << "]";
-			//plugin::api.logMessage(debug, ss.str().c_str());
+			std::stringstream ss;
+			ss << "Received message with id [" << idstring << "], size [" << size << "]";
+			plugin::api.logMessage(debug, ss.str().c_str());
 			
 			std::string message((const char*) data, size);
 			//if (size > 0) {

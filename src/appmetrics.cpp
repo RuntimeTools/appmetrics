@@ -461,7 +461,7 @@ NAN_METHOD(nativeEmit) {
 }
 
 NAN_METHOD(sendControlCommand) {
-    
+    printf("sendControlCommand\n");
     if (!isMonitorApiValid()) {
         Nan::ThrowError("Monitoring API is not initialized");
         return;
