@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2016 IBM Corp.
+ * Copyright 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -12,108 +12,91 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *******************************************************************************/
+*******************************************************************************/
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
 var am = require('../');
-var cluster = require('cluster');
-var extend = require('util')._extend;
 
 function ExpressProbe() {
-	Probe.call(this, 'express');
-	this.config = {
-			filters: []
-	};
+  Probe.call(this, 'express');
 }
 
 util.inherits(ExpressProbe, Probe);
 
-var VERSION = require('../package.json').version;
+// This method attaches the probe to the instance of the postgres module (target)
+ExpressProbe.prototype.attach = function(name, target) {
 
-module.exports = createStatsHandler;
+  var that = this;
+  if( name != 'express' ) return target;
+  if( target.__ddProbeAttached__ ) return target;
+  target.__ddProbeAttached__ = true;
 
-function createStatsHandler(recordBuilder) {
-  return function statistics(req, res, next) {
-    req.__start = new Date();
+  var applicationMethods = ['checkout', 'copy', 'delete', 'get', 'head', 'lock', 'merge', 'mkactivity',
+                            'mkcol', 'move', 'm-search', 'notify', 'options', 'patch', 'post', 'purge', 
+                            'put', 'report', 'search', 'subscribe', 'trace', 'unlock', 'unsubscribe'];
 
-    // Save the client address, as it is not available in Node v0.10
-    // at the time when the response was sent
-    req.__clientAddress = req.ip || req.connection.remoteAddress;
+  // Get the new target after the express constructor has been called
+  var newTarget = aspect.afterConstructor(target, {});
 
-    res.on('finish', function() {
-      res.durationInMs = new Date() - req.__start;
+  // Map the application object to the newTarget
+  if (newTarget.application) {
+    newTarget = newTarget.application;
+    
+    // Ensure we are only attaching the probe to this target once
+    if (!newTarget.__ddProbeAttached__) {
+      newTarget.__ddProbeAttached__ = true;
 
-     try {
-        var record = createRecord(recordBuilder, req, res);
-        am.emit('express', record);
-      } catch (err) {
-        console.warn('strong-express-metrics ignored error', err.stack);
-      }
-    });
-    next();
-  };
-}
+      // Before we make the call to an applicaton method
+      aspect.before(newTarget, applicationMethods, function(target, methodName, methodArgs, probeData) {
+        
+        // Patch the callback - i.e. the user's function when someone vists an application URL
+        aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
+          that.metricsProbeStart(probeData, methodName, methodArgs);
+          that.requestProbeStart(probeData, methodName, methodArgs);
 
-function createRecord(builder, req, res) {
-  var record = {
-    version: VERSION,
-    timestamp: Date.now(),
-    client: {
-      address: req.__clientAddress,
-      // How to extract client-id and username?
-      // Should we parse Authorization header for Basic Auth?
-      id: undefined,
-      username: undefined
-    },
-    request: {
-      method: req.method,
-      url: req.url
-    },
-    response: {
-      status: res.statusCode,
-      duration: res.durationInMs,
-      // Computing the length of a writable stream
-      // is tricky and expensive.
-      bytes: undefined
-    },
-    process: {
-      pid: process.pid,
-      workerId: cluster.worker && cluster.workerId
-    },
-    data: {
-      // placeholder for user-provided data
+        }, function(target, args, probeData, ret) {
+            methodArgs.statusCode = args[1].statusCode;
+            that.metricsProbeEnd(probeData, methodName, methodArgs);
+            that.requestProbeEnd(probeData, methodName, methodArgs);
+        });
+      });
     }
-  };
-
-  addLoopBackInfo(record, req, res);
-
-  var custom = builder && builder(req, res);
-
-  if (custom) {
-    for (var k in custom)
-      record[k] = extend(record[k], custom[k]);
   }
-
-  return record;
+  return target;
 }
 
-function addLoopBackInfo(record, req, res) {
-  var ctx = req.remotingContext;
-  if (!ctx) return;
-
-  var method = ctx.method;
-  var lb = record.loopback = {
-    modelName: method.sharedClass ? method.sharedClass.name : null,
-    remoteMethod: method.name
-  };
-
-  if (!method.isStatic) {
-    lb.remoteMethod = 'prototype.' + lb.remoteMethod;
-    lb.instanceId = ctx.ctorArgs && ctx.ctorArgs.id;
-  } else if (/ById$/.test(method.name)) {
-    // PersistedModel.findById, PersistedModel.deleteById
-    lb.instanceId = ctx.args.id;
+/*
+ * Lightweight metrics probe for express queries
+ * 
+ * These provide:
+ *      time:       time event started
+ *      url:        the url visited
+ *      method:     the HTTP method called
+ *      statusCode: the HTTP status code returned
+ *      duration:   the time for the request to respond
+ */
+ExpressProbe.prototype.metricsEnd = function(probeData, methodName, methodArgs) {
+  probeData.timer.stop();
+  var expressMetrics = {
+    time: probeData.timer.startTimeMillis, 
+    url: methodArgs[0], 
+    method: methodName, 
+    statusCode: methodArgs.statusCode, 
+    duration: probeData.timer.timeDelta
   }
-}
+  am.emit('express', expressMetrics);
+};
+
+// Heavyweight request probes for express queries 
+ExpressProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
+  probeData.req = request.startRequest( 'HTTP', 'request', false, probeData.timer );
+  probeData.req.setContext({url: methodArgs[0]});
+};
+
+ExpressProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
+  probeData.req.stop({url: methodArgs[0]});
+};
+
+module.exports = ExpressProbe;
