@@ -77,7 +77,6 @@ using namespace std;
 bool jsonEnabled = false;
 int profilingInterval = 5000;
 int watchdogThreshold = 0;
-int watchdogMaxCycles = 0;
 
 static void setProfilingInterval(int interval){
 	profilingInterval = interval;
@@ -94,15 +93,6 @@ static void setWatchdogThreshold(int threshold){
 static int getWatchdogThreshold(){
 	return watchdogThreshold;
 }
-
-static void setWatchdogMaxCycles(int cycles){
-	watchdogMaxCycles = cycles;
-}
-
-static int getWatchdogMaxCycles(){
-	return watchdogMaxCycles;
-}
-
 
 static char* NewCString(const std::string& s) {
 	char *result = new char[s.length() + 1];
@@ -594,18 +584,6 @@ extern "C" {
 				}
                 setWatchdogThreshold(threshold);
             }
-
-			else if(rest == "profiling_node_maxCycles") {
-				std::string msg = "Setting [" + rest + "] to " + command;
-                plugin::api.logMessage(fine, msg.c_str());
-                // command should be an integer (maximum cycles to profile for)
-				int maxCycles;
-				std::stringstream ss(command);
-				if (!(ss >> maxCycles)) {
-					maxCycles = 0;
-				}
-                setWatchdogMaxCycles(maxCycles);
-			}
 		}
 	}
 	

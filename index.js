@@ -204,12 +204,10 @@ module.exports.setConfig = function (data, config) {
             })
         }
         break;
-    case 'advancedprofiling':
+    case 'advancedProfiling':
 		if(typeof(config.threshold) !== 'undefined')
 			agent.sendControlCommand("profiling_node", config.threshold + ",profiling_node_threshold");
-        if(typeof(config.maxCycles) !== 'undefined')
-			agent.sendControlCommand("profiling_node", config.maxCycles + ",profiling_node_maxCycles");
-		break;
+        break;
     default:
         probes.forEach(function (probe) {
             if (probe.name == data) {

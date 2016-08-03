@@ -24,7 +24,9 @@ tap.test("Profiling Data using Watchdog", function(t) {
     app.appmetrics.enable("profiling");
     monitor.on('profiling', function(data) {
     	if (completedTests.watchdog != true){
-    		
+    		t.type(app.appmetrics.watchdogActivationCount, 'function');
+		var activationCount = app.appmetrics.watchdogActivationCount();
+		t.ok(isInteger(activationCount) && (activationCount > 0));
     		runProfilingTests(data, t);  
     		t.end();
     		completedTests.watchdog = true;
@@ -36,13 +38,17 @@ tap.test("Profiling Data using Watchdog", function(t) {
 tap.test("Setting Watchdog threshold to high value, no profiling data expected", function(t) {
     app.appmetrics.disable("profiling");
     delay(100);
-    app.appmetrics.setConfig('advancedProfiling', {threshold:100000});
+    app.appmetrics.setConfig('advancedProfiling', {threshold:1000});
     app.appmetrics.enable("profiling");
     monitor.on('profiling', function(data) {
         t.fail("Profiling data was produced in error");
     });
-    delay(10000);
-    t.end();
+    delay(200);
+    delay(200);
+    delay(200);
+    delay(200);
+    delay(200);
+    setTimeout(function() {t.end();}, 5000);
 });
 
 function delay(ms) {
@@ -110,3 +116,4 @@ function runProfilingTests(profData, t){
 		t.pass("Value of '" + keyName + "' is greater than " + val + " for all functions");
 	}
 }
+
