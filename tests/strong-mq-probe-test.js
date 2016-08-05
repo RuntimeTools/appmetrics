@@ -23,7 +23,7 @@
  * Debug code is included commented out for use if the test fails.
  */
 
-var appmetrics = require('appmetrics');
+var appmetrics = require('../');
 var process = require('process');
 
 var methodpairs = {

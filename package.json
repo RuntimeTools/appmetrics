@@ -11,10 +11,13 @@
   "devDependencies": {
     "nan": "2.x",
     "node-gyp": "2.x",
-    "tap": "^5.7.x"
+    "tap": "5.7.x",
+    "axon": "^2.0.2",
+    "pg": "^6.0.3",
+    "strong-mq": "^1.0.1"
   },
   "scripts": {
-    "test": "tap --reporter tap tests/api_tests.js",
+    "test": "tap --reporter tap tests/*-test.js tests/probes/*-test.js",
     "install": "node-gyp rebuild"
   },
   "directories": {

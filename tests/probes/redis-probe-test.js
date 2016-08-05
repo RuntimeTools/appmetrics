@@ -97,7 +97,7 @@ process.on('exit', function(code) {
 	process.exit(exitCode);
 });
 
-var appmetrics = require('appmetrics');
+var appmetrics = require('../../');
 
 var monitoring = appmetrics.monitor();
 
