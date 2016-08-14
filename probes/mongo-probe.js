@@ -110,11 +110,13 @@ MongoProbe.prototype.attach = function(name, target) {
  *         time:        time event started
  *         query:        the query itself
  *         duration:    the time for the request to respond
+ *         method:      the executed method for the query, such as find, update
+ *         collection:  the mongo collection
  */
 MongoProbe.prototype.metricsEnd = function(probeData, collectionName, method, methodArgs) {
     probeData.timer.stop();
     am.emit('mongo', {time: probeData.timer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: probeData.timer.timeDelta,
-        method: method, collectionName: collectionName});
+        method: method, collection: collectionName});
 };
 
 /*
