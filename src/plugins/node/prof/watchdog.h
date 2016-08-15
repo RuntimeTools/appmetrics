@@ -302,13 +302,9 @@ void Initialize(v8::Isolate* isolate, v8::Local<v8::Object> binding) {
 }
 
 }  // namespace watchdog
-//}  // namespace agent
-//}  // namespace strongloop
 
 #else  // defined(__linux__) && (defined(__i386) || defined(__x86_64__))
 
-//namespace strongloop {
-//namespace agent {
 namespace watchdog {
 
 namespace C = ::compat;
