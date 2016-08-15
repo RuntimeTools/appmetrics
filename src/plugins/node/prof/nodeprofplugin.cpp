@@ -234,18 +234,8 @@ static CpuProfiler* GetCpuProfiler(Isolate *isolate) {
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
 //                 since it calls V8 APIs
 static void StartTheProfiler() {
-//#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 	Isolate *isolate = GetIsolate();
 	if (isolate == NULL) return;
-//	Nan::HandleScope scope;
-//	
-//	CpuProfiler *cpu = GetCpuProfiler(isolate);
-//	if (cpu == NULL) return;
-
-//	cpu->StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked(), false);
-//#else
-//	CpuProfiler::StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
-//#endif
     const char* errmsg =
       watchdog::StartCpuProfiling(isolate, watchdogThreshold);
     if (errmsg != NULL) {
@@ -258,18 +248,7 @@ static void StartTheProfiler() {
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
 //                 since it calls V8 APIs
 static const CpuProfile* StopTheProfiler() {
-//#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 	Isolate *isolate = GetIsolate();
-//	if (isolate == NULL) return NULL;
-//	Nan::HandleScope scope;
-	
-//	CpuProfiler *cpu = GetCpuProfiler(isolate);
-//	if (cpu == NULL) return NULL;
-	
-//	return cpu->StopProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
-//#else
-//	return CpuProfiler::StopProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
-//#endif
     return watchdog::StopCpuProfiling(isolate);
 }
 
@@ -541,11 +520,11 @@ extern "C" {
 	
 	NODEPROFPLUGIN_DECL void ibmras_monitoring_receiveMessage(const char *id, uint32 size, void *data) {
 		std::string idstring(id);
-	
+
 		if (idstring == "profiling_node") {
-			std::stringstream ss;
-			ss << "Received message with id [" << idstring << "], size [" << size << "]";
-			plugin::api.logMessage(debug, ss.str().c_str());
+			//std::stringstream ss;
+			//ss << "Received message with id [" << idstring << "], size [" << size << "]";
+			//plugin::api.logMessage(debug, ss.str().c_str());
 			
 			std::string message((const char*) data, size);
 			//if (size > 0) {
@@ -561,19 +540,16 @@ extern "C" {
 				//std::string msg = "Setting [" + rest + "] to " + (enabled ? "enabled" : "disabled");
 				//plugin::api.logMessage(debug, msg.c_str());
 				setEnabled(enabled);
-			}
-			
-			else if (rest == "profiling_node_v8json"){
+
+            } else if (rest == "profiling_node_v8json"){
 				jsonEnabled = (command == "on");
 				if (jsonEnabled){
 					//set interval to 60000
 					setProfilingInterval(60000);
 				}
 				else setProfilingInterval(5000);
-				
-			}
 
-            else if(rest == "profiling_node_threshold") {
+			} else if(rest == "profiling_node_threshold") {
 				std::string msg = "Setting [" + rest + "] to " + command;
                 plugin::api.logMessage(fine, msg.c_str());
                 // command should be an integer (timeout threshold)

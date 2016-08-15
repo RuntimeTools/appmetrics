@@ -205,8 +205,8 @@ module.exports.setConfig = function (data, config) {
         }
         break;
     case 'advancedProfiling':
-		if(typeof(config.threshold) !== 'undefined')
-			agent.sendControlCommand("profiling_node", config.threshold + ",profiling_node_threshold");
+        if(typeof(config.threshold) !== 'undefined')
+            agent.sendControlCommand("profiling_node", config.threshold + ",profiling_node_threshold");
         break;
     default:
         probes.forEach(function (probe) {
