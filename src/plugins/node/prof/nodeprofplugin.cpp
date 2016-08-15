@@ -426,6 +426,7 @@ void setEnabled(bool value) {
 		} else {
 			uv_async_send(asyncDisable);
 		}
+        setWatchdogThreshold(0);
 	}
 }
 
