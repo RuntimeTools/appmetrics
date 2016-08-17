@@ -6,11 +6,11 @@
     "node-hc": "bin/appmetrics-cli.js"
   },
   "dependencies": {
-    "nan": "2.x",
-    "node-gyp": "2.x",
     "tar": "2.x"
   },
   "devDependencies": {
+    "nan": "2.x",
+    "node-gyp": "2.x",
     "tap": "^5.7.x"
   },
   "scripts": {
@@ -18,7 +18,6 @@
     "install": "node-gyp rebuild"
   },
   "directories": {
-    "licenses": "licenses",
     "lib": "lib",
     "probes": "probes"
   },
@@ -27,5 +26,5 @@
     "url": "git://github.com/RuntimeTools/appmetrics.git"
   },
   "author": "",
-  "license": "Apache-2.0 and proprietary"
+  "license": "Apache-2.0"
 }
