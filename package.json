@@ -6,11 +6,11 @@
     "node-hc": "bin/appmetrics-cli.js"
   },
   "dependencies": {
-    "nan": "2.x",
-    "node-gyp": "2.x",
     "tar": "2.x"
   },
   "devDependencies": {
+    "nan": "2.x",
+    "node-gyp": "2.x",
     "tap": "^5.7.x"
   },
   "scripts": {
