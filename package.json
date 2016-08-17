@@ -18,7 +18,6 @@
     "install": "node-gyp rebuild"
   },
   "directories": {
-    "licenses": "licenses",
     "lib": "lib",
     "probes": "probes"
   },
