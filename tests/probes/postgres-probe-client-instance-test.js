@@ -16,7 +16,7 @@
 
 //This script tests the client instance functionality of the pg module.
 //It assumes a postgres server is running on the local host.
-var appmetrics = require('appmetrics');
+var appmetrics = require('../../');
 
 //Live monitoring
 var amapi = appmetrics.monitor();
