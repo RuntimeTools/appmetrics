@@ -314,8 +314,14 @@ function runNodeEnvTests(nodeEnvData, t) {
 		t.ok(parseInt(nodeEnvData['max.old.space.size']) > 0,
 			   "max.old.space.size is positive");
 
-		t.ok(4*parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']) === parseInt(nodeEnvData['heap.size.limit']),
+		var nodeVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1]);
+		if(nodeVersion >= 6.5) { // issue 283
+			t.ok(2*parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']) === parseInt(nodeEnvData['heap.size.limit']),
 			   'Values for max.old.space.size and max.semi.space.size match heap.size.limit');
+		} else {
+			t.ok(4*parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']) === parseInt(nodeEnvData['heap.size.limit']),
+			   'Values for max.old.space.size and max.semi.space.size match heap.size.limit');
+		}
 
 		t.ok(isInteger(nodeEnvData['max.heap.size']),
 			   "max.heap.size is an integer");
