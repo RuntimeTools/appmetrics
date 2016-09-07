@@ -300,17 +300,17 @@ function runNodeEnvTests(nodeEnvData, t) {
 	// NOTE(ignasbol): max.heap.size included as well as part of 1.0.4
 	if (nodeEnvData['heap.size.limit']) {
 		t.ok(isInteger(nodeEnvData['heap.size.limit']),
-			   "heap.size.limit is an integer");
+			   "heap.size.limit is an integer (value was: " + nodeEnvData['heap.size.limit'] + ")");
 			   
 		t.ok(parseInt(nodeEnvData['heap.size.limit']) > 0,
 			   'heap.size.limit is positive');
 		t.ok(isInteger(nodeEnvData['max.semi.space.size']),
-			   "max.semi.space.size is an integer");
+			   "max.semi.space.size is an integer (value was: " + nodeEnvData['max.semi.space.size'] + ")");
 		t.ok(parseInt(nodeEnvData['max.semi.space.size']) > 0,
 			   "max.semi.size is positive");
 
 		t.ok(isInteger(nodeEnvData['max.old.space.size']),
-			   "max.old.space.size is an integer");
+			   "max.old.space.size is an integer (value was: " + nodeEnvData['max.old.space.size'] + ")");
 		t.ok(parseInt(nodeEnvData['max.old.space.size']) > 0,
 			   "max.old.space.size is positive");
 
@@ -324,7 +324,7 @@ function runNodeEnvTests(nodeEnvData, t) {
 		}
 
 		t.ok(isInteger(nodeEnvData['max.heap.size']),
-			   "max.heap.size is an integer");
+			   "max.heap.size is an integer (value was: " + nodeEnvData['max.heap.size'] + ")");
 
 		t.ok(parseInt(nodeEnvData['max.heap.size']) > 0,
 			   "max.heap.size is positive");
