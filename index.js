@@ -241,9 +241,7 @@ module.exports.monitor = function() {
     return this.api;
 };
 
-module.exports.lrtime = function() {
-    return agent.lrtime();
-};
+module.exports.lrtime = agent.lrtime;
 
 module.exports.configure = function(options) {
     options = options || {};

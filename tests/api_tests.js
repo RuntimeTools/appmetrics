@@ -19,9 +19,20 @@ var monitor = app.appmetrics.monitor();
 app.appmetrics.enable("profiling");
 
 var tap = require('tap');
-tap.plan(5); // NOTE: This needs to be updated when tests are added/removed
+tap.plan(6); // NOTE: This needs to be updated when tests are added/removed
 tap.tearDown(function(){
 	app.endRun();
+});
+
+tap.test('lrtime is a function or undefined', function(t) {
+  var lrtime = app.appmetrics.lrtime;
+
+  if (lrtime) {
+    t.doesNotThrow(lrtime, 'callable, not just present');
+  } else {
+    t.notEqual(process.platform, 'linux', 'lrtime mandatory on linux');
+  }
+  t.end();
 });
 
 var completedTests = {}; //Stores which tests have been run, ensures single run per test
