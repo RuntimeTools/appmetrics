@@ -219,16 +219,6 @@ static Isolate* GetIsolate() {
 	return isolate;
 }
 
-// NOTE(tunniclm): Must be called from the V8/Node/uv thread
-//                 since it calls V8 APIs
-static CpuProfiler* GetCpuProfiler(Isolate *isolate) {
-	CpuProfiler *cpu = isolate->GetCpuProfiler();
-	if (cpu == NULL) {
-		plugin::api.logMessage(debug, "[profiling_node] No CpuProfiler found");
-	}
-	return cpu;
-}
-
 #endif
 
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
@@ -237,7 +227,7 @@ static void StartTheProfiler() {
 	Isolate *isolate = GetIsolate();
 	if (isolate == NULL) return;
     const char* errmsg =
-      watchdog::StartCpuProfiling(isolate, watchdogThreshold);
+      watchdog::StartCpuProfiling(isolate, getWatchdogThreshold());
     if (errmsg != NULL) {
         std::stringstream logMsg;
         logMsg << "[profiling_node] Error starting CPU profiler: [" << &errmsg << "]";
