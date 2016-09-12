@@ -20,6 +20,7 @@
 #include "v8-profiler.h"
 #include "uv.h"
 #include "nan.h"
+#include "watchdog.h"
 #include <iostream>
 //#include "node_version.h"
 #include <cstring>
@@ -75,6 +76,7 @@ using namespace std;
 
 bool jsonEnabled = false;
 int profilingInterval = 5000;
+int watchdogThreshold = 0;
 
 static void setProfilingInterval(int interval){
 	profilingInterval = interval;
@@ -84,6 +86,13 @@ static int getProfilingInterval(){
 	return profilingInterval;
 }
 
+static void setWatchdogThreshold(int threshold){
+	watchdogThreshold = threshold;
+}
+
+static int getWatchdogThreshold(){
+	return watchdogThreshold;
+}
 
 static char* NewCString(const std::string& s) {
 	char *result = new char[s.length() + 1];
@@ -210,50 +219,27 @@ static Isolate* GetIsolate() {
 	return isolate;
 }
 
-// NOTE(tunniclm): Must be called from the V8/Node/uv thread
-//                 since it calls V8 APIs
-static CpuProfiler* GetCpuProfiler(Isolate *isolate) {
-	CpuProfiler *cpu = isolate->GetCpuProfiler();
-	if (cpu == NULL) {
-		plugin::api.logMessage(debug, "[profiling_node] No CpuProfiler found");
-	}
-	return cpu;
-}
-
 #endif
 
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
 //                 since it calls V8 APIs
 static void StartTheProfiler() {
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 	Isolate *isolate = GetIsolate();
 	if (isolate == NULL) return;
-	Nan::HandleScope scope;
-	
-	CpuProfiler *cpu = GetCpuProfiler(isolate);
-	if (cpu == NULL) return;
-
-	cpu->StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked(), false);
-#else
-	CpuProfiler::StartProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
-#endif
+    const char* errmsg =
+      watchdog::StartCpuProfiling(isolate, getWatchdogThreshold());
+    if (errmsg != NULL) {
+        std::stringstream logMsg;
+        logMsg << "[profiling_node] Error starting CPU profiler: [" << &errmsg << "]";
+        plugin::api.logMessage(warning, logMsg.str().c_str());
+    }
 }
 
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
 //                 since it calls V8 APIs
 static const CpuProfile* StopTheProfiler() {
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 	Isolate *isolate = GetIsolate();
-	if (isolate == NULL) return NULL;
-	Nan::HandleScope scope;
-	
-	CpuProfiler *cpu = GetCpuProfiler(isolate);
-	if (cpu == NULL) return NULL;
-	
-	return cpu->StopProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
-#else
-	return CpuProfiler::StopProfiling(Nan::New<String>("NodeProfPlugin").ToLocalChecked());
-#endif
+    return watchdog::StopCpuProfiling(isolate);
 }
 
 static void ReleaseProfile(const CpuProfile *profile) {
@@ -430,6 +416,7 @@ void setEnabled(bool value) {
 		} else {
 			uv_async_send(asyncDisable);
 		}
+        setWatchdogThreshold(0);
 	}
 }
 
@@ -524,7 +511,7 @@ extern "C" {
 	
 	NODEPROFPLUGIN_DECL void ibmras_monitoring_receiveMessage(const char *id, uint32 size, void *data) {
 		std::string idstring(id);
-	
+
 		if (idstring == "profiling_node") {
 			//std::stringstream ss;
 			//ss << "Received message with id [" << idstring << "], size [" << size << "]";
@@ -544,18 +531,27 @@ extern "C" {
 				//std::string msg = "Setting [" + rest + "] to " + (enabled ? "enabled" : "disabled");
 				//plugin::api.logMessage(debug, msg.c_str());
 				setEnabled(enabled);
-			}
-			
-			if (rest == "profiling_node_v8json"){
+
+            } else if (rest == "profiling_node_v8json"){
 				jsonEnabled = (command == "on");
 				if (jsonEnabled){
 					//set interval to 60000
 					setProfilingInterval(60000);
 				}
 				else setProfilingInterval(5000);
-				
-			}
-		} 
+
+			} else if(rest == "profiling_node_threshold") {
+				std::string msg = "Setting [" + rest + "] to " + command;
+                plugin::api.logMessage(fine, msg.c_str());
+                // command should be an integer (timeout threshold)
+				int threshold;
+				std::stringstream ss(command);
+				if (!(ss >> threshold)) {
+					threshold = 0;
+				}
+                setWatchdogThreshold(threshold);
+            }
+		}
 	}
 	
 	NODEPROFPLUGIN_DECL const char* ibmras_monitoring_getVersion() {
