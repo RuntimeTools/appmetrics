@@ -9,6 +9,9 @@
     "nan": "2.x",
     "tar": "2.x"
   },
+  "bundleDependencies": [
+    "tar"
+  ],
   "devDependencies": {
     "node-gyp": "2.x",
     "tap": "^5.7.x"
