@@ -22,10 +22,10 @@
 #include "nan.h"
 #include "uv.h"
 #include "AgentExtensions.h"
+#include "plugins/node/prof/watchdog.h"
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 #include "objecttracker.hpp"
-#include "plugins/node/prof/watchdog.h"
 #endif
 
 #include <string>
