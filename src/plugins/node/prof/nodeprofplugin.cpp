@@ -207,8 +207,6 @@ static char * ConstructData(const CpuProfile *profile) {
 	return NewCString(result.str());
 }
 
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
 //                 since it calls V8 APIs
 static Isolate* GetIsolate() {
@@ -218,8 +216,6 @@ static Isolate* GetIsolate() {
 	}
 	return isolate;
 }
-
-#endif
 
 // NOTE(tunniclm): Must be called from the V8/Node/uv thread
 //                 since it calls V8 APIs
