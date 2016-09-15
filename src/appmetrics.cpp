@@ -147,7 +147,7 @@ static std::string fileJoin(const std::string& path, const std::string& filename
     return path + fileSeparator + filename;
 }
 
-static std::string* getModuleDir(Handle<Object> module) {
+static std::string* getModuleDir(Local<Object> module) {
     std::string moduleFilename(toStdString(module->Get(Nan::New<String>("filename").ToLocalChecked())->ToString()));
     return new std::string(portDirname(moduleFilename));
 }
@@ -157,7 +157,7 @@ static Local<Object> getProcessObject() {
 }
 
 static std::string* findApplicationDir() {
-    Handle<Value> mainModule = getProcessObject()->Get(Nan::New<String>("mainModule").ToLocalChecked());
+    Local<Value> mainModule = getProcessObject()->Get(Nan::New<String>("mainModule").ToLocalChecked());
     if (!mainModule->IsUndefined()) {
         return getModuleDir(mainModule->ToObject());
     }
@@ -551,9 +551,9 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 // directly by NativeModule.require() (in Module._load())
 // So we need to get it from Module._cache instead (by
 // executing require('module')._cache)
-static Local<Object> getRequireCache(Handle<Object> module) {
+static Local<Object> getRequireCache(Local<Object> module) {
     Nan::EscapableHandleScope scope;
-    Handle<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
+    Local<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
     Local<Value> m = module->Get(Nan::New<String>("require").ToLocalChecked())->ToObject()->CallAsFunction(Nan::GetCurrentContext()->Global(), 1, args);
     Local<Object> cache = m->ToObject()->Get(Nan::New<String>("_cache").ToLocalChecked())->ToObject();
     return scope.Escape(cache);
@@ -594,7 +594,7 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 //   ^--- .../node_modules/appmetrics/index.js (parent)
 //        ^-- .../node_modules/appmetrics/appmetrics.node (this)
 //
-static bool isGlobalAgent(Handle<Object> module) {
+static bool isGlobalAgent(Local<Object> module) {
     Nan::HandleScope scope;
     Local<Value> parent = module->Get(Nan::New<String>("parent").ToLocalChecked());
     if (parent->IsObject()) {
@@ -613,7 +613,7 @@ static bool isGlobalAgent(Handle<Object> module) {
 // Check if a global appmetrics agent module is already loaded.
 // This is actually searching the module cache for a module with filepath
 // ending .../appmetrics/launcher.js
-static bool isGlobalAgentAlreadyLoaded(Handle<Object> module) {
+static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     //Nan::HandleScope scope;
     Local<Object> cache = getRequireCache(module);
     Local<Array> props = cache->GetOwnPropertyNames();
@@ -629,7 +629,7 @@ static bool isGlobalAgentAlreadyLoaded(Handle<Object> module) {
     return false;
 }
 
-void init(Handle<Object> exports, Handle<Object> module) {
+void init(Local<Object> exports, Local<Object> module) {
     /*
      * Throw an error if appmetrics has already been loaded globally
      */
