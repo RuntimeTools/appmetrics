@@ -7,14 +7,16 @@
   },
   "dependencies": {
     "nan": "2.x",
-    "tar": "2.x"
+    "tar": "2.x",
+    "request": "2.x"
   },
   "bundleDependencies": [
-    "tar"
+    "tar",
+    "request"
   ],
   "devDependencies": {
-    "node-gyp": "2.x",
-    "tap": "^5.7.x"
+    "node-gyp": "3.x",
+    "tap": "7.x"
   },
   "scripts": {
     "test": "tap --reporter tap tests/api_tests.js",
