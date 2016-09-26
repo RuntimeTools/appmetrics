@@ -297,6 +297,8 @@ Emitted when a MongoDB query is made using the `mongodb` module.
     * `time` (Number) the milliseconds when the MongoDB query was made. This can be converted to a Date using `new Date(data.time)`
     * `query` (String) the query made of the MongoDB database.
     * `duration` (Number) the time taken for the MongoDB query to be responded to in ms.
+    * `method` (String) the executed method for the query, such as find, update.
+    * `collection` (String) the MongoDB collection name.
 
 ### Event: 'mqtt'
 Emitted when a MQTT message is sent or received.
