@@ -459,6 +459,7 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 1.0.13
 
 ## Release History
+`1.1.0` - Bug fixes, improved MongoDB data, updated dependencies, CPU watchdog feature
 `1.0.13` - Express probe, strong-supervisor integration  
 `1.0.12` - Appmetrics now fully open sourced under Apache 2.0 license  
 `1.0.11` - Bug fixes    
