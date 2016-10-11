@@ -194,13 +194,14 @@ Set the configuration to be applied to a specific data type. The configuration a
 * `type` (String) the type of event to apply the configuration to.
 * `config` (Object) key value pairs of configurations to be applied to the specified event. The available configuration options are as follows:
 
- Source     | Configuration            | Effect
-:-----------|:-------------------------|:-----------------------------
- `http`     | `filters`                | (Array) of URL filter Objects consisting of: 
-            |                          | `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
-            |                          | `to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.             
- `requests` | `excludeModules`         | (Array) of String names of modules to exclude from request tracking.
- `trace`    | `includeModules`         | (Array) of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
+ Source              | Configuration            | Effect
+:--------------------|:-------------------------|:-----------------------------
+ `http`              | `filters`                | (Array) of URL filter Objects consisting of: 
+                     |                          | `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
+                     |                          | `to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.             
+ `requests`          | `excludeModules`         | (Array) of String names of modules to exclude from request tracking.
+ `trace`             | `includeModules`         | (Array) of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
+ `advancedProfiling` | `threshold`              | (Number) millisecond run time of an event loop cycle that will trigger profiling
 
 ### appmetrics.emit(`type`, `data`)
 Allows custom monitoring events to be added into the Node Application Metrics agent.
