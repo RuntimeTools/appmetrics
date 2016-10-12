@@ -211,7 +211,7 @@ Allows custom monitoring events to be added into the Node Application Metrics ag
 Creates a Node Application Metrics agent client instance. This can subsequently be used to get environment data and subscribe to data events. This function will start the appmetrics monitoring agent if it is not already running.
 
 ### appmetrics.monitor.getEnvironment()
-Requests an object containing all of the available environment information for the running application.
+Requests an object containing all of the available environment information for the running application. This will not contain all possible environment information until an 'initialized' event has been received.
 
 ### Event: 'cpu'
 Emitted when a CPU monitoring sample is taken.
@@ -230,6 +230,9 @@ Emitted when a memory monitoring sample is taken.
     * `virtual` (Number) the memory address space used by the Node.js application in bytes.
     * `private` (Number) the amount of memory used by the Node.js application that cannot be shared with other processes, in bytes.
     * `physical` (Number) the amount of RAM used by the Node.js application in bytes.
+
+### Event: 'initialized'
+Emitted when all possible environment variables have been collected. Use `appmetrics.monitor.getEnvironment()` to access the available environment variables.
 
 ### Event: 'gc'
 Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime.
