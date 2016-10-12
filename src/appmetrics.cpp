@@ -292,8 +292,6 @@ NAN_METHOD(start) {
 
         loaderApi->init();
 
-        // Force MQTT on for now
-        loaderApi->setProperty("com.ibm.diagnostics.healthcenter.mqtt", "on");
         loaderApi->start();
     }
     if (!initMonitorApi()) {
