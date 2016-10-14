@@ -37,15 +37,17 @@ TraceProbe.prototype.attach = function( moduleName, target ) {
         return target;
     }
     var ret = target;
+	console.log('julien was not here..');
     if (typeof(target) != "function") {
         instrumentMethods(moduleName, target);
     } else {
         instrumentMethods(moduleName, target.prototype);
         ret = target;
-        if(Object.keys(target.prototype).length==0 && Object.keys(target).length == 0){
+        if(target && target.prototype && Object.keys(target.prototype).length==0 && Object.keys(target).length==0){
             ret = function () {
                 var rc = target.apply(this, arguments);
                 instrumentMethods(moduleName, rc);
+		console.log('julien was here');
                 return rc;
             }
         }
