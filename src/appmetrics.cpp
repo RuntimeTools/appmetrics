@@ -21,7 +21,7 @@
 #include "node.h"
 #include "nan.h"
 #include "uv.h"
-#include "AgentExtensions.h"
+#include "ibmras/monitoring/AgentExtensions.h"
 #include "plugins/node/prof/watchdog.h"
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
@@ -268,6 +268,8 @@ static bool initMonitorApi() {
 
     return isMonitorApiValid();
 }
+
+typedef loaderCoreFunctions* (*LOADER_CORE)();
 
 static bool initLoaderApi() {
 #if defined(_WINDOWS)
