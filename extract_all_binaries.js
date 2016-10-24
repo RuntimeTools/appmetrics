@@ -109,6 +109,9 @@ var getSupportedNodeVersionOrExit = function() {
 	if (process.version.indexOf('v6') === 0) {
 		return '6';
 	}
+	if (process.version.indexOf('v7') === 0) {
+		return '7';
+	}
 	console.log('Unsupported version ' + process.version + '. Exiting.');
 	process.exit(1);
 };
