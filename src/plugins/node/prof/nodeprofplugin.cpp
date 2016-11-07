@@ -14,7 +14,7 @@
  * limitations under the License.
  *******************************************************************************/
 
-#include "AgentExtensions.h"
+#include "ibmras/monitoring/AgentExtensions.h"
 #include "Typesdef.h"
 #include "v8.h"
 #include "v8-profiler.h"

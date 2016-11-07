@@ -194,13 +194,14 @@ Set the configuration to be applied to a specific data type. The configuration a
 * `type` (String) the type of event to apply the configuration to.
 * `config` (Object) key value pairs of configurations to be applied to the specified event. The available configuration options are as follows:
 
- Source     | Configuration            | Effect
-:-----------|:-------------------------|:-----------------------------
- `http`     | `filters`                | (Array) of URL filter Objects consisting of: 
-            |                          | `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
-            |                          | `to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.             
- `requests` | `excludeModules`         | (Array) of String names of modules to exclude from request tracking.
- `trace`    | `includeModules`         | (Array) of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
+ Source              | Configuration            | Effect
+:--------------------|:-------------------------|:-----------------------------
+ `http`              | `filters`                | (Array) of URL filter Objects consisting of: 
+                     |                          | `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
+                     |                          | `to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.             
+ `requests`          | `excludeModules`         | (Array) of String names of modules to exclude from request tracking.
+ `trace`             | `includeModules`         | (Array) of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
+ `advancedProfiling` | `threshold`              | (Number) millisecond run time of an event loop cycle that will trigger profiling
 
 ### appmetrics.emit(`type`, `data`)
 Allows custom monitoring events to be added into the Node Application Metrics agent.
@@ -211,7 +212,7 @@ Allows custom monitoring events to be added into the Node Application Metrics ag
 Creates a Node Application Metrics agent client instance. This can subsequently be used to get environment data and subscribe to data events. This function will start the appmetrics monitoring agent if it is not already running.
 
 ### appmetrics.monitor.getEnvironment()
-Requests an object containing all of the available environment information for the running application.
+Requests an object containing all of the available environment information for the running application. This will not contain all possible environment information until an 'initialized' event has been received.
 
 ### Event: 'cpu'
 Emitted when a CPU monitoring sample is taken.
@@ -230,6 +231,9 @@ Emitted when a memory monitoring sample is taken.
     * `virtual` (Number) the memory address space used by the Node.js application in bytes.
     * `private` (Number) the amount of memory used by the Node.js application that cannot be shared with other processes, in bytes.
     * `physical` (Number) the amount of RAM used by the Node.js application in bytes.
+
+### Event: 'initialized'
+Emitted when all possible environment variables have been collected. Use `appmetrics.monitor.getEnvironment()` to access the available environment variables.
 
 ### Event: 'gc'
 Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime.
@@ -458,9 +462,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.1.1
+1.1.3 development
 
 ## Release History
+`1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
 `1.1.1` - Fix node-gyp rebuild failure and don't force MQTT broker to on  
 `1.1.0` - Bug fixes, improved MongoDB data, updated dependencies, CPU watchdog feature  
 `1.0.13` - Express probe, strong-supervisor integration  

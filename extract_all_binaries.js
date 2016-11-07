@@ -38,8 +38,8 @@ var AGENTCORE_PLATFORMS = ['aix-ppc',
                            'linux-x64',
                            'win32-ia32',
                            'win32-x64'];
-var AGENTCORE_VERSION = "3.0.9";
-var APPMETRICS_VERSION = "1.1.1";
+var AGENTCORE_VERSION = "3.0.10";
+var APPMETRICS_VERSION = "1.1.3";
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, {flags : 'a'});
@@ -108,6 +108,9 @@ var getSupportedNodeVersionOrExit = function() {
 	}
 	if (process.version.indexOf('v6') === 0) {
 		return '6';
+	}
+	if (process.version.indexOf('v7') === 0) {
+		return '7';
 	}
 	console.log('Unsupported version ' + process.version + '. Exiting.');
 	process.exit(1);

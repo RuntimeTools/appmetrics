@@ -16,7 +16,7 @@
 
   "target_defaults": {
     "cflags_cc!": [ '-fno-exceptions' ],
-    "include_dirs": [ '<(srcdir)', '<(nandir)'],
+    "include_dirs": [ '<(srcdir)', '<(nandir)', '<(agentcoredir)/src'],
     "target_conditions": [
       ['_type=="shared_library"', {
         'product_prefix': '<(SHARED_LIB_PREFIX)',
