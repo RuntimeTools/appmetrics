@@ -209,10 +209,10 @@ Allows custom monitoring events to be added into the Node Application Metrics ag
 * `data` (Object) the data to be made available with the event. The object must not contain circular references, and by convention should contain a `time` value representing the milliseconds when the event occurred.
 
 ### appmetrics.writeSnapshot([filename],[callback])
-Dumps the v8 heap via 'heapdump'. For more information, see [the heapdump README][https://github.com/bnoordhuis/node-heapdump/blob/master/README.md]
+Dumps the v8 heap via 'heapdump'. For more information, see [the heapdump README](https://github.com/bnoordhuis/node-heapdump/blob/master/README.md)
 
 ### appmetrics.triggerReport()
-Provides a human-readable diagnostic summary via 'nodereport'. For more information, see [the nodereport README][https://github.com/nodejs/nodereport/blob/master/README.md]
+Provides a human-readable diagnostic summary via 'nodereport'. For more information, see [the nodereport README](https://github.com/nodejs/nodereport/blob/master/README.md)
 
 ### appmetrics.monitor()
 Creates a Node Application Metrics agent client instance. This can subsequently be used to get environment data and subscribe to data events. This function will start the appmetrics monitoring agent if it is not already running.
