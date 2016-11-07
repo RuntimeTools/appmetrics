@@ -57,7 +57,7 @@
 
   "targets": [
     {
-      "target_name": "omr-agentcore",
+      "target_name": "agentcore",
       "type": "none",
       "dependencies": [
         "<(agentcoredir)/binding.gyp:external",
@@ -128,7 +128,7 @@
       "target_name": "install",
       "type": "none",
       "dependencies": [
-        "omr-agentcore",
+        "agentcore",
         "appmetrics",
         "nodeenvplugin",
         "nodegcplugin",

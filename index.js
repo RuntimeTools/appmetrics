@@ -20,7 +20,7 @@ var os = require("os")
 //var serializer = require('./lib/serializer.js');
 var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
-var fs = require('fs');                
+var fs = require('fs');
 
 var agent = require("./appmetrics")
 // Set the plugin search path
@@ -266,13 +266,10 @@ module.exports.getJSONProfilingMode = function() {
     return jsonProfilingMode;
 }
 
-module.exports.triggerReport = function() {
+module.exports.triggerNodeReport = function() {
     return require('nodereport').triggerReport();
 }
 
-module.exports.writeSnapshot = function() {
+module.exports.writeHeapSnapshot = function() {
     return require('heapdump').writeSnapshot.apply(null, arguments);
 }
-
-
-
