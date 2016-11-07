@@ -7,10 +7,14 @@
   },
   "dependencies": {
     "nan": "2.x",
-    "tar": "2.x"
+    "tar": "2.x",
+    "nodereport": "1.x",
+    "heapdump": "0.x"
   },
   "bundleDependencies": [
-    "tar"
+    "tar",
+    "nodereport",
+    "heapdump"
   ],
   "devDependencies": {
     "node-gyp": "3.x",
