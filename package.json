@@ -6,7 +6,7 @@
     "node-hc": "bin/appmetrics-cli.js"
   },
   "dependencies": {
-    "heapdump": "0.x"
+    "heapdump": "0.x",
     "nan": "2.x",
     "nodereport": "1.x",
     "tar": "2.x"
