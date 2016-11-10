@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
 var path = require("path")
+var main_filename = path.dirname(require.main.filename);
 var module_dir = path.dirname(module.filename)
 var os = require("os")
-//var serializer = require('./lib/serializer.js');
 var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
 var fs = require('fs');
-
 var agent = require("./appmetrics")
 // Set the plugin search path
 agent.spath(path.join(module_dir, "plugins"))
-agent.start();
+// pass in the main file name for use in identifying the app in mqtt connection
+agent.start(main_filename);
 
 var hcAPI = require("./appmetrics-api.js");
 

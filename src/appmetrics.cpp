@@ -281,6 +281,11 @@ static bool initLoaderApi() {
 
 NAN_METHOD(start) {
 
+	Local<String> value = info[0]->ToString();
+	if (info.Length() > 0) {
+		loaderApi->setProperty("com.ibm.diagnostics.healthcenter.mqtt.application.id", toStdString(value).c_str());
+    }
+
 	if (!running) {
 		running = true;
 
@@ -476,7 +481,7 @@ NAN_METHOD(sendControlCommand) {
 
 
 NAN_METHOD(localConnect) {
-	
+		
 	if (!isMonitorApiValid()) {
 		Nan::ThrowError("Monitoring API is not initialized");
 		return;
