@@ -14,7 +14,7 @@
  * limitations under the License.
  *******************************************************************************/
 var path = require("path")
-var main_filename = path.dirname(require.main.filename);
+var main_filename = path.join(path.dirname(require.main.filename),path.basename(require.main.filename));
 var module_dir = path.dirname(module.filename)
 var os = require("os")
 var aspect = require('./lib/aspect.js');
