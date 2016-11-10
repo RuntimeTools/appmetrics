@@ -27,6 +27,7 @@ agent.spath(path.join(module_dir, "plugins"))
 agent.start(main_filename);
 
 var hcAPI = require("./appmetrics-api.js");
+var jsonProfilingMode = false;
 
 /*
  * Load module probes into probes array by searching the probes directory.
@@ -35,52 +36,52 @@ var hcAPI = require("./appmetrics-api.js");
  */
 var probes = [];
 var traceProbe;
-	
+    
 var dirPath = path.join(__dirname, 'probes'); 
 var files = fs.readdirSync(dirPath);
 files.forEach(function (fileName) {
-	var file = path.join(dirPath, fileName);
-	var probeModule = new (require(file))();
-	if (probeModule.name === 'trace') {
-		traceProbe = probeModule;
-	} else {
-		probes.push(probeModule);					
-	}
+    var file = path.join(dirPath, fileName);
+    var probeModule = new (require(file))();
+    if (probeModule.name === 'trace') {
+        traceProbe = probeModule;
+    } else {
+        probes.push(probeModule);                   
+    }
 });
 
 
 var latencyData = {
-	count: 0,
-	min: 1 * 60 * 1000,
-	max: 0,
-	total: 0
+    count: 0,
+    min: 1 * 60 * 1000,
+    max: 0,
+    total: 0
 }
 
 var latencyCheck = function() {
-	var start = process.hrtime();
-	setImmediate(function(start) {
-		var delta = process.hrtime(start);
-		var latency = (delta[0] * 1000) + (delta[1] / 1000000);
-		latencyData.count++;
-		latencyData.min = Math.min(latencyData.min, latency);
-		latencyData.max = Math.max(latencyData.max, latency);
-		latencyData.total = latencyData.total + latency;
-	}, start);
+    var start = process.hrtime();
+    setImmediate(function(start) {
+        var delta = process.hrtime(start);
+        var latency = (delta[0] * 1000) + (delta[1] / 1000000);
+        latencyData.count++;
+        latencyData.min = Math.min(latencyData.min, latency);
+        latencyData.max = Math.max(latencyData.max, latency);
+        latencyData.total = latencyData.total + latency;
+    }, start);
 }
 
 var latencyReport = function() {
-	if (latencyData.count == 0) return;
-	var latency = {
-		min:	latencyData.min,
-		max:	latencyData.max,
-		avg:	latencyData.total / latencyData.count
-	};
-	var avg = latencyData.total / latencyData.count;
-	exports.emit('eventloop', {time: Date.now(), latency: latency});
-	latencyData.count = 0;
-	latencyData.min = 1 * 60 * 1000;
-	latencyData.max = 0;
-	latencyData.total = 0;
+    if (latencyData.count == 0) return;
+    var latency = {
+        min:    latencyData.min,
+        max:    latencyData.max,
+        avg:    latencyData.total / latencyData.count
+    };
+    var avg = latencyData.total / latencyData.count;
+    exports.emit('eventloop', {time: Date.now(), latency: latency});
+    latencyData.count = 0;
+    latencyData.min = 1 * 60 * 1000;
+    latencyData.max = 0;
+    latencyData.total = 0;
 }
 
 var latencyCheckInterval = 500;
@@ -98,19 +99,19 @@ latencyReportLoop.unref();
 var data = {};
 
 aspect.after(module.__proto__, 'require', data, function(obj, methodName, args, context, ret) {
-	if (ret == null || ret.__ddProbeAttached__) {
-		return ret;
-	} else {
-		for (var i = 0; i < probes.length; i++) {
-			if (probes[i].name === args[0]) {
-				ret = probes[i].attach(args[0], ret, module.exports);
-			}
-			if (probes[i].name === 'trace') {
-				ret = probes[i].attach(args[0], ret);
-			}
-		}
-		return ret;
-	}
+    if (ret == null || ret.__ddProbeAttached__) {
+        return ret;
+    } else {
+        for (var i = 0; i < probes.length; i++) {
+            if (probes[i].name === args[0]) {
+                ret = probes[i].attach(args[0], ret, module.exports);
+            }
+            if (probes[i].name === 'trace') {
+                ret = probes[i].attach(args[0], ret);
+            }
+        }
+        return ret;
+    }
 });
 
 /*
@@ -120,35 +121,35 @@ aspect.after(module.__proto__, 'require', data, function(obj, methodName, args, 
  * Other requests are passed to any probe matching the name
  */
 module.exports.enable = function (data, config) {
-	switch (data) {
-		case 'profiling':
-			agent.sendControlCommand("profiling_node", "on,profiling_node_subsystem");
-			break;
-		case 'requests':
-			probes.forEach(function (probe) {
-				probe.enableRequests();
-			});
-			break;
-		case 'trace':
-			if (probes.indexOf(traceProbe) === -1) {
-				probes.push(traceProbe);
-			}
-			traceProbe.enable();
-			break;
-		case 'eventloop':
-			if (latencyRunning === true) break;
-			latencyRunning = true;
-			latencyCheckLoop = setInterval(latencyCheck, latencyCheckInterval);
-			latencyReportLoop = setInterval(latencyReport, latencyReportInterval);
-			break;
-		default:
-			probes.forEach(function (probe) {
-				if (probe.name == data) {
-					probe.enable();
-				}
-			});
-	}
-	if (config) module.exports.setConfig(data, config);
+    switch (data) {
+        case 'profiling':
+            agent.sendControlCommand("profiling_node", "on,profiling_node_subsystem");
+            break;
+        case 'requests':
+            probes.forEach(function (probe) {
+                probe.enableRequests();
+            });
+            break;
+        case 'trace':
+            if (probes.indexOf(traceProbe) === -1) {
+                probes.push(traceProbe);
+            }
+            traceProbe.enable();
+            break;
+        case 'eventloop':
+            if (latencyRunning === true) break;
+            latencyRunning = true;
+            latencyCheckLoop = setInterval(latencyCheck, latencyCheckInterval);
+            latencyReportLoop = setInterval(latencyReport, latencyReportInterval);
+            break;
+        default:
+            probes.forEach(function (probe) {
+                if (probe.name == data) {
+                    probe.enable();
+                }
+            });
+    }
+    if (config) module.exports.setConfig(data, config);
 };
 
 /*
@@ -158,28 +159,28 @@ module.exports.enable = function (data, config) {
  * Other requests are passed to any probe matching the name
  */
 module.exports.disable = function (data) {
-	switch (data) {
-	case 'profiling':
-		agent.sendControlCommand("profiling_node", "off,profiling_node_subsystem");
-		break;
-	case 'requests':
-		probes.forEach(function (probe) {
-			probe.disableRequests();
-		});
-		break;
-	case 'eventloop':
-		if (latencyRunning === false) break;
-		latencyRunning = false;
-		clearInterval(latencyCheckLoop);
-		clearInterval(latencyReportLoop);
-		break;
-	default:
-		probes.forEach(function (probe) {
-			if (probe.name == data) {
-				probe.disable();
-			}
-		});
-	}
+    switch (data) {
+    case 'profiling':
+        agent.sendControlCommand("profiling_node", "off,profiling_node_subsystem");
+        break;
+    case 'requests':
+        probes.forEach(function (probe) {
+            probe.disableRequests();
+        });
+        break;
+    case 'eventloop':
+        if (latencyRunning === false) break;
+        latencyRunning = false;
+        clearInterval(latencyCheckLoop);
+        clearInterval(latencyReportLoop);
+        break;
+    default:
+        probes.forEach(function (probe) {
+            if (probe.name == data) {
+                probe.disable();
+            }
+        });
+    }
 };
 
 /*
@@ -188,27 +189,31 @@ module.exports.disable = function (data) {
  * and if present use that to control the relevant probes directly.
  */
 module.exports.setConfig = function (data, config) {
-	switch (data) {
-	case 'requests':
-		request.setConfig(config);
-		/* check for exclude modules and disable those to be excluded */
-		if (typeof(config.excludeModules) !== 'undefined') {
-			config.excludeModules.forEach(function(module) {
-				probes.forEach(function (probe) {
-					if (probe.name === module) {
-						probe.disableRequests();
-					}
-				});
-			})
-		}
-		break;
-	default:
-		probes.forEach(function (probe) {
-			if (probe.name == data) {
-				probe.setConfig(config);
-			}
-		});
-	}
+    switch (data) {
+    case 'requests':
+        request.setConfig(config);
+        /* check for exclude modules and disable those to be excluded */
+        if (typeof(config.excludeModules) !== 'undefined') {
+            config.excludeModules.forEach(function(module) {
+                probes.forEach(function (probe) {
+                    if (probe.name === module) {
+                        probe.disableRequests();
+                    }
+                });
+            })
+        }
+        break;
+    case 'advancedProfiling':
+        if(typeof(config.threshold) !== 'undefined')
+            agent.sendControlCommand("profiling_node", config.threshold + ",profiling_node_threshold");
+        break;
+    default:
+        probes.forEach(function (probe) {
+            if (probe.name == data) {
+                probe.setConfig(config);
+            }
+        });
+    }
 };
 
 // Export any functions exported by the agent
@@ -220,21 +225,42 @@ for (var prop in agent) {
 
 // Export emit() API for JS data providers
 module.exports.emit = function (topic, data) {
-	if (typeof(this.api) !== 'undefined') {
-		// We have a listener, so fast path the notification to them
-		this.api.raiseLocalEvent(topic, data);
-	}
-	// Publish data that can be visualised in Health Center
-	if ((topic == 'http') || (topic == 'mqlight') || (topic == 'mongo') || (topic == 'mysql')) {
-		data = JSON.stringify(data);
-		agent.nativeEmit(topic, String(data));
-	}
+    if (typeof(this.api) !== 'undefined') {
+        // We have a listener, so fast path the notification to them
+        this.api.raiseLocalEvent(topic, data);
+    }
+    // Publish data that can be visualised in Health Center
+    if ((topic == 'http') || (topic == 'mqlight') || (topic == 'mongo') || (topic == 'mysql')) {
+        data = JSON.stringify(data);
+        agent.nativeEmit(topic, String(data));
+    }
 };
 
 // Export monitor() API for consuming data in-process
 module.exports.monitor = function() {
-	if (typeof(this.api) == 'undefined') {
-		this.api = hcAPI.getAPI(agent, module.exports);
-	}
-	return this.api;
+    if (typeof(this.api) == 'undefined') {
+        this.api = hcAPI.getAPI(agent, module.exports);
+    }
+    return this.api;
 };
+
+module.exports.lrtime = agent.lrtime;
+
+module.exports.configure = function(options) {
+    options = options || {};
+    this.strongTracerInstrument =
+      options.strongTracer ? options.strongTracer.tracer : null;
+};
+
+module.exports.transactionLink = function(linkName, callback) {
+  if (!this.strongTracerInstrument) return callback;
+  return this.strongTracerInstrument.transactionLink(linkName, callback);
+};
+
+module.exports.setJSONProfilingMode = function(val) {
+    jsonProfilingMode = val;
+}
+
+module.exports.getJSONProfilingMode = function() {
+    return jsonProfilingMode;
+}

@@ -17,6 +17,8 @@ Node Application Metrics provides the following built-in data collection sources
  Memory             | Process and system memory usage
  GC                 | Node/V8 garbage collection statistics
  Event Loop         | Event loop latency information
+ Express            | Express 4.x Web Framework application request monitoring
+ Loop               | Event loop timing metrics
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
  socket.io          | WebSocket data sent and received by the application
@@ -177,14 +179,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `express`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `express`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -192,13 +194,14 @@ Set the configuration to be applied to a specific data type. The configuration a
 * `type` (String) the type of event to apply the configuration to.
 * `config` (Object) key value pairs of configurations to be applied to the specified event. The available configuration options are as follows:
 
- Source     | Configuration            | Effect
-:-----------|:-------------------------|:-----------------------------
- `http`     | `filters`                | (Array) of URL filter Objects consisting of: 
-            |                          | `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
-            |                          | `to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.             
- `requests` | `excludeModules`         | (Array) of String names of modules to exclude from request tracking.
- `trace`    | `includeModules`         | (Array) of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
+ Source              | Configuration            | Effect
+:--------------------|:-------------------------|:-----------------------------
+ `http`              | `filters`                | (Array) of URL filter Objects consisting of: 
+                     |                          | `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
+                     |                          | `to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.             
+ `requests`          | `excludeModules`         | (Array) of String names of modules to exclude from request tracking.
+ `trace`             | `includeModules`         | (Array) of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
+ `advancedProfiling` | `threshold`              | (Number) millisecond run time of an event loop cycle that will trigger profiling
 
 ### appmetrics.emit(`type`, `data`)
 Allows custom monitoring events to be added into the Node Application Metrics agent.
@@ -209,7 +212,7 @@ Allows custom monitoring events to be added into the Node Application Metrics ag
 Creates a Node Application Metrics agent client instance. This can subsequently be used to get environment data and subscribe to data events. This function will start the appmetrics monitoring agent if it is not already running.
 
 ### appmetrics.monitor.getEnvironment()
-Requests an object containing all of the available environment information for the running application.
+Requests an object containing all of the available environment information for the running application. This will not contain all possible environment information until an 'initialized' event has been received.
 
 ### Event: 'cpu'
 Emitted when a CPU monitoring sample is taken.
@@ -229,6 +232,9 @@ Emitted when a memory monitoring sample is taken.
     * `private` (Number) the amount of memory used by the Node.js application that cannot be shared with other processes, in bytes.
     * `physical` (Number) the amount of RAM used by the Node.js application in bytes.
 
+### Event: 'initialized'
+Emitted when all possible environment variables have been collected. Use `appmetrics.monitor.getEnvironment()` to access the available environment variables.
+
 ### Event: 'gc'
 Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime.
 * `data` (Object) the data from the GC sample:
@@ -245,6 +251,14 @@ Emitted every 5 seconds, summarising sample based information of the event loop 
     * `latency.min` (Number) the shortest sampled latency, in milliseconds.
     * `latency.max` (Number) the longest sampled latency, in milliseconds.
     * `latency.avg` (Number) the average sampled latency, in milliseconds.
+
+### Event: 'loop'
+Emitted every 60 seconds, summarising event tick information in time interval
+* `data` (Object) the data from the event loop sample:
+    * `loop.count` (Number) the number of event loop ticks in the last interval.
+    * `loop.minimum` (Number) the shortest (i.e. fastest) tick in milliseconds.
+    * `loop.maximum` (Number) the longest (slowest) tick in milliseconds.
+    * `loop.average` (Number) the average tick time in milliseconds.
 
 ### Event: 'profiling'
 Emitted when a profiling sample is available from the underlying V8 runtime.
@@ -287,6 +301,8 @@ Emitted when a MongoDB query is made using the `mongodb` module.
     * `time` (Number) the milliseconds when the MongoDB query was made. This can be converted to a Date using `new Date(data.time)`
     * `query` (String) the query made of the MongoDB database.
     * `duration` (Number) the time taken for the MongoDB query to be responded to in ms.
+    * `method` (String) the executed method for the query, such as find, update.
+    * `collection` (String) the MongoDB collection name.
 
 ### Event: 'mqtt'
 Emitted when a MQTT message is sent or received.
@@ -386,6 +402,14 @@ Emitted when a PostgreSQL query is made to the `pg` module.
     * `query` (String) the query made of the PostgreSQL database.
     * `duration` (Number) the time taken for the PostgreSQL query to be responded to in ms.
 
+### Event: 'express'
+Emitted when an express request finishes its response. Note. appmetrics has only been tested with express 4.x, support is not guaranteed for lower versions.
+* `data` (Object) the data from the Express request/response.
+    * `method` (String) The HTTP method for this request.
+    * `url` (String) The target URL for this request.
+    * `statusCode` (Number) The HTTP status code of the response.
+    * `duration` (Number) The time in ms between receiving the request and sending the response.
+
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
 
@@ -438,9 +462,13 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.0.12
+1.1.3 development
 
 ## Release History
+`1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
+`1.1.1` - Fix node-gyp rebuild failure and don't force MQTT broker to on  
+`1.1.0` - Bug fixes, improved MongoDB data, updated dependencies, CPU watchdog feature  
+`1.0.13` - Express probe, strong-supervisor integration  
 `1.0.12` - Appmetrics now fully open sourced under Apache 2.0 license  
 `1.0.11` - Bug fixes    
 `1.0.10` - Bug fixes  

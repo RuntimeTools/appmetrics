@@ -17,7 +17,7 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var am = require('appmetrics');
+var am = require('../');
 
 //Riak methods can have different arguments.
 //Methods which only have a 'callback' parameter
@@ -65,7 +65,14 @@ RiakProbe.prototype.attach = function(name, target) {
 
                 //If the method contains a callback, finish probing when the callback returns
                 if (aspect.findCallbackArg(methodArgs) != undefined) {
-                    aspect.aroundCallback(methodArgs, probeData, function(target,args, probeData) {
+                    aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
+
+                        //Call the transaction link with a name and the callback for strong trace
+                        var callbackPosition = aspect.findCallbackArg(methodArgs);
+                        if (typeof(callbackPosition) != 'undefined') {
+                            aspect.strongTraceTransactionLink('basho-riak-client: ', methodName, methodArgs[callbackPosition]);
+                        }
+
                         that.metricsProbeEnd(probeData, methodName, methodArgs);
                         that.requestProbeEnd(probeData, methodName, methodArgs);
                     });

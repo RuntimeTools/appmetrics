@@ -24,6 +24,17 @@ tap.tearDown(function(){
 	app.endRun();
 });
 
+tap.test('lrtime is a function or undefined', function(t) {
+  var lrtime = app.appmetrics.lrtime;
+
+  if (lrtime) {
+    t.doesNotThrow(lrtime, 'callable, not just present');
+  } else {
+    t.notEqual(process.platform, 'linux', 'lrtime mandatory on linux');
+  }
+  t.end();
+});
+
 var completedTests = {}; //Stores which tests have been run, ensures single run per test
 
 monitor.on('cpu', function(data) {
@@ -300,25 +311,31 @@ function runNodeEnvTests(nodeEnvData, t) {
 	// NOTE(ignasbol): max.heap.size included as well as part of 1.0.4
 	if (nodeEnvData['heap.size.limit']) {
 		t.ok(isInteger(nodeEnvData['heap.size.limit']),
-			   "heap.size.limit is an integer");
+			   "heap.size.limit is an integer (value was: " + nodeEnvData['heap.size.limit'] + ")");
 			   
 		t.ok(parseInt(nodeEnvData['heap.size.limit']) > 0,
 			   'heap.size.limit is positive');
 		t.ok(isInteger(nodeEnvData['max.semi.space.size']),
-			   "max.semi.space.size is an integer");
+			   "max.semi.space.size is an integer (value was: " + nodeEnvData['max.semi.space.size'] + ")");
 		t.ok(parseInt(nodeEnvData['max.semi.space.size']) > 0,
 			   "max.semi.size is positive");
 
 		t.ok(isInteger(nodeEnvData['max.old.space.size']),
-			   "max.old.space.size is an integer");
+			   "max.old.space.size is an integer (value was: " + nodeEnvData['max.old.space.size'] + ")");
 		t.ok(parseInt(nodeEnvData['max.old.space.size']) > 0,
 			   "max.old.space.size is positive");
 
-		t.ok(4*parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']) === parseInt(nodeEnvData['heap.size.limit']),
+		var nodeVersion = Number(process.version.match(/^v(\d+\.\d+)/)[1]);
+		if(nodeVersion >= 6.5) { // issue 283
+			t.ok(2*parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']) === parseInt(nodeEnvData['heap.size.limit']),
 			   'Values for max.old.space.size and max.semi.space.size match heap.size.limit');
+		} else {
+			t.ok(4*parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']) === parseInt(nodeEnvData['heap.size.limit']),
+			   'Values for max.old.space.size and max.semi.space.size match heap.size.limit');
+		}
 
 		t.ok(isInteger(nodeEnvData['max.heap.size']),
-			   "max.heap.size is an integer");
+			   "max.heap.size is an integer (value was: " + nodeEnvData['max.heap.size'] + ")");
 
 		t.ok(parseInt(nodeEnvData['max.heap.size']) > 0,
 			   "max.heap.size is positive");

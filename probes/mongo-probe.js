@@ -17,39 +17,50 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var am = require('appmetrics');
+var am = require('../');
 
 function MongoProbe() {
-	Probe.call(this, 'mongodb');
+    Probe.call(this, 'mongodb');
 }
 util.inherits(MongoProbe, Probe);
 
 MongoProbe.prototype.aspectCollectionMethod = function(coll, method) {
-	var that = this;
+    var that = this;
     var req;
     aspect.around( coll, method,
         function(target, methodName, methodArgs, probeData) {
-			that.metricsProbeStart(probeData, target, method, methodArgs);
-			that.requestProbeStart(probeData, target, method, methodArgs);
+            var collectionName = target.collectionName;
+
+            that.metricsProbeStart(probeData, target, method, methodArgs);
+            that.requestProbeStart(probeData, target, method, methodArgs);
             if (aspect.findCallbackArg(methodArgs) != undefined) {
                 aspect.aroundCallback( methodArgs, probeData, function(target,args, probeData){
-                	that.metricsProbeEnd(probeData, method, methodArgs);
-                	that.requestProbeEnd(probeData, method, methodArgs);
+
+                    //Call the transaction link with a name and the callback for strong trace
+                    var callbackPosition = aspect.findCallbackArg(methodArgs);
+                    if (typeof(callbackPosition) != 'undefined') {
+                        aspect.strongTraceTransactionLink('mongodb: ', methodName, methodArgs[callbackPosition]);
+                    }
+
+                    that.metricsProbeEnd(probeData, collectionName, method, methodArgs);
+                    that.requestProbeEnd(probeData, method, methodArgs);
                 } );
             } 
-    	},
+        },
         function(target, methodName, methodArgs, probeData, rc) {
+            var collectionName = target.collectionName;
+
             if (aspect.findCallbackArg(methodArgs) == undefined) {
-            	that.metricsProbeEnd(probeData, method, methodArgs);
-            	that.requestProbeEnd(probeData, method, methodArgs);
+                that.metricsProbeEnd(probeData, collectionName, method, methodArgs);
+                that.requestProbeEnd(probeData, method, methodArgs);
             }
             return rc;
-    	}
+        }
     );
 }
 
 MongoProbe.prototype.attach = function(name, target) {
-	var that = this;
+    var that = this;
     if( name != "mongodb" ) return target;
     if(target.__ddProbeAttached__) return target;
     target.__ddProbeAttached__ = true;
@@ -58,18 +69,20 @@ MongoProbe.prototype.attach = function(name, target) {
     var method = 'find';
     aspect.around( coll, "find",
         function(target, methodName, methodArgs, probeData){
-    		that.metricsProbeStart(probeData, target, method, methodArgs);
-    		that.requestProbeStart(probeData, target, method, methodArgs);
-    	},
+            that.metricsProbeStart(probeData, target, method, methodArgs);
+            that.requestProbeStart(probeData, target, method, methodArgs);
+        },
         function(target, methodName, findArgs, probeData, rc){
+            var collectionName = target.collectionName;
+
             if (rc == undefined) {
-            	that.metricsProbeEnd(probeData, method, findArgs);
-            	that.requestProbeEnd(probeData, method, findArgs);
+                that.metricsProbeEnd(probeData, collectionName, method, findArgs);
+                that.requestProbeEnd(probeData, method, findArgs);
             } else {
                 aspect.before( rc, "toArray", function(target, methodName, args, context){
                     aspect.aroundCallback( args, probeData, function(target, args, probeData){
-                    	that.metricsProbeEnd(probeData, method, findArgs);
-                    	that.requestProbeEnd(probeData, method, findArgs);
+                        that.metricsProbeEnd(probeData, collectionName, method, findArgs);
+                        that.requestProbeEnd(probeData, method, findArgs);
                     });
                 });
             }
@@ -94,24 +107,27 @@ MongoProbe.prototype.attach = function(name, target) {
  * Lightweight metrics probe for MongoDB queries
  * 
  * These provide:
- * 		time:		time event started
- * 		query:		the query itself
- * 		duration:	the time for the request to respond
+ *         time:        time event started
+ *         query:        the query itself
+ *         duration:    the time for the request to respond
+ *         method:      the executed method for the query, such as find, update
+ *         collection:  the mongo collection
  */
-MongoProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-	probeData.timer.stop();
-	am.emit('mongo', {time: probeData.timer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: probeData.timer.timeDelta});
+MongoProbe.prototype.metricsEnd = function(probeData, collectionName, method, methodArgs) {
+    probeData.timer.stop();
+    am.emit('mongo', {time: probeData.timer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: probeData.timer.timeDelta,
+        method: method, collection: collectionName});
 };
 
 /*
  * Heavyweight request probes for MongoDB queries
  */
 MongoProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
-	probeData.req = request.startRequest( 'DB', method + "("+target.collectionName+")", false, probeData.timer );
+    probeData.req = request.startRequest( 'DB', method + "("+target.collectionName+")", false, probeData.timer );
 };
 
 MongoProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-	probeData.req.stop( { query: JSON.stringify(methodArgs[0]) } );
+    probeData.req.stop( { query: JSON.stringify(methodArgs[0]) } );
 };
 
 module.exports = MongoProbe;

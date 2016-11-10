@@ -16,7 +16,7 @@
 
   "target_defaults": {
     "cflags_cc!": [ '-fno-exceptions' ],
-    "include_dirs": [ '<(srcdir)', '<(nandir)'],
+    "include_dirs": [ '<(srcdir)', '<(nandir)', '<(agentcoredir)/src'],
     "target_conditions": [
       ['_type=="shared_library"', {
         'product_prefix': '<(SHARED_LIB_PREFIX)',
@@ -57,7 +57,7 @@
 
   "targets": [
     {
-      "target_name": "agentcore",
+      "target_name": "omr-agentcore",
       "type": "none",
       "dependencies": [
         "<(agentcoredir)/binding.gyp:external",
@@ -67,6 +67,7 @@
       "target_name": "appmetrics",
       "sources": [
         "<(INTERMEDIATE_DIR)/appmetrics.cpp",
+        "<(srcdir)/objecttracker.cpp",
       ],
       'variables': {
         'appmetricslevel%':'<(appmetricsversion)<(build_id)',
@@ -94,10 +95,25 @@
       ],
     },
     {
+      "target_name": "nodeheapplugin",
+      "type": "shared_library",
+      "sources": [
+        "<(srcdir)/plugins/node/heap/nodeheapplugin.cpp",
+      ],
+    },
+
+    {
       "target_name": "nodeprofplugin",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/prof/nodeprofplugin.cpp",
+      ],
+    },
+    {
+      "target_name": "nodeloopplugin",
+      "type": "shared_library",
+      "sources": [
+        "<(srcdir)/plugins/node/loop/nodeloopplugin.cpp",
       ],
     },
     {
@@ -112,12 +128,12 @@
       "target_name": "install",
       "type": "none",
       "dependencies": [
-        "agentcore",
+        "omr-agentcore",
         "appmetrics",
         "nodeenvplugin",
         "nodegcplugin",
         "nodeprofplugin",
-        
+        "nodeloopplugin",
      ],
       "copies": [
         {
@@ -131,13 +147,15 @@
           "destination": "./plugins",
           "files": [
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeenvplugin<(SHARED_LIB_SUFFIX)",
+            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeheapplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeprofplugin<(SHARED_LIB_SUFFIX)",
+            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeloopplugin<(SHARED_LIB_SUFFIX)",
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)cpuplugin<(SHARED_LIB_SUFFIX)",
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)envplugin<(SHARED_LIB_SUFFIX)",
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcapiplugin<(SHARED_LIB_SUFFIX)",            
+            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcapiplugin<(SHARED_LIB_SUFFIX)",
           ],
         },
       ],

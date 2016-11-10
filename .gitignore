@@ -5,3 +5,4 @@ libagentcore.so
 licenses
 node_modules
 plugins
+.project

@@ -17,7 +17,7 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var am = require('appmetrics');
+var am = require('../');
 
 function MySqlProbe() {
 	Probe.call(this, 'mysql');
@@ -38,6 +38,13 @@ MySqlProbe.prototype.attach = function(name, target) {
         		that.requestProbeStart(probeData, method, methodArgs);
             	if (aspect.findCallbackArg(methodArgs) != undefined) {
             		aspect.aroundCallback( methodArgs, probeData, function(target,args){
+
+                        //Call the transaction link with a name and the callback for strong trace
+                        var callbackPosition = aspect.findCallbackArg(methodArgs);
+                        if (typeof(callbackPosition) != 'undefined') {
+                            aspect.strongTraceTransactionLink('mysql: ', method, methodArgs[callbackPosition]);
+                        }
+                        
             			that.metricsProbeEnd(probeData, method, methodArgs);
             			that.requestProbeEnd(probeData, method, methodArgs);
             		});
