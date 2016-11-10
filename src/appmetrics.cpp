@@ -489,19 +489,10 @@ NAN_METHOD(sendControlCommand) {
 
 
 NAN_METHOD(localConnect) {
-<<<<<<< HEAD
-		
-	if (!isMonitorApiValid()) {
-		Nan::ThrowError("Monitoring API is not initialized");
-		return;
-	}
-=======
-    
     if (!isMonitorApiValid()) {
         Nan::ThrowError("Monitoring API is not initialized");
         return;
     }
->>>>>>> 6b4443a36534d4d6bc091b8064783cfa01c4dacd
 
     if (!info[0]->IsFunction()) {
         return Nan::ThrowError("First argument must be a callback function");
