@@ -20,6 +20,7 @@ var os = require("os")
 var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
 var fs = require('fs');
+var nodereport = require('nodereport');
 var agent = require("./appmetrics")
 // Set the plugin search path
 agent.spath(path.join(module_dir, "plugins"))
@@ -264,3 +265,12 @@ module.exports.setJSONProfilingMode = function(val) {
 module.exports.getJSONProfilingMode = function() {
     return jsonProfilingMode;
 }
+
+module.exports.nodereport = function() {
+    return nodereport;
+}
+
+module.exports.writeHeapSnapshot = function() {
+    return require('heapdump').writeSnapshot.apply(null, arguments);
+}
+
