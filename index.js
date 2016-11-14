@@ -264,3 +264,11 @@ module.exports.setJSONProfilingMode = function(val) {
 module.exports.getJSONProfilingMode = function() {
     return jsonProfilingMode;
 }
+
+module.exports.triggerNodeReport = function() {
+    return require('nodereport').triggerReport();
+}
+
+module.exports.writeHeapSnapshot = function() {
+    return require('heapdump').writeSnapshot.apply(null, arguments);
+}
