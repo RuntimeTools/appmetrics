@@ -105,7 +105,10 @@ It also adds the `node-hc` command to another directory tied to your Node.js SDK
 
 <a name="config"></a>
 ### Configuring Node Application Metrics
-Node Application Metrics comes with a configuration file inside the [module installation directory](#install) (`.../node_modules/appmetrics/appmetrics.properties`). This is used to configure connection options, logging and data source options. 
+
+Node Application Metrics can be configured in two ways, by using the configuration file described below or via a call to configure(Object).
+
+Node Application Metrics comes with a configuration file inside the [module installation directory](#install) (`.../node_modules/appmetrics/appmetrics.properties`). This can be used to configure connection options, logging and data source options. 
 
 Node Application Metrics will attempt to load `appmetrics.properties` from one of the following locations (in order):
 
@@ -162,7 +165,7 @@ monitoring.on('cpu', function (cpu) {
 
 ## Health Center Eclipse IDE client
 ### Connecting to the client
-Connecting to the Health Center client requires the additional installation of a MQTT broker. The Node Application Metrics agent sends data to the MQTT broker specified in the `appmetrics.properties` file. Installation and configuration documentation for the Health Center client is available from the [Health Center documentation in IBM Knowledge Center][2].
+Connecting to the Health Center client requires the additional installation of a MQTT broker. The Node Application Metrics agent sends data to the MQTT broker specified in the `appmetrics.properties` file or set via a call to configure(Obect). Installation and configuration documentation for the Health Center client is available from the [Health Center documentation in IBM Knowledge Center][2].
 
 Note that both the API and the Health Center client can be used at the same time and will receive the same data. Use of the API requires a local install and application modification (see *[Modifying your application to use the local installation](#run-local)*).
 
@@ -170,6 +173,18 @@ Further information regarding the use of the Health Center client with Node Appl
 
 <a name="api-doc"></a>
 ## API Documentation
+### appmetrics.configure(options)
+Sets various properties on the appmetrics monitoring agent. If the agent has already been started, this function does nothing. 
+* `options'(Object) key value pairs of properties and values to be set on the monitoring agent. 
+
+Property name              | Property value            | Effect
+:--------------------|:-------------------------|:-----------------------------
+ `applicationID`              | `string`      | Specifies a unique identifier for the mqtt connection             
+ `mqtt`          | `[off|on]`         | Specifies whether the monitoring agent sends data to the mqtt broker
+ `mqttHost`             | `host name`         | Specifies the host name of the mqtt broker
+ `mqttPort` | `port number`              | Specifies the port number of the mqtt broker
+ `profiling` | `[off|on]`              | Specifies whether method profiling data will be captured. The default value is off
+ 
 
 ### appmetrics.start()
 Starts the appmetrics monitoring agent. If the agent is already running this function does nothing.
