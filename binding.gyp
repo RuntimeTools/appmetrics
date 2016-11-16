@@ -67,6 +67,7 @@
       "target_name": "appmetrics",
       "sources": [
         "<(INTERMEDIATE_DIR)/appmetrics.cpp",
+        "<(srcdir)/headlessutils.cpp",
         "<(srcdir)/objecttracker.cpp",
       ],
       'variables': {
@@ -123,7 +124,6 @@
         "<(srcdir)/plugins/node/gc/nodegcplugin.cpp",
       ],
     },
-
     {
       "target_name": "install",
       "type": "none",
@@ -156,6 +156,7 @@
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)envplugin<(SHARED_LIB_SUFFIX)",
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcapiplugin<(SHARED_LIB_SUFFIX)",
+            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
           ],
         },
       ],

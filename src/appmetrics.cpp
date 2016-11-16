@@ -23,6 +23,7 @@
 #include "uv.h"
 #include "ibmras/monitoring/AgentExtensions.h"
 #include "plugins/node/prof/watchdog.h"
+#include "headlessutils.h"
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 #include "objecttracker.hpp"
@@ -295,6 +296,8 @@ NAN_METHOD(start) {
         loaderApi->init();
 
         loaderApi->start();
+	
+	headless::start();
     }
     if (!initMonitorApi()) {
         loaderApi->logMessage(warning, "Failed to initialize monitoring API");
@@ -309,6 +312,7 @@ NAN_METHOD(stop) {
         running = false;
         loaderApi->stop();
         loaderApi->shutdown();
+	headless::stop();
     }
 
 }
@@ -482,6 +486,13 @@ NAN_METHOD(sendControlCommand) {
 
 }
 
+NAN_METHOD(setHeadlessZipFunction) {
+    if (!info[0]->IsFunction()) {
+        return Nan::ThrowError("First argument must be a function");
+    }
+    Nan::Callback *callback = new Nan::Callback(info[0].As<Function>());
+    headless::setZipFunction(callback);
+}
 
 NAN_METHOD(localConnect) {
     
@@ -629,6 +640,10 @@ static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     return false;
 }
 
+void zip(const char* outputDir) {
+	headless::zip(outputDir);
+}
+
 void init(Local<Object> exports, Local<Object> module) {
     /*
      * Throw an error if appmetrics has already been loaded globally
@@ -655,6 +670,7 @@ void init(Local<Object> exports, Local<Object> module) {
     exports->Set(Nan::New<String>("localConnect").ToLocalChecked(), Nan::New<FunctionTemplate>(localConnect)->GetFunction());
     exports->Set(Nan::New<String>("nativeEmit").ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmit)->GetFunction());
     exports->Set(Nan::New<String>("sendControlCommand").ToLocalChecked(), Nan::New<FunctionTemplate>(sendControlCommand)->GetFunction());
+    exports->Set(Nan::New<String>("setHeadlessZipFunction").ToLocalChecked(), Nan::New<FunctionTemplate>(setHeadlessZipFunction)->GetFunction());
 #if defined(_LINUX)
     exports->Set(Nan::New<String>("lrtime").ToLocalChecked(), Nan::New<FunctionTemplate>(lrtime)->GetFunction());
 #endif
@@ -674,6 +690,7 @@ void init(Local<Object> exports, Local<Object> module) {
     if (!loadProperties()) {
         loaderApi->logMessage(warning, "Failed to load appmetrics.properties file");
     }
+    loaderApi->registerZipFunction(&zip);
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
     loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());

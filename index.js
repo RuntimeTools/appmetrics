@@ -23,6 +23,7 @@ var request = require('./lib/request.js');
 var fs = require('fs');
 
 var agent = require("./appmetrics")
+var headlessZip = require("./headless_zip.js")
 // Set the plugin search path
 agent.spath(path.join(module_dir, "plugins"))
 agent.start();
@@ -222,6 +223,7 @@ for (var prop in agent) {
     if (typeof agent[prop] == "function") {
         module.exports[prop] = agent[prop]
     }
+    agent.setHeadlessZipFunction(headlessZip.headlessZip);
 }
 
 // Export emit() API for JS data providers
