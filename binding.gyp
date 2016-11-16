@@ -124,6 +124,7 @@
         "<(srcdir)/plugins/node/gc/nodegcplugin.cpp",
       ],
     },
+
     {
       "target_name": "install",
       "type": "none",
