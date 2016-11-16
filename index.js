@@ -259,9 +259,9 @@ module.exports.configure = function(options) {
       options.strongTracer ? options.strongTracer.tracer : null;
     for (var key in options) {
       if(propertyMappings[key]) {
-        agent.setOptions(propertyMappings[key], options[key]);
+        agent.setOption(propertyMappings[key], options[key]);
       } else {
-        agent.setOptions(key, options[key]);
+        agent.setOption(key, options[key]);
       }
     }
 
@@ -283,7 +283,7 @@ module.exports.getJSONProfilingMode = function() {
 }
 
 module.exports.start = function () {
-  agent.setOptions(propertyMappings['applicationID'], main_filename);
+  agent.setOption(propertyMappings['applicationID'], main_filename);
   agent.start();
 }
 module.exports.nodereport = function() {
