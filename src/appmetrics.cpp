@@ -299,6 +299,24 @@ NAN_METHOD(setOption) {
     }
 }
 
+// set the property to given value (called from index.js)
+NAN_METHOD(getOption) {
+	if (info.Length() > 0) {
+		//Nan::NanScope();
+		Local<String> value = info[0]->ToString();
+		printf(toStdString(value).c_str());
+		std::string property = loaderApi->getProperty(toStdString(value).c_str());
+		printf("*** HEADLESS OUTPUT PROPERTY ="); 
+		printf(property.c_str());
+		printf(" ***\n");
+		v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str());
+		info.GetReturnValue().Set<v8::String>(v8str);
+  		//Nan::NanReturnValue(NanNew<String>(loaderApi->getProperty(toStdString(value).c_str())));
+	} else {
+		loaderApi->logMessage(warning, "Incorrect number of parameters passed to getOption");
+	}
+}
+
 NAN_METHOD(start) {
 	if (!running) {
 		running = true;
@@ -659,6 +677,7 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Set exported functions
      */
+    exports->Set(Nan::New<String>("getOption").ToLocalChecked(), Nan::New<FunctionTemplate>(getOption)->GetFunction());
     exports->Set(Nan::New<String>("setOption").ToLocalChecked(), Nan::New<FunctionTemplate>(setOption)->GetFunction());
     exports->Set(Nan::New<String>("start").ToLocalChecked(), Nan::New<FunctionTemplate>(start)->GetFunction());
     exports->Set(Nan::New<String>("spath").ToLocalChecked(), Nan::New<FunctionTemplate>(spath)->GetFunction());

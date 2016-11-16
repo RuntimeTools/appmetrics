@@ -27,7 +27,6 @@ function onError(err) {
 }
 
 function deleteDir(directory) {
-	console.log('Deleting directory: ' + directory)
 	// Delete temporary directory
 	if(fs.existsSync(directory)) {
 		fs.readdirSync(directory).forEach(function(file,index){
@@ -65,7 +64,6 @@ module.exports.headlessZip = function headlessZip(dirToZip) {
 	} else {
 		outputFileName = 'nodeappmetrics' + timestamp() + '.hcd'
 	}
-	console.log("zipping: " + dirToZip + " to file: " + outputFileName + "\n")
 
 	var packer = tar.Pack({ fromBase: true })
 		.on('error', onError)

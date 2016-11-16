@@ -249,7 +249,11 @@ module.exports.monitor = function() {
 
     if (typeof(this.api) == 'undefined') {
       agent.start();
-        this.api = hcAPI.getAPI(agent, module.exports);
+      this.api = hcAPI.getAPI(agent, module.exports);
+      var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
+      if(headlessOutputDir) {
+        headlessZip.setHeadlessOutputDir(headlessOutputDir);
+      }
     }
     return this.api;
 };
@@ -287,8 +291,13 @@ module.exports.getJSONProfilingMode = function() {
 
 module.exports.start = function () {
   agent.setOption(propertyMappings['applicationID'], main_filename);
+  var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
+  if(headlessOutputDir) {
+    headlessZip.setHeadlessOutputDir(headlessOutputDir);
+  }
   agent.start();
 }
+
 module.exports.nodereport = function() {
     return nodereport;
 }
