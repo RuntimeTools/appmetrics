@@ -20,6 +20,7 @@ var os = require("os")
 var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
 var fs = require('fs');
+var nodereport = require('nodereport');
 var agent = require("./appmetrics")
 
 agent.spath(path.join(module_dir, "plugins"))
@@ -285,5 +286,10 @@ module.exports.start = function () {
   agent.setOptions(propertyMappings['applicationID'], main_filename);
   agent.start();
 }
+module.exports.nodereport = function() {
+    return nodereport;
+}
 
-
+module.exports.writeHeapSnapshot = function() {
+    return require('heapdump').writeSnapshot.apply(null, arguments);
+}
