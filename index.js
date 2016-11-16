@@ -21,13 +21,17 @@ var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
 var fs = require('fs');
 var agent = require("./appmetrics")
-// Set the plugin search path
+
 agent.spath(path.join(module_dir, "plugins"))
-// pass in the main file name for use in identifying the app in mqtt connection
-agent.start(main_filename);
+
 
 var hcAPI = require("./appmetrics-api.js");
 var jsonProfilingMode = false;
+var propertyMappings = {'mqttPort':'com.ibm.diagnostics.healthcenter.mqtt.broker.port',
+    'mqttHost':'com.ibm.diagnostics.healthcenter.mqtt.broker.host',
+    'applicationID':'com.ibm.diagnostics.healthcenter.mqtt.application.id',
+    'mqtt':'com.ibm.diagnostics.healthcenter.mqtt',
+    'profiling':'com.ibm.diagnostics.healthcenter.data.profiling'};
 
 /*
  * Load module probes into probes array by searching the probes directory.
@@ -238,7 +242,9 @@ module.exports.emit = function (topic, data) {
 
 // Export monitor() API for consuming data in-process
 module.exports.monitor = function() {
+
     if (typeof(this.api) == 'undefined') {
+      agent.start();
         this.api = hcAPI.getAPI(agent, module.exports);
     }
     return this.api;
@@ -250,6 +256,16 @@ module.exports.configure = function(options) {
     options = options || {};
     this.strongTracerInstrument =
       options.strongTracer ? options.strongTracer.tracer : null;
+    for (var key in options) {
+      if(propertyMappings[key]) {
+        agent.setOptions(propertyMappings[key], options[key]);
+      } else {
+        agent.setOptions(key, options[key]);
+      }
+    }
+
+    // If user has not specified application ID, use main filename
+    main_filename = options.applicationID ? options.applicationID : main_filename;
 };
 
 module.exports.transactionLink = function(linkName, callback) {
@@ -264,3 +280,10 @@ module.exports.setJSONProfilingMode = function(val) {
 module.exports.getJSONProfilingMode = function() {
     return jsonProfilingMode;
 }
+
+module.exports.start = function () {
+  agent.setOptions(propertyMappings['applicationID'], main_filename);
+  agent.start();
+}
+
+

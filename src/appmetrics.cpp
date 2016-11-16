@@ -287,13 +287,18 @@ static bool initLoaderApi() {
     return (loaderApi != NULL);
 }
 
-NAN_METHOD(start) {
-
-	Local<String> value = info[0]->ToString();
-	if (info.Length() > 0) {
-		loaderApi->setProperty("com.ibm.diagnostics.healthcenter.mqtt.application.id", toStdString(value).c_str());
+// set the property to given value (called from index.js)
+NAN_METHOD(setOption) {
+	if (info.Length() > 1) {
+		Local<String> value = info[0]->ToString();
+		Local<String> value1 = info[1]->ToString();
+		loaderApi->setProperty(toStdString(value).c_str(),toStdString(value1).c_str());
+    } else {
+        loaderApi->logMessage(warning, "Incorrect number of parameters passed to setOption");
     }
+}
 
+NAN_METHOD(start) {
 	if (!running) {
 		running = true;
 
@@ -584,20 +589,6 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
     return false;
 }
 
-// Check if this appmetrics agent native module is loaded via the node-hc command.
-// This is actually checking if this module has appmetrics/launcher.js as it's grandparent.
-// For reference:
-// A locally loaded module would have ancestry like:
-//   ...
-//   ^-- some_module_that_does_require('appmetrics') (grandparent)
-//       ^--- .../node_modules/appmetrics/index.js (parent)
-//            ^-- .../node_modules/appmetrics/appmetrics.node (this)
-//
-// A globally loaded module would have ancestry like:
-//   .../node_modules/appmetrics/launcher.js (grandparent)
-//   ^--- .../node_modules/appmetrics/index.js (parent)
-//        ^-- .../node_modules/appmetrics/appmetrics.node (this)
-//
 static bool isGlobalAgent(Local<Object> module) {
     Nan::HandleScope scope;
     Local<Value> parent = module->Get(Nan::New<String>("parent").ToLocalChecked());
@@ -653,6 +644,7 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Set exported functions
      */
+    exports->Set(Nan::New<String>("setOption").ToLocalChecked(), Nan::New<FunctionTemplate>(setOption)->GetFunction());
     exports->Set(Nan::New<String>("start").ToLocalChecked(), Nan::New<FunctionTemplate>(start)->GetFunction());
     exports->Set(Nan::New<String>("spath").ToLocalChecked(), Nan::New<FunctionTemplate>(spath)->GetFunction());
     exports->Set(Nan::New<String>("stop").ToLocalChecked(), Nan::New<FunctionTemplate>(stop)->GetFunction());
