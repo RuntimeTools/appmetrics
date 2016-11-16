@@ -208,6 +208,12 @@ Allows custom monitoring events to be added into the Node Application Metrics ag
 * `type` (String) the name you wish to use for the data. A subsequent event of that type will be raised, allowing callbacks to be registered for it.
 * `data` (Object) the data to be made available with the event. The object must not contain circular references, and by convention should contain a `time` value representing the milliseconds when the event occurred.
 
+### appmetrics.writeHeapSnapshot([filename],[callback])
+Dumps the v8 heap via `heapdump`. For more information, see [the heapdump README](https://github.com/bnoordhuis/node-heapdump/blob/master/README.md)
+
+### appmetrics.nodereport()
+Provides an instance of `nodereport` that can be used to obtain a human-readable diagnostic summary. For more information, see [the nodereport README](https://github.com/nodejs/nodereport/blob/master/README.md)
+
 ### appmetrics.monitor()
 Creates a Node Application Metrics agent client instance. This can subsequently be used to get environment data and subscribe to data events. This function will start the appmetrics monitoring agent if it is not already running.
 
@@ -462,9 +468,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-1.1.2 development
+1.1.3 development
 
 ## Release History
+`1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
 `1.1.1` - Fix node-gyp rebuild failure and don't force MQTT broker to on  
 `1.1.0` - Bug fixes, improved MongoDB data, updated dependencies, CPU watchdog feature  
 `1.0.13` - Express probe, strong-supervisor integration  

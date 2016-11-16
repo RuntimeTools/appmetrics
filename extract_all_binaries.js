@@ -39,7 +39,7 @@ var AGENTCORE_PLATFORMS = ['aix-ppc',
                            'win32-ia32',
                            'win32-x64'];
 var AGENTCORE_VERSION = "3.0.10";
-var APPMETRICS_VERSION = "1.1.2";
+var APPMETRICS_VERSION = "1.1.3";
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, {flags : 'a'});
