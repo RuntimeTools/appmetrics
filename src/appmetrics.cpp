@@ -299,19 +299,13 @@ NAN_METHOD(setOption) {
     }
 }
 
-// set the property to given value (called from index.js)
+// get property
 NAN_METHOD(getOption) {
 	if (info.Length() > 0) {
-		//Nan::NanScope();
 		Local<String> value = info[0]->ToString();
-		printf(toStdString(value).c_str());
 		std::string property = loaderApi->getProperty(toStdString(value).c_str());
-		printf("*** HEADLESS OUTPUT PROPERTY ="); 
-		printf(property.c_str());
-		printf(" ***\n");
 		v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str());
 		info.GetReturnValue().Set<v8::String>(v8str);
-  		//Nan::NanReturnValue(NanNew<String>(loaderApi->getProperty(toStdString(value).c_str())));
 	} else {
 		loaderApi->logMessage(warning, "Incorrect number of parameters passed to getOption");
 	}
