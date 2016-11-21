@@ -14,11 +14,9 @@
  * limitations under the License.
  *******************************************************************************/
 
-var fstream = require('fstream')
-var tar = require('tar')
-var zlib = require('zlib')
 var fs = require('fs')
 var path = require('path')
+var JSZip = require("jszip");
 
 var dirToWriteTo;
 
@@ -43,7 +41,7 @@ module.exports.setHeadlessOutputDir = function setHeadlessOutputDir(dir) {
 
 function timestamp() {
 	var date = new Date(Date.now())
-	var timestamp = pad(date.getDate().toString()) + pad(date.getMonth().toString()) + date.getFullYear().toString().substr(2,3) + '_'
+	var timestamp = pad(date.getDate().toString()) + pad((date.getMonth() + 1).toString()) + date.getFullYear().toString().substr(2,3) + '_'
 		+ pad(date.getHours().toString()) + pad(date.getMinutes().toString()) + pad(date.getSeconds().toString()) + '_'
 		+ process.pid
 	return timestamp
@@ -65,19 +63,20 @@ module.exports.headlessZip = function headlessZip(dirToZip) {
 		outputFileName = 'nodeappmetrics' + timestamp() + '.hcd'
 	}
 
-	var packer = tar.Pack({ fromBase: true })
-		.on('error', onError)
-	var zipper = zlib.Gzip()
-	var writer = fstream.Writer({'path': outputFileName})
-		.on('error', onError)
-		.on('close', function() {
-			deleteDir(dirToZip) 
-		})
-
-	fstream.Reader({'path': dirToZip, 'type': 'Directory'})
-  		.on('error', onError)
-		.pipe(packer)
-		.pipe(zipper)
-		.pipe(writer)
+	var zip = new JSZip();
+	fs.readdir(dirToZip, function(error, files) {
+		if (error) {
+      			onError(error)
+      			return
+    		}
+		for (var i = 0, len = files.length; i < len; i++) {
+      			zip.file(files[i], fs.readFileSync(path.join(dirToZip, files[i])), {compression : "DEFLATE"})
+		}
 	
+		zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
+		.pipe(fs.createWriteStream(outputFileName))
+		.on('finish', function () {
+			deleteDir(dirToZip)
+		})
+	})
 } 
