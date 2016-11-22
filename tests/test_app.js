@@ -46,10 +46,13 @@ if (timeout) {
 //If being run from other test, start the agent and make available
 if (agent) {
 	appmetrics = require('../');
-	appmetrics.start();
 
 	// Make agent visible for other script files.
 	module.exports.appmetrics = appmetrics;
+}
+
+module.exports.start = function start() {
+	appmetrics.start();
 }
 
 //Write a string to memory on timer

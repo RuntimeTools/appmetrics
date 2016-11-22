@@ -15,6 +15,7 @@
  *******************************************************************************/
  
 var app = require('./test_app');
+app.start();
 var monitor = app.appmetrics.monitor();
 app.appmetrics.enable("profiling");
 
