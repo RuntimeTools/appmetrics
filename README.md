@@ -477,9 +477,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-2.0 development
+1.2.0
 
 ## Release History
+`1.2.0` - Add headless data collection capability and option configuration via api.  
 `1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
 `1.1.1` - Fix node-gyp rebuild failure and don't force MQTT broker to on  
 `1.1.0` - Bug fixes, improved MongoDB data, updated dependencies, CPU watchdog feature  
