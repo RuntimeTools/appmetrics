@@ -26,7 +26,9 @@ var request = require('./lib/request.js');
 var fs = require('fs');
 var nodereport = require('nodereport');
 var agent = require("./appmetrics")
+var headlessZip = require("./headless_zip.js")
 
+// Set the plugin search path
 agent.spath(path.join(module_dir, "plugins"))
 
 
@@ -230,6 +232,7 @@ for (var prop in agent) {
     if (typeof agent[prop] == "function") {
         module.exports[prop] = agent[prop]
     }
+    agent.setHeadlessZipFunction(headlessZip.headlessZip);
 }
 
 // Export emit() API for JS data providers
@@ -250,7 +253,11 @@ module.exports.monitor = function() {
 
     if (typeof(this.api) == 'undefined') {
       agent.start();
-        this.api = hcAPI.getAPI(agent, module.exports);
+      this.api = hcAPI.getAPI(agent, module.exports);
+      var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
+      if(headlessOutputDir) {
+        headlessZip.setHeadlessOutputDir(headlessOutputDir);
+      }
     }
     return this.api;
 };
@@ -288,8 +295,13 @@ module.exports.getJSONProfilingMode = function() {
 
 module.exports.start = function () {
   agent.setOption(propertyMappings['applicationID'], main_filename);
+  var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
+  if(headlessOutputDir) {
+    headlessZip.setHeadlessOutputDir(headlessOutputDir);
+  }
   agent.start();
 }
+
 module.exports.nodereport = function() {
     return nodereport;
 }

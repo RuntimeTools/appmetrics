@@ -23,6 +23,7 @@
 #include "uv.h"
 #include "ibmras/monitoring/AgentExtensions.h"
 #include "plugins/node/prof/watchdog.h"
+#include "headlessutils.h"
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 #include "objecttracker.hpp"
@@ -298,6 +299,18 @@ NAN_METHOD(setOption) {
     }
 }
 
+// get property
+NAN_METHOD(getOption) {
+	if (info.Length() > 0) {
+		Local<String> value = info[0]->ToString();
+		std::string property = loaderApi->getProperty(toStdString(value).c_str());
+		v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str());
+		info.GetReturnValue().Set<v8::String>(v8str);
+	} else {
+		loaderApi->logMessage(warning, "Incorrect number of parameters passed to getOption");
+	}
+}
+
 NAN_METHOD(start) {
 	if (!running) {
 		running = true;
@@ -305,6 +318,8 @@ NAN_METHOD(start) {
         loaderApi->init();
 
         loaderApi->start();
+	
+	headless::start();
     }
     if (!initMonitorApi()) {
         loaderApi->logMessage(warning, "Failed to initialize monitoring API");
@@ -319,6 +334,7 @@ NAN_METHOD(stop) {
         running = false;
         loaderApi->stop();
         loaderApi->shutdown();
+	headless::stop();
     }
 
 }
@@ -492,6 +508,13 @@ NAN_METHOD(sendControlCommand) {
 
 }
 
+NAN_METHOD(setHeadlessZipFunction) {
+    if (!info[0]->IsFunction()) {
+        return Nan::ThrowError("First argument must be a function");
+    }
+    Nan::Callback *callback = new Nan::Callback(info[0].As<Function>());
+    headless::setZipFunction(callback);
+}
 
 NAN_METHOD(localConnect) {
     if (!isMonitorApiValid()) {
@@ -624,6 +647,10 @@ static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     return false;
 }
 
+void zip(const char* outputDir) {
+	headless::zip(outputDir);
+}
+
 void init(Local<Object> exports, Local<Object> module) {
     /*
      * Throw an error if appmetrics has already been loaded globally
@@ -644,6 +671,7 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Set exported functions
      */
+    exports->Set(Nan::New<String>("getOption").ToLocalChecked(), Nan::New<FunctionTemplate>(getOption)->GetFunction());
     exports->Set(Nan::New<String>("setOption").ToLocalChecked(), Nan::New<FunctionTemplate>(setOption)->GetFunction());
     exports->Set(Nan::New<String>("start").ToLocalChecked(), Nan::New<FunctionTemplate>(start)->GetFunction());
     exports->Set(Nan::New<String>("spath").ToLocalChecked(), Nan::New<FunctionTemplate>(spath)->GetFunction());
@@ -651,6 +679,7 @@ void init(Local<Object> exports, Local<Object> module) {
     exports->Set(Nan::New<String>("localConnect").ToLocalChecked(), Nan::New<FunctionTemplate>(localConnect)->GetFunction());
     exports->Set(Nan::New<String>("nativeEmit").ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmit)->GetFunction());
     exports->Set(Nan::New<String>("sendControlCommand").ToLocalChecked(), Nan::New<FunctionTemplate>(sendControlCommand)->GetFunction());
+    exports->Set(Nan::New<String>("setHeadlessZipFunction").ToLocalChecked(), Nan::New<FunctionTemplate>(setHeadlessZipFunction)->GetFunction());
 #if defined(_LINUX)
     exports->Set(Nan::New<String>("lrtime").ToLocalChecked(), Nan::New<FunctionTemplate>(lrtime)->GetFunction());
 #endif
@@ -670,6 +699,7 @@ void init(Local<Object> exports, Local<Object> module) {
     if (!loadProperties()) {
         loaderApi->logMessage(warning, "Failed to load appmetrics.properties file");
     }
+    loaderApi->registerZipFunction(&zip);
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
     loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());
