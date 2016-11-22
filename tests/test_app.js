@@ -65,9 +65,6 @@ var ih = setInterval(function() {
 
 
 module.exports.endRun = function(){
-	//console.log("end Run");
 	appmetrics.stop();
-	//console.log("appmetrics stopped");
 	clearInterval(ih);
-	//console.log("interval cleared");
 }
