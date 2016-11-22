@@ -46,10 +46,13 @@ if (timeout) {
 //If being run from other test, start the agent and make available
 if (agent) {
 	appmetrics = require('../');
-	appmetrics.start();
 
 	// Make agent visible for other script files.
 	module.exports.appmetrics = appmetrics;
+}
+
+module.exports.start = function start() {
+	appmetrics.start();
 }
 
 //Write a string to memory on timer
@@ -62,6 +65,9 @@ var ih = setInterval(function() {
 
 
 module.exports.endRun = function(){
+	//console.log("end Run");
 	appmetrics.stop();
+	//console.log("appmetrics stopped");
 	clearInterval(ih);
+	//console.log("interval cleared");
 }
