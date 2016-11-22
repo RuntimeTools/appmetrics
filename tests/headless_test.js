@@ -24,7 +24,6 @@ var outputDir = path.join(process.cwd(), "headlesstestoutput" + Date.now());
 appmetrics.configure({'com.ibm.diagnostics.healthcenter.headless':'on', 
 	'com.ibm.diagnostics.healthcenter.headless.run.duration':'1',
 	'com.ibm.diagnostics.healthcenter.headless.run.number.of.runs':'1',
-	'com.ibm.diagnostics.healthcenter.logging.Agent':'debug',
 	'com.ibm.diagnostics.healthcenter.headless.output.directory': outputDir });
 app.start();
 
