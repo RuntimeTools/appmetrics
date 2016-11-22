@@ -19,6 +19,8 @@ var path = require('path')
 var JSZip = require("jszip");
 
 var dirToWriteTo;
+var filesToKeep = 10;
+var filesWritten = [];
 
 function onError(err) {
 	console.error('Headless Zip: an error occurred:', err)
@@ -35,8 +37,16 @@ function deleteDir(directory) {
 	}
 }
 
+function deleteFile(filename) {
+	fs.unlink(filename)
+}
+
 module.exports.setHeadlessOutputDir = function setHeadlessOutputDir(dir) {
 	dirToWriteTo = dir;
+}
+
+module.exports.setFilesToKeep = function setFilesToKeep(numFiles) {
+	filesToKeep = numFiles;
 }
 
 function timestamp() {
@@ -63,14 +73,20 @@ module.exports.headlessZip = function headlessZip(dirToZip) {
 		outputFileName = 'nodeappmetrics' + timestamp() + '.hcd'
 	}
 
+	filesWritten.push(outputFileName)
+	if(filesWritten.length > filesToKeep) {
+		var earliest = filesWritten.shift()
+		deleteFile(earliest)
+	}
+
 	var zip = new JSZip();
 	fs.readdir(dirToZip, function(error, files) {
 		if (error) {
-      			onError(error)
-      			return
-    		}
+				onError(error)
+				return
+		}
 		for (var i = 0, len = files.length; i < len; i++) {
-      			zip.file(files[i], fs.readFileSync(path.join(dirToZip, files[i])), {compression : "DEFLATE"})
+			zip.file(files[i], fs.readFileSync(path.join(dirToZip, files[i])), {compression : "DEFLATE"})
 		}
 	
 		zip.generateNodeStream({type:'nodebuffer',streamFiles:true})
