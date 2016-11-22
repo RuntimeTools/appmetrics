@@ -258,6 +258,10 @@ module.exports.monitor = function() {
       if(headlessOutputDir) {
         headlessZip.setHeadlessOutputDir(headlessOutputDir);
       }
+      var headlessFilesToKeep = agent.getOption('com.ibm.diagnostics.healthcenter.headless.files.to.keep');
+      if(headlessFilesToKeep && !isNaN(headlessFilesToKeep) && headlessFilesToKeep > 0) {
+	headlessZip.setFilesToKeep(headlessFilesToKeep);
+      }
     }
     return this.api;
 };
