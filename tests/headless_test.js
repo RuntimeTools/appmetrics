@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright 2015 IBM Corp.
+ * Copyright 2016 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,22 +58,18 @@ tap.test('Headless mode should produce a .hcd file', function(t) {
 });
 
 function cleanUp() {
-  console.log("cleanup");
   app.endRun();
   deleteDir(outputDir);
 }
 
 function deleteDir(directory) {
   // Delete temporary directory
-  console.log("deleting " + directory);
   if(fs.existsSync(directory)) {
     fs.readdirSync(directory).forEach(function(file,index){
       var fileName = path.join(directory, file)
-      console.log("deleting " + file);
       fs.unlinkSync(fileName)
     })
     fs.rmdirSync(directory);
-    console.log("deleted " + directory);
   }
 }
 
