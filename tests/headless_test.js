@@ -42,8 +42,8 @@ tap.test('Headless mode should produce a .hcd file', function(t) {
         return
       }
       for (var i = 0, len = files.length; i < len; i++) {
-        if(files[i].endsWith('.hcd')) {
-	  t.pass(".hcd file found");
+        if(/(\w+)\.hcd/.test(files[i].toString())) {
+	  t.pass(files[i] + " HCD file found");
           t.end();
           cleanUp();
           return;

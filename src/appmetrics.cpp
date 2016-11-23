@@ -304,7 +304,11 @@ NAN_METHOD(getOption) {
 	if (info.Length() > 0) {
 		Local<String> value = info[0]->ToString();
 		std::string property = loaderApi->getProperty(toStdString(value).c_str());
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 		v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str());
+#else
+		v8::Local<v8::String> v8str = v8::String::New(property.c_str(), strlen(property.c_str()));
+#endif
 		info.GetReturnValue().Set<v8::String>(v8str);
 	} else {
 		loaderApi->logMessage(warning, "Incorrect number of parameters passed to getOption");
