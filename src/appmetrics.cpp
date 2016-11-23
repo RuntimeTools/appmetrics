@@ -335,10 +335,8 @@ NAN_METHOD(start) {
 NAN_METHOD(stop) {
 
     if (running) {
-	printf("running");
         running = false;
         loaderApi->stop();
-	printf("stopped loaderApi");
         loaderApi->shutdown();
 	headless::stop();
     }

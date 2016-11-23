@@ -58,9 +58,7 @@ void start() {
 }
 
 void stop() {
-	printf(">> stop");
 	uv_close((uv_handle_t*) &async_zip, NULL);
-	printf("<< stop");
 }
 
 void zip(const char* dir) {
