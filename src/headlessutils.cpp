@@ -17,6 +17,7 @@
 
 #include "headlessutils.h"
 #include <iostream>
+#include <string>
 #include "nan.h"
 #include "uv.h"
 
@@ -31,7 +32,7 @@ void setZipFunction(Nan::Callback* zF) {
 uv_async_t async_zip;
 
 uv_loop_t* loop;
-const char* outputDir;
+std::string outputDir;
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 void asyncfunc(uv_async_t* handle) {
@@ -41,9 +42,9 @@ void asyncfunc(uv_async_t* handle, int status) {
 	Nan::HandleScope scope;
  	v8::Isolate* isolate = v8::Isolate::GetCurrent();
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-	v8::Local<v8::Value> argv[] = { v8::String::NewFromUtf8(isolate, outputDir) };
+	v8::Local<v8::Value> argv[] = { v8::String::NewFromUtf8(isolate, outputDir.c_str()) };
 #else
-	v8::Local<v8::Value> argv[] = { v8::String::New(outputDir,  strlen(outputDir)) };
+	v8::Local<v8::Value> argv[] = { v8::String::New(outputDir.c_str(),  strlen(outputDir.c_str())) };
 #endif
   	headless::zipFunction->Call(1, argv);
 }
@@ -63,7 +64,7 @@ void stop() {
 }
 
 void zip(const char* dir) {
-	outputDir = dir;
+	outputDir = std::string(dir);
 	uv_async_send(&async_zip);
 }
 
