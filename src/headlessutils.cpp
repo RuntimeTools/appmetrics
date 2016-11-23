@@ -33,10 +33,18 @@ uv_async_t async_zip;
 uv_loop_t* loop;
 const char* outputDir;
 
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 void asyncfunc(uv_async_t* handle) {
+#else
+void asyncfunc(uv_async_t* handle, int status) {
+#endif
 	Nan::HandleScope scope;
  	v8::Isolate* isolate = v8::Isolate::GetCurrent();
-  	v8::Local<v8::Value> argv[] = { v8::String::NewFromUtf8(isolate, outputDir) };
+#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+	v8::Local<v8::Value> argv[] = { v8::String::NewFromUtf8(isolate, outputDir) };
+#else
+	v8::Local<v8::Value> argv[] = { v8::String::New(outputDir,  strlen(outputDir)) };
+#endif
   	headless::zipFunction->Call(1, argv);
 }
 
@@ -49,7 +57,9 @@ void start() {
 }
 
 void stop() {
+	printf(">> stop");
 	uv_close((uv_handle_t*) &async_zip, NULL);
+	printf("<< stop");
 }
 
 void zip(const char* dir) {
