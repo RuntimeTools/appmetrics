@@ -55,6 +55,7 @@ const char* headlessRecVersion = "1.0";
 void start() {
 	loop = uv_default_loop();
 	uv_async_init(loop, &async_zip, asyncfunc);
+	uv_unref((uv_handle_t*) &async_zip);
 }
 
 void stop() {
