@@ -8,7 +8,7 @@
   "dependencies": {
     "nan": "2.x",
     "tar": "2.x",
-    "jszip": "3.0.x"
+    "jszip": "2.5.x"
   },
   "bundleDependencies": [
     "tar"
