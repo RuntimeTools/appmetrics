@@ -251,16 +251,8 @@ module.exports.emit = function (topic, data) {
 module.exports.monitor = function() {
 
     if (typeof(this.api) == 'undefined') {
-      agent.start();
+      this.start();
       this.api = hcAPI.getAPI(agent, module.exports);
-      var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
-      if(headlessOutputDir) {
-        headlessZip.setHeadlessOutputDir(headlessOutputDir);
-      }
-      var headlessFilesToKeep = agent.getOption('com.ibm.diagnostics.healthcenter.headless.files.to.keep');
-      if(headlessFilesToKeep && !isNaN(headlessFilesToKeep) && headlessFilesToKeep > 0) {
-	headlessZip.setFilesToKeep(headlessFilesToKeep);
-      }
     }
     return this.api;
 };
@@ -296,11 +288,20 @@ module.exports.getJSONProfilingMode = function() {
     return jsonProfilingMode;
 }
 
-module.exports.start = function () {
+module.exports.start = function start () {
   agent.setOption(propertyMappings['applicationID'], main_filename);
   var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
   if(headlessOutputDir) {
     headlessZip.setHeadlessOutputDir(headlessOutputDir);
   }
+  var headlessFilesToKeep = agent.getOption('com.ibm.diagnostics.healthcenter.headless.files.to.keep');
+  if(headlessFilesToKeep && !isNaN(headlessFilesToKeep) && headlessFilesToKeep > 0) {
+    headlessZip.setFilesToKeep(headlessFilesToKeep);
+  }
+  var am = this;
   agent.start();
+  process.on('exit', function () {
+    am.stop();
+  });
 }
+
