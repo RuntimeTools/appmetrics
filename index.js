@@ -301,7 +301,11 @@ module.exports.start = function start () {
   var am = this;
   agent.start();
   process.on('exit', function () {
+    var headlessMode = agent.getOption('com.ibm.diagnostics.healthcenter.headless');
     am.stop();
+    if(headlessMode == 'on') {
+      headlessZip.tryZipOnExit();
+    }
   });
 }
 
