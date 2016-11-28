@@ -79,13 +79,15 @@ module.exports.headlessZip = function headlessZip(dirToZip) {
 		deleteFile(earliest)
 	}
 
-	var zip = new JSZip();
-	var files = fs.readdirSync(dirToZip)
-	for (var i = 0, len = files.length; i < len; i++) {
-		zip.file(files[i], fs.readFileSync(path.join(dirToZip, files[i])), {compression : "DEFLATE"})
+	if(fs.existsSync(dirToZip)) {
+		var zip = new JSZip();
+		var files = fs.readdirSync(dirToZip)
+		for (var i = 0, len = files.length; i < len; i++) {
+			zip.file(files[i], fs.readFileSync(path.join(dirToZip, files[i])), {compression : "DEFLATE"})
+		}
+		fs.writeFileSync(outputFileName, zip.generate({type:"nodebuffer", compression:'DEFLATE'}));
+		deleteDir(dirToZip)
 	}
-	fs.writeFileSync(outputFileName, zip.generate({type:"nodebuffer", compression:'DEFLATE'}));
-	deleteDir(dirToZip)
 }
 
 module.exports.tryZipOnExit = function tryZipOnExit() {
@@ -93,13 +95,15 @@ module.exports.tryZipOnExit = function tryZipOnExit() {
 	if(!outputDir) {
 		ouputDir = process.cwd().toString()
 	}
-	var files = fs.readdirSync(outputDir);
-	// Search for temporary output directory using pattern matching
-	for (var i = 0, len = files.length; i < len; i++) {
-		if(/tmp_(\w+)/.test(files[i].toString())) {
-			var dirToZip = path.join(outputDir, files[i])
-			this.headlessZip(dirToZip)
-			return;
+	if(fs.existsSync(outputDir)) {
+		var files = fs.readdirSync(outputDir);
+		// Search for temporary output directory using pattern matching
+		for (var i = 0, len = files.length; i < len; i++) {
+			if(/tmp_(\w+)/.test(files[i].toString())) {
+				var dirToZip = path.join(outputDir, files[i])
+				this.headlessZip(dirToZip)
+				return;
+			}
 		}
 	}
 }
