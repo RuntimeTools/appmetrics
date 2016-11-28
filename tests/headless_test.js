@@ -57,8 +57,8 @@ tap.test('Headless mode should produce a .hcd file', function(t) {
 });
 
 function cleanUp() {
-  app.endRun();
   deleteDir(outputDir);
+  app.endRun();
 }
 
 function deleteDir(directory) {
