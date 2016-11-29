@@ -250,6 +250,8 @@ static void* getMonitorApiFunction(std::string pluginPath, std::string functionN
     std::string libname = "hcapiplugin.dll";
 #elif defined(__MACH__) || defined(__APPLE__)
     std::string libname = "libhcapiplugin.dylib";
+#elif defined (__AIX__) || defined(AIX)
+    std::string libname = "libhcapiplugin.a";
 #else
     std::string libname = "libhcapiplugin.so";
 #endif
@@ -277,6 +279,8 @@ static bool initLoaderApi() {
     std::string libname = "agentcore.dll";
 #elif defined(__MACH__) || defined(__APPLE__)
     std::string libname = "libagentcore.dylib";
+#elif defined (__AIX__) || defined(AIX)
+    std::string libname = "libagentcore.a";
 #else
     std::string libname = "libagentcore.so";
 #endif
