@@ -299,6 +299,12 @@ module.exports.getJSONProfilingMode = function() {
 
 module.exports.start = function start () {
   agent.setOption(propertyMappings['applicationID'], main_filename);
+  for(var property in headlessPropertyMappings) {
+    var prop = agent.getOption(property);
+    if(prop) {
+      agent.setOption(headlessPropertyMappings[property], prop);
+    }
+  }
   var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
   if(headlessOutputDir) {
     headlessZip.setHeadlessOutputDir(headlessOutputDir);
@@ -306,12 +312,6 @@ module.exports.start = function start () {
   var headlessFilesToKeep = agent.getOption('com.ibm.diagnostics.healthcenter.headless.files.to.keep');
   if(headlessFilesToKeep && !isNaN(headlessFilesToKeep) && headlessFilesToKeep > 0) {
     headlessZip.setFilesToKeep(headlessFilesToKeep);
-  }
-  for(var property in headlessPropertyMappings) {
-    var prop = agent.getOption(property);
-    if(prop) {
-      agent.setOption(headlessPropertyMappings[property], prop);
-    }
   }
   var am = this;
   agent.start();
