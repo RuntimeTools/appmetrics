@@ -38,6 +38,15 @@ var propertyMappings = {'mqttPort':'com.ibm.diagnostics.healthcenter.mqtt.broker
     'applicationID':'com.ibm.diagnostics.healthcenter.mqtt.application.id',
     'mqtt':'com.ibm.diagnostics.healthcenter.mqtt',
     'profiling':'com.ibm.diagnostics.healthcenter.data.profiling'};
+var headlessPropertyMappings = {
+'appmetrics.file.collection':'com.ibm.diagnostics.healthcenter.headless',
+'appmetrics.file.max.size':'com.ibm.diagnostics.healthcenter.headless.files.max.size',
+'appmetrics.file.run.duration':'com.ibm.diagnostics.healthcenter.headless.run.duration',
+'appmetrics.file.delay.start':'com.ibm.diagnostics.healthcenter.headless.delay.start',
+'appmetrics.file.run.pause.duration':'com.ibm.diagnostics.healthcenter.headless.run.pause.duration',
+'appmetrics.file.run.number.of.runs':'com.ibm.diagnostics.healthcenter.headless.run.number.of.runs',
+'appmetrics.file.files.to.keep':'com.ibm.diagnostics.healthcenter.headless.files.to.keep',
+'appmetrics.file.output.directory':'com.ibm.diagnostics.healthcenter.headless.output.directory'};
 
 /*
  * Load module probes into probes array by searching the probes directory.
@@ -297,6 +306,12 @@ module.exports.start = function start () {
   var headlessFilesToKeep = agent.getOption('com.ibm.diagnostics.healthcenter.headless.files.to.keep');
   if(headlessFilesToKeep && !isNaN(headlessFilesToKeep) && headlessFilesToKeep > 0) {
     headlessZip.setFilesToKeep(headlessFilesToKeep);
+  }
+  for(var property in headlessPropertyMappings) {
+    var prop = agent.getOption(property);
+    if(prop) {
+      agent.setOption(headlessPropertyMappings[property], prop);
+    }
   }
   var am = this;
   agent.start();
