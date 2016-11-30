@@ -14,7 +14,7 @@
 
 #include "node.h"  // Picks up BUILDING_NODE_EXTENSION on Windows, see #30.
 
-#include "compat-inl.h"
+#include "../plugins/node/prof/compat-inl.h"
 #include "uv.h"
 #include "v8-profiler.h"
 #include "v8.h"
