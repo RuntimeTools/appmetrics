@@ -147,9 +147,13 @@ var monitoring = appmetrics.monitor();
 ```
 The call to `appmetrics.monitor()` starts the data collection agent, making the data available via the API and to the Heath Center client via MQTT.
 
-You should start your application using the `node` command as usual (**not** `node-hc`). 
+You should start your application using the `node` command as usual (**not** `node-hc`).
 
-You can then use the monitoring object to register callbacks and request information about the application:
+You must call `require('appmetrics');` *before* the require statements for any npm modules you want to monitor. Appmetrics must be initialized first so that it can instrument modules for monitoring as they are loaded. If this is a problem due to the structure of your application you can require the module on the node command line with -r to make sure it is pre-loaded:
+
+`> node -r appmetrics myapp.js`
+
+Once you have loaded appmetrics you can then use the monitoring object to register callbacks and request information about the application:
 ```js
 monitoring.on('initialized', function (env) {
     env = monitoring.getEnvironment();
