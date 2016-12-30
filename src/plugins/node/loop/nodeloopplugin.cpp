@@ -140,30 +140,31 @@ extern "C" {
 	}
 
 	NODELOOPPLUGIN_DECL int ibmras_monitoring_plugin_init(const char* properties) {
+		uv_check_init(uv_default_loop(), &check_handle);
+		uv_unref(reinterpret_cast<uv_handle_t*>(&check_handle));
+
+		plugin::timer = new uv_timer_t;
+		uv_timer_init(uv_default_loop(), plugin::timer);
+		uv_unref((uv_handle_t*) plugin::timer); // don't prevent event loop exit
+
 		return 0;
 	}
 
 	NODELOOPPLUGIN_DECL int ibmras_monitoring_plugin_start() {
 		plugin::api.logMessage(fine, "[loop_node] Starting");
 
-		uv_check_init(uv_default_loop(), &check_handle);
 		uv_check_start(&check_handle, reinterpret_cast<uv_check_cb>(OnCheck));
-		uv_unref(reinterpret_cast<uv_handle_t*>(&check_handle));
+		uv_timer_start(plugin::timer, GetLoopInformation, LOOP_INTERVAL, LOOP_INTERVAL);
 
-
-        plugin::timer = new uv_timer_t;
-		uv_timer_init(uv_default_loop(), plugin::timer);
-		uv_unref((uv_handle_t*) plugin::timer); // don't prevent event loop exit
-
-        uv_timer_start(plugin::timer, GetLoopInformation, LOOP_INTERVAL, LOOP_INTERVAL);
-
-        return 0;
+		return 0;
 	}
 
 	NODELOOPPLUGIN_DECL int ibmras_monitoring_plugin_stop() {
 		plugin::api.logMessage(fine, "[loop_node] Stopping");
-        uv_timer_stop(plugin::timer);
-		uv_close((uv_handle_t*) plugin::timer, cleanupHandle);
+
+		uv_timer_stop(plugin::timer);
+		uv_check_stop(&check_handle);
+
 		return 0;
 	}
 
