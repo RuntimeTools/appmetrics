@@ -68,13 +68,17 @@ static void GetLoopInformation(uv_timer_s *data) {
 #else
 static void GetLoopInformation(uv_timer_s *data, int status) {
 #endif
+	double mean = std::numeric_limits<double>::infinity();
+	if (num != 0) {
+		mean = sum / num;
+	}
 
 	std::stringstream contentss;
 	contentss << "NodeLoopData";
 	contentss << "," << min;
 	contentss << "," << max;
 	contentss << "," << num;
-	contentss << "," << sum / num;
+	contentss << "," << mean;
 	contentss << '\n';
 
 	std::string content = contentss.str();
