@@ -90,7 +90,7 @@ ExpressProbe.prototype.metricsEnd = function(probeData, methodName, methodArgs) 
 };
 
 // Heavyweight request probes for express queries 
-ExpressProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
+ExpressProbe.prototype.requestStart = function (probeData, method, methodArgs) {
   probeData.req = request.startRequest( 'HTTP', 'request', false, probeData.timer );
   probeData.req.setContext({url: methodArgs[0]});
 };
