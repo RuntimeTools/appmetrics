@@ -63,7 +63,18 @@
         "<(agentcoredir)/binding.gyp:external",
       ],
     },
-      {
+    {
+      'target_name': 'heapdump',
+      'win_delay_load_hook': 'false',
+      'sources': [
+        'src/heapdump/compat-inl.h',
+        'src/heapdump/compat.h',
+        'src/heapdump/heapdump-posix.h',
+        'src/heapdump/heapdump-win32.h',
+        'src/heapdump/heapdump.cc',
+      ],
+    },
+    {
       "target_name": "appmetrics",
       "sources": [
         "<(INTERMEDIATE_DIR)/appmetrics.cpp",
@@ -130,6 +141,7 @@
       "type": "none",
       "dependencies": [
         "omr-agentcore",
+        "heapdump",
         "appmetrics",
         "nodeenvplugin",
         "nodegcplugin",
@@ -141,6 +153,7 @@
           "destination": "./",
           "files": [
             "<(PRODUCT_DIR)/appmetrics.node",
+            "<(PRODUCT_DIR)/heapdump.node",
             "<(agentcoredir)/<(SHARED_LIB_PREFIX)agentcore<(SHARED_LIB_SUFFIX)",
           ],
         },
