@@ -29,7 +29,10 @@ var headlessZip = require("./headless_zip.js")
 
 // Set the plugin search path
 agent.spath(path.join(module_dir, "plugins"))
-process.env.LIBPATH = module_dir + ":" + process.env.LIBPATH
+
+// Edit LIBPATH on AIX to enable libagentcore to be loaded
+if(process.platform == "aix")
+  process.env.LIBPATH = module_dir + ":" + process.env.LIBPATH
 
 
 var hcAPI = require("./appmetrics-api.js");
