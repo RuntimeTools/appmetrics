@@ -49,3 +49,7 @@ if (process.env.NODE_PATH) {
 }
 
 var p = child_process.fork(launcher_filename, args, {"execArgv": node_args})
+
+p.on('close', (code) => {
+  process.exit(code)
+})
