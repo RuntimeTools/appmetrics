@@ -274,10 +274,10 @@ Emitted every 5 seconds, summarising sample based information of the event loop 
 ### Event: 'loop'
 Emitted every 60 seconds, summarising event tick information in time interval
 * `data` (Object) the data from the event loop sample:
-    * `loop.count` (Number) the number of event loop ticks in the last interval.
-    * `loop.minimum` (Number) the shortest (i.e. fastest) tick in milliseconds.
-    * `loop.maximum` (Number) the longest (slowest) tick in milliseconds.
-    * `loop.average` (Number) the average tick time in milliseconds.
+    * `count` (Number) the number of event loop ticks in the last interval.
+    * `minimum` (Number) the shortest (i.e. fastest) tick in milliseconds.
+    * `maximum` (Number) the longest (slowest) tick in milliseconds.
+    * `average` (Number) the average tick time in milliseconds.
 
 ### Event: 'profiling'
 Emitted when a profiling sample is available from the underlying V8 runtime.
