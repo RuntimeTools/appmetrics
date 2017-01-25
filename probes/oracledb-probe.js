@@ -31,7 +31,7 @@ util.inherits(OracleDBProbe, Probe);
 OracleDBProbe.prototype.attach = function(name, target) {
 	var that = this;
 	if( name != 'oracledb' ) return target;
-	if(target.__probeAttached__) return;
+	if(target.__probeAttached__) return target;
 	target.__probeAttached__ = true;
 
 	// After 'getConnection' (single-user connection model)
