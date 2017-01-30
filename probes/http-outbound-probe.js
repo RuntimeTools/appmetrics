@@ -58,7 +58,6 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
             // Start metrics
             that.metricsProbeStart(probeData, requestMethod, urlRequested);
 	        that.requestProbeStart(probeData, requestMethod, urlRequested);
-            console.log("\n\n\ncalling " + methodName + " " + methodArgs + "\n\n\n");
           
            // End metrics
            aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
