@@ -68,7 +68,7 @@ static void GetLoopInformation(uv_timer_s *data) {
 #else
 static void GetLoopInformation(uv_timer_s *data, int status) {
 #endif
-	double mean = std::numeric_limits<double>::infinity();
+	double mean = 0;
 	if (num != 0) {
 		mean = sum / num;
 	}
