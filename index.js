@@ -303,8 +303,8 @@ module.exports.getJSONProfilingMode = function() {
     return jsonProfilingMode;
 }
 
-module.exports.writeSnapshot = function() {
-    return heapdump.writeSnapshot();
+module.exports.writeSnapshot = function(arguments) {
+    return heapdump.writeSnapshot(arguments);
 }
 
 module.exports.start = function start () {
