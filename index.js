@@ -303,8 +303,13 @@ module.exports.getJSONProfilingMode = function() {
     return jsonProfilingMode;
 }
 
+<<<<<<< HEAD
 module.exports.writeSnapshot = function(arguments) {
     return heapdump.writeSnapshot(arguments);
+=======
+module.exports.writeSnapshot = function() {
+    return heapdump.writeSnapshot();
+>>>>>>> e2dd72475dbfeedddabbf659dc1564a71ed51b6f
 }
 
 module.exports.start = function start () {
