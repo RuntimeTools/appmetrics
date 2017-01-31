@@ -26,7 +26,7 @@ var request = require('./lib/request.js');
 var fs = require('fs');
 var agent = require("./appmetrics")
 var headlessZip = require("./headless_zip.js")
-var heapdump = require('heapdump');
+var heapdump = require('heapdump.js');
 
 
 // Set the plugin search path
@@ -303,8 +303,8 @@ module.exports.getJSONProfilingMode = function() {
     return jsonProfilingMode;
 }
 
-module.exports.writeSnapshot = function() {
-    return heapdump.writeSnapshot();
+module.exports.writeSnapshot = function(arguments) {
+    return heapdump.writeSnapshot(arguments);
 }
 
 module.exports.start = function start () {

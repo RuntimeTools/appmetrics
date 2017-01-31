@@ -42,11 +42,11 @@ Node Application Metrics provides the following built-in data collection sources
 
 The Node Application Metrics agent supports the following runtime environments:
 
-* **Node.js v6** on:
+* **Node.js v7** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
   * 64-bit runtime on Mac OS X (x64)
-* **Node.js v5** on:
+* **Node.js v6** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
   * 64-bit runtime on Mac OS X (x64)
@@ -54,20 +54,11 @@ The Node Application Metrics agent supports the following runtime environments:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
   * 64-bit runtime on Mac OS X (x64)
-* **Node.js 0.10 and 0.12** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86)
-  * 64-bit or 32-bit runtime on Mac OS X (x64 or x86)
 * **IBM SDK for Node.js 4** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
   * 64-bit or 32-bit runtime on AIX (PPC32, PPC64)
   * 64-bit runtime on Mac OS X (x64)
-* **IBM SDK for Node.js 1.1 and 1.2** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
-  * 64-bit or 32-bit runtime on AIX (PPC32, PPC64)
-  * 64-bit or 32-bit runtime on Mac OS X (x64 or x86)
 
 <a name="install"></a>
 ### Installation
@@ -226,6 +217,10 @@ Set the configuration to be applied to a specific data type. The configuration a
 Allows custom monitoring events to be added into the Node Application Metrics agent.
 * `type` (String) the name you wish to use for the data. A subsequent event of that type will be raised, allowing callbacks to be registered for it.
 * `data` (Object) the data to be made available with the event. The object must not contain circular references, and by convention should contain a `time` value representing the milliseconds when the event occurred.
+
+### appmetrics.writeSnapshot([filename],[callback])
+Dumps the v8 heap via `heapdump`. 
+For more information, see https://github.com/bnoordhuis/node-heapdump/blob/master/README.md
 
 ### appmetrics.monitor()
 Creates a Node Application Metrics agent client instance. This can subsequently be used to get environment data and subscribe to data events. This function will start the appmetrics monitoring agent if it is not already running.
@@ -484,6 +479,7 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 2.0.0 development
 
 ## Release History
+`2.0.0` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call
 `1.2.0` - Add file data collection capability and option configuration via api.  
 `1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
 `1.1.1` - Fix node-gyp rebuild failure and don't force MQTT broker to on  
