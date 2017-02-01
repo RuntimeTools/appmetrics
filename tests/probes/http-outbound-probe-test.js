@@ -23,39 +23,37 @@ var tap = require('tap');
 
 tap.plan(2);
 
-tap.tearDown(function(){
-	server.close();
+tap.tearDown(function() {
+    server.close();
 });
 
 var completedTests = 0;
 
 monitor.on('http-outbound', function(data) {
-    if (completedTests < 2){
-		tap.test("HTTP Outbound Event", function(t){
-			checkHttpOutboundData(data, t);
-			t.end();
-			completedTests++;
-		});
-	}
+    if (completedTests < 2) {
+        tap.test("HTTP Outbound Event", function(t) {
+            checkHttpOutboundData(data, t);
+            t.end();
+            completedTests++;
+        });
+    }
 });
 
 function checkHttpOutboundData(data, t) {
-	t.ok(isInteger(data.time), 
-		"Timestamp is an integer");
-	t.equals(data.method, "GET", 
-		"Should report GET as HTTP request method");
-	t.equals(data.url, "http://localhost:8000", 
-		"Should report http://localhost:8000 as URL");
+    t.ok(isInteger(data.time),
+     "Timestamp is an integer");
+    t.equals(data.method, "GET",
+        "Should report GET as HTTP request method");
+    t.equals(data.url, "http://localhost:8000",
+        "Should report http://localhost:8000 as URL");
 }
 
-function isInteger(n)
-{
-  return isNumeric(n) && (n % 1) == 0;
+function isInteger(n) {
+    return isNumeric(n) && (n % 1) == 0;
 }
 
-function isNumeric(n)
-{
-  return !isNaN(parseFloat(n)) && isFinite(n);
+function isNumeric(n) {
+    return !isNaN(parseFloat(n)) && isFinite(n);
 }
 
 // Request with a callback
@@ -63,3 +61,4 @@ http.get('http://localhost:8000', function (res) {});
 
 // Request without a callback
 http.get('http://localhost:8000')
+
