@@ -29,15 +29,8 @@ a Github [issue](https://github.com/RuntimeTools/appmetrics/issues).
 
 ### Contributor License Agreement
 
-In order for us to accept pull-requests, the contributor must first complete
-a Contributor License Agreement (CLA). This clarifies the intellectual
-property license granted with any contribution. It is for your protection as a
-Contributor as well as the protection of IBM and its customers; it does not
-change your rights to use your own Contributions for any other purpose.
-
-You can download the CLAs here:
-
- - [Contributor License Agreement](https://github.com/RuntimeTools/appmetrics/raw/master/NodeApplicationMetrics-V1-CLA.odt)
+In order for us to accept pull-requests from a new contributor, the contributor must indicate in their first Pull Request that they accept and agree to be bound by the terms of the IBM Contributor License Agreement that can be found here:
+- https://github.com/RuntimeTools/appmetrics/raw/master/IBM-RuntimesTools-V1.0.1-CLA.odt
 
 If you are an IBMer, please contact us directly as the contribution process is
 slightly different.
