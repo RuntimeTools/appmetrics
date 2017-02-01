@@ -23,19 +23,19 @@ var am = require('../');
 // Probe to instrument outbound http requests
 
 function HttpOutboundProbe() {    
-	Probe.call(this, 'http'); // match the name of the module we're instrumenting
+    Probe.call(this, 'http'); // match the name of the module we're instrumenting
 }
 util.inherits(HttpOutboundProbe, Probe);
 
 HttpOutboundProbe.prototype.attach = function(name, target) {
-	var that = this;
-	if( name == 'http' ) {
-		if(target.__outboundProbeAttached__) return target;
-	    target.__outboundProbeAttached__ = true;
-	   
+    var that = this;
+    if( name == 'http' ) {
+        if(target.__outboundProbeAttached__) return target;
+        target.__outboundProbeAttached__ = true;
+       
         aspect.around(target, 'request',
           // Before 'http.request' function
-	      function(obj, methodName, methodArgs, probeData) {
+          function(obj, methodName, methodArgs, probeData) {
 
 
             // Get HTTP request method from options
@@ -57,7 +57,7 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
 
             // Start metrics
             that.metricsProbeStart(probeData, requestMethod, urlRequested);
-	        that.requestProbeStart(probeData, requestMethod, urlRequested);
+            that.requestProbeStart(probeData, requestMethod, urlRequested);
           
            // End metrics
            aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
@@ -70,10 +70,10 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
             });
         },
         // After 'http.request' function returns
-		function(target, methodName, methodArgs, probeData, rc) {
+        function(target, methodName, methodArgs, probeData, rc) {
 
             // If no callback has been used then end the metrics after returning from the method instead
-			if (aspect.findCallbackArg(methodArgs) == undefined) {
+            if (aspect.findCallbackArg(methodArgs) == undefined) {
 
                 // Need to get request method and URL again
                 var options = methodArgs[0];
@@ -93,14 +93,14 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
                 }
 
                 // End metrics (no response available so pass empty object)
-				that.metricsProbeEnd(probeData, requestMethod, urlRequested, {});
-				that.requestProbeEnd(probeData, requestMethod, urlRequested, {});
-			}
-			return rc;
-		});
+                that.metricsProbeEnd(probeData, requestMethod, urlRequested, {});
+                that.requestProbeEnd(probeData, requestMethod, urlRequested, {});
+            }
+            return rc;
+        });
 
-	}
-	return target;
+    }
+    return target;
 };
 
 // Get a URL as a string from the options object passed to http.get or http.request
@@ -138,16 +138,16 @@ function formatURL(httpOptions) {
  * Lightweight metrics probe for HTTP requests
  * 
  * These provide:
- * 		time:		 time event started
- * 		method:		 HTTP method, eg. GET, POST, etc
- * 		url:		 The url requested
- * 		duration:	 the time for the request to respond
- *      contentType: HTTP content-type
- *      statusCode:  HTTP status code
+ *   time:        time event started
+ *   method:      HTTP method, eg. GET, POST, etc
+ *   url:         The url requested
+ *   duration:    the time for the request to respond
+ *   contentType: HTTP content-type
+ *   statusCode:  HTTP status code
  */
 HttpOutboundProbe.prototype.metricsEnd = function(probeData, method, url, res) {
-	probeData.timer.stop();
-	am.emit('http-outbound', {time: probeData.timer.startTimeMillis, method: method, url: url, 
+    probeData.timer.stop();
+    am.emit('http-outbound', {time: probeData.timer.startTimeMillis, method: method, url: url, 
         duration: probeData.timer.timeDelta, statusCode: res.statusCode, contentType:res.headers?res.headers['content-type']:"undefined"});
 };
 
@@ -164,5 +164,6 @@ HttpOutboundProbe.prototype.requestEnd = function (probeData, method, url, res) 
     probeData.req.stop({url: url, statusCode: res.statusCode, contentType:res.headers?res.headers['content-type']:"undefined"});
 };
 
-	
+
 module.exports = HttpOutboundProbe;
+
