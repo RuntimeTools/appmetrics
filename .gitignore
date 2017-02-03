@@ -8,3 +8,4 @@ plugins
 .project
 /agentcore.dll
 /heapdump.node
+headlesstestoutput*
