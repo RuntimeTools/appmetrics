@@ -15,7 +15,7 @@
  *******************************************************************************/
  
 var app = require('./test_app');
-app.start();
+var appmetrics = app.start();
 var monitor = app.appmetrics.monitor();
 app.appmetrics.enable("profiling");
 
@@ -23,6 +23,12 @@ var tap = require('tap');
 
 tap.tearDown(function(){
   app.endRun();
+});
+
+tap.test('start returns this', function(t) {
+  t.equal(appmetrics, app.appmetrics);
+  t.equal(appmetrics, require('../'));
+  t.end();
 });
 
 tap.test('lrtime is a function or undefined', function(t) {
