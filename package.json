@@ -18,7 +18,7 @@
     "tap": "7.x"
   },
   "scripts": {
-    "test": "tap --reporter tap --timeout=120 tests/api_tests.js tests/probes/http-outbound-probe-test.js tests/headless_test.js",
+    "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/headless_test.js",
     "install": "node-gyp rebuild"
   },
   "directories": {
