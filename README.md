@@ -294,6 +294,8 @@ Emitted when a HTTP request is made of the application.
     * `method` (String) the HTTP method used for the request.
     * `url` (String) the URL on which the request was made.
     * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
+    * `header` (String) the header for the HTTP request.
+    * `contentType` (String) the content type of the HTTP request.
 
 ### Event: 'http-outbound'
 Emitted when the application makes an outbound HTTP request.
