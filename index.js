@@ -332,9 +332,11 @@ module.exports.start = function start () {
       headlessZip.tryZipOnExit();
     }
   });
+
   // Start the probes
   probes.forEach(function (probe) {
     probe.start();
   });
-}
 
+  return this;
+}

@@ -52,7 +52,7 @@ if (agent) {
 }
 
 module.exports.start = function start() {
-	appmetrics.start();
+	return appmetrics.start();
 }
 
 //Write a string to memory on timer
