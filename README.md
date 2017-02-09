@@ -492,7 +492,7 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 2.0.0
 
 ## Release History
-`2.0.0` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call
+`2.0.0` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.  
 `1.2.0` - Add file data collection capability and option configuration via api.  
 `1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
 `1.1.1` - Fix node-gyp rebuild failure and don't force MQTT broker to on  
