@@ -489,7 +489,8 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-2.0.1
+
+3.0.0 development
 
 ## Release History
 `2.0.1` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.  
