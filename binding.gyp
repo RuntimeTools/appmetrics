@@ -81,6 +81,9 @@
         "<(srcdir)/headlessutils.cpp",
         "<(srcdir)/objecttracker.cpp",
       ],
+      "include_dirs": [
+        "<(srcdir)",
+      ],
       'variables': {
         'appmetricslevel%':'<(appmetricsversion)<(build_id)',
       },
@@ -119,6 +122,10 @@
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/prof/nodeprofplugin.cpp",
+        "<(srcdir)/plugins/node/prof/compat.h",
+        "<(srcdir)/plugins/node/prof/compat-inl.h",
+        "<(srcdir)/plugins/node/prof/util.h",
+        "<(srcdir)/plugins/node/prof/watchdog.h",
       ],
     },
     {
