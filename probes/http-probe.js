@@ -49,7 +49,7 @@ HttpProbe.prototype.attach = function(name, target) {
 	            	that.metricsProbeStart(probeData, httpReq.method, traceUrl);
 	            	that.requestProbeStart(probeData, httpReq.method, traceUrl);
 	                aspect.after(res, 'end', probeData, function(obj, methodName, args, probeData, ret) {
-	            		that.metricsProbeEnd(probeData, httpReq.method, traceUrl, res);
+	            		that.metricsProbeEnd(probeData, httpReq.method, traceUrl, res, httpReq);
 	            		that.requestProbeEnd(probeData, httpReq.method, traceUrl);
 	            	});
 	            }
@@ -98,9 +98,9 @@ HttpProbe.prototype.filterUrl = function(req) {
  * 		duration:	the time for the request to respond
  */
 
-HttpProbe.prototype.metricsEnd = function(probeData, method, url, res) {
+HttpProbe.prototype.metricsEnd = function(probeData, method, url, res, httpReq) {
 	probeData.timer.stop();
-	am.emit('http', {time: probeData.timer.startTimeMillis, method: method, url: url, duration: probeData.timer.timeDelta, header: res._header, statusCode: res.statusCode, contentType: res.getHeader('content-type')});
+	am.emit('http', {time: probeData.timer.startTimeMillis, method: method, url: url, duration: probeData.timer.timeDelta, header: res._header, statusCode: res.statusCode, contentType: res.getHeader('content-type'), requestHeader: httpReq.headers});
 };
 
 /*
