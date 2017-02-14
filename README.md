@@ -21,6 +21,7 @@ Node Application Metrics provides the following built-in data collection sources
  Loop               | Event loop timing metrics
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
+ HTTP Outbound      | HTTP requests made by the application
  socket.io          | WebSocket data sent and received by the application
  LevelDB            | LevelDB queries made by the application
  MySQL              | MySQL queries made by the application
@@ -189,7 +190,7 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of `eventloop`, `express`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `express`, `profiling`, `http`, `http-outbound`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
@@ -293,7 +294,19 @@ Emitted when a HTTP request is made of the application.
     * `method` (String) the HTTP method used for the request.
     * `url` (String) the URL on which the request was made.
     * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
-    
+    * `header` (String) the header for the HTTP request.
+    * `contentType` (String) the content type of the HTTP request.
+
+### Event: 'http-outbound'
+Emitted when the application makes an outbound HTTP request.
+* `data` (Object) the data from the HTTP request:
+    * `time` (Number) the milliseconds when the request was made. This can be converted to a Date using `new Date(data.time)`.
+    * `method` (String) the HTTP method used for the request.
+    * `url` (String) the URL on which the request was made.
+    * `contentType` (String) the HTTP response content-type.
+    * `statusCode` (String) the HTTP response status code.
+    * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
+
 ### Event: 'socketio'
 Emitted when WebSocket data is sent or received by the application using socketio.
 * `data` (Object) the data from the socket.io request:
@@ -476,10 +489,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-2.0.0 development
+2.0.1
 
 ## Release History
-`2.0.0` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call
+`2.0.1` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.  
 `1.2.0` - Add file data collection capability and option configuration via api.  
 `1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
 `1.1.1` - Fix node-gyp rebuild failure and don't force MQTT broker to on  
