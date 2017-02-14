@@ -306,6 +306,7 @@ Emitted when the application makes an outbound HTTP request.
     * `contentType` (String) the HTTP response content-type.
     * `statusCode` (String) the HTTP response status code.
     * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
+    * 'requestHeaders' (Object) the HTTP request headers.
 
 ### Event: 'socketio'
 Emitted when WebSocket data is sent or received by the application using socketio.
