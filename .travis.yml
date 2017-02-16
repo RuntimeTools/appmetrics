@@ -5,8 +5,5 @@ node_js:
   - "6"
   - "4"
   - "node"
- compiler:
-  - gcc
- os:
+os:
   - linux
-
