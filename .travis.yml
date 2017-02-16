@@ -1,0 +1,11 @@
+dist: trusty
+language: node_js
+before_install:
+  - git submodule update --init --recursive
+node_js:
+  - "6"
+  - "4"
+  - "node"
+os:
+  - linux
+
