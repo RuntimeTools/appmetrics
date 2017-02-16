@@ -44,8 +44,8 @@ function checkHttpOutboundData(data, t) {
      "Timestamp is an integer");
     t.equals(data.method, "GET",
         "Should report GET as HTTP request method");
-    t.equals(data.url, "http://localhost:8000",
-        "Should report http://localhost:8000 as URL");
+    t.equals(data.url, "http://localhost:8000/",
+        "Should report http://localhost:8000/ as URL");
     if (data.requestHeaders) {
         t.equals(data.requestHeaders.hello, "world",
             "Should report world as value of hello header");
@@ -69,10 +69,10 @@ var options = {
 }
 
 // Request with a callback
-http.get('http://localhost:8000', function (res) {});
+http.get('http://localhost:8000/', function (res) {});
 
 // Request without a callback
-http.get('http://localhost:8000')
+http.get('http://localhost:8000/')
 
 // Request with headers
 http.request(options).end()
