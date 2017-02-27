@@ -78,15 +78,17 @@ ExpressProbe.prototype.attach = function(name, target) {
  *      duration:   the time for the request to respond
  */
 ExpressProbe.prototype.metricsEnd = function(probeData, methodName, methodArgs) {
-  probeData.timer.stop();
-  var expressMetrics = {
-    time: probeData.timer.startTimeMillis, 
-    url: methodArgs[0], 
-    method: methodName, 
-    statusCode: methodArgs.statusCode, 
-    duration: probeData.timer.timeDelta
+  if(probeData && probeData.timer) {
+    probeData.timer.stop();
+    var expressMetrics = {
+      time: probeData.timer.startTimeMillis, 
+      url: methodArgs[0], 
+      method: methodName, 
+      statusCode: methodArgs.statusCode, 
+      duration: probeData.timer.timeDelta
+    }
+    am.emit('express', expressMetrics);
   }
-  am.emit('express', expressMetrics);
 };
 
 // Heavyweight request probes for express queries 
@@ -96,7 +98,8 @@ ExpressProbe.prototype.requestStart = function (probeData, method, methodArgs) {
 };
 
 ExpressProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-  probeData.req.stop({url: methodArgs[0]});
+  if(probeData && probeData.req)
+    probeData.req.stop({url: methodArgs[0]});
 };
 
 module.exports = ExpressProbe;

@@ -65,9 +65,11 @@ MySqlProbe.prototype.attach = function(name, target) {
  * 		duration:	the time for the request to respond
  */
 MySqlProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-	probeData.timer.stop();
-	eventTimer = probeData.timer;
-	am.emit('mysql', {time: eventTimer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: eventTimer.timeDelta});
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    eventTimer = probeData.timer;
+	    am.emit('mysql', {time: eventTimer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: eventTimer.timeDelta});
+    }
 };
 
 /*
@@ -78,7 +80,8 @@ MySqlProbe.prototype.requestStart = function (probeData, method, methodArgs) {
 };
 
 MySqlProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-	probeData.req.stop({sql: JSON.stringify(methodArgs[0])});
+    if(probeData && probeData.req)
+	    probeData.req.stop({sql: JSON.stringify(methodArgs[0])});
 };
 
 module.exports = MySqlProbe;

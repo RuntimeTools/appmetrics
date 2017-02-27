@@ -106,13 +106,15 @@ function addMonitoring(connection, probe) {
  * Lightweight metrics probe end for OracleDB queries
  */
 OracleDBProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-	probeData.timer.stop();
-	var query = methodArgs[0];
-	am.emit('oracledb', {
-		time : probeData.timer.startTimeMillis,
-		query : query,
-		duration : probeData.timer.timeDelta
-	});
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    var query = methodArgs[0];
+	    am.emit('oracledb', {
+		    time : probeData.timer.startTimeMillis,
+		    query : query,
+		    duration : probeData.timer.timeDelta
+	    });
+    }
 };
 
 /*
@@ -123,8 +125,10 @@ OracleDBProbe.prototype.requestStart = function (probeData, method, methodArgs) 
 };
 
 OracleDBProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-	var query = methodArgs[0];
-	probeData.req.stop({query:query});
+    if(probeData && probeData.req) {
+	    var query = methodArgs[0];
+	    probeData.req.stop({query:query});
+    }
 };
 
 module.exports = OracleDBProbe;

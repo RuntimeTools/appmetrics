@@ -86,8 +86,10 @@ MemcachedProbe.prototype.attach = function(name, target) {
  * 		duration:	the time for the request to respond
  */
 MemcachedProbe.prototype.metricsEnd = function(context, method, methodArgs) {
-	context.timer.stop();
-	am.emit('memcached', {time: context.timer.startTimeMillis, method: method, key: methodArgs[0], duration: context.timer.timeDelta});
+    if(context && context.timer) {
+	    context.timer.stop();
+	    am.emit('memcached', {time: context.timer.startTimeMillis, method: method, key: methodArgs[0], duration: context.timer.timeDelta});
+    }
 };
 
 /*
@@ -98,7 +100,8 @@ MemcachedProbe.prototype.requestStart = function (context, methodName, methodArg
 };
 
 MemcachedProbe.prototype.requestEnd = function (context, methodName, methodArgs) {
-	context.req.stop({key: methodArgs[0]});
+    if(context && context.req)
+	    context.req.stop({key: methodArgs[0]});
 };
 
 module.exports = MemcachedProbe;
