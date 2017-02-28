@@ -99,8 +99,10 @@ HttpProbe.prototype.filterUrl = function(req) {
  */
 
 HttpProbe.prototype.metricsEnd = function(probeData, method, url, res, httpReq) {
-	probeData.timer.stop();
-	am.emit('http', {time: probeData.timer.startTimeMillis, method: method, url: url, duration: probeData.timer.timeDelta, header: res._header, statusCode: res.statusCode, contentType: res.getHeader('content-type'), requestHeader: httpReq.headers});
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    am.emit('http', {time: probeData.timer.startTimeMillis, method: method, url: url, duration: probeData.timer.timeDelta, header: res._header, statusCode: res.statusCode, contentType: res.getHeader('content-type'), requestHeader: httpReq.headers});
+    }
 };
 
 /*
@@ -114,7 +116,8 @@ HttpProbe.prototype.requestStart = function (probeData, method, url) {
 };
 
 HttpProbe.prototype.requestEnd = function (probeData, method, url) {
-    probeData.req.stop({url: url });
+    if(probeData && probeData.req)
+        probeData.req.stop({url: url });
 };
 	
 /*

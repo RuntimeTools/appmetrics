@@ -99,42 +99,44 @@ MQLightProbe.prototype.attach = function(name, target) {
  * Lightweight metrics probe end for MQLight messages
  */
 MQLightProbe.prototype.metricsEnd = function(probeData, method, methodArgs, client) {
-	probeData.timer.stop();
-	if(method == 'message') {
-		var data = methodArgs[0];
-		if(data.length > 25) {
-			data = data.substring(0, 22) + "...";
-		}
-		var topic = methodArgs[1].message.topic;
-		am.emit('mqlight', {
-			time : probeData.timer.startTimeMillis,
-			clientid : client.id,
-			data : data,
-			method : method,
-			topic : topic,
-			duration : probeData.timer.timeDelta
-		});
-	} else if(method == 'send') {
-		var data = methodArgs[1];
-		if(data.length > 25) {
-			data = data.substring(0, 22) + "...";
-		}
-		var qos;
-		var options; // options are optional - check number of arguments.
-		if(methodArgs.length > 3) {
-			options = methodArgs[2];
-			qos = options[0];
-		}
-		am.emit('mqlight', {
-			time : probeData.timer.startTimeMillis,
-			clientid : client.id,
-			data : data,
-			method : method,
-			topic : methodArgs[0],
-			qos : qos,
-			duration : probeData.timer.timeDelta
-		});
-	}
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    if(method == 'message') {
+		    var data = methodArgs[0];
+		    if(data.length > 25) {
+			    data = data.substring(0, 22) + "...";
+		    }
+		    var topic = methodArgs[1].message.topic;
+		    am.emit('mqlight', {
+			    time : probeData.timer.startTimeMillis,
+			    clientid : client.id,
+			    data : data,
+			    method : method,
+			    topic : topic,
+			    duration : probeData.timer.timeDelta
+		    });
+	    } else if(method == 'send') {
+		    var data = methodArgs[1];
+		    if(data.length > 25) {
+			    data = data.substring(0, 22) + "...";
+		    }
+		    var qos;
+		    var options; // options are optional - check number of arguments.
+		    if(methodArgs.length > 3) {
+			    options = methodArgs[2];
+			    qos = options[0];
+		    }
+		    am.emit('mqlight', {
+			    time : probeData.timer.startTimeMillis,
+			    clientid : client.id,
+			    data : data,
+			    method : method,
+			    topic : methodArgs[0],
+			    qos : qos,
+			    duration : probeData.timer.timeDelta
+		    });
+	    }
+    }
 };
 
 /*
@@ -149,26 +151,28 @@ MQLightProbe.prototype.requestStart = function (probeData, method, methodArgs) {
 };
 
 MQLightProbe.prototype.requestEnd = function (probeData, method, methodArgs, client) {
-	if(method == 'message') {
-		var data = methodArgs[0];
-		if(data.length > 25) {
-			data = data.substring(0, 22) + "...";
-		}
-		var topic = methodArgs[1].message.topic;
-		probeData.req.stop({clientid: client.id, data: data, method: method,  topic: methodArgs[0]});
-	} else if(method == 'send') {
-		var data = methodArgs[1];
-		if(data.length > 25) {
-			data = data.substring(0, 22) + "...";
-		}
-		var qos;
-		var options; // options are optional - check number of arguments.
-		if(methodArgs.length > 3) {
-			options = methodArgs[2];
-			qos = options[0];
-		}
-		probeData.req.stop({clientid: client.id, data: data, method: method,  topic: methodArgs[0], qos: qos});
-	}
+    if(probeData && probeData.req) {
+	    if(method == 'message') {
+		    var data = methodArgs[0];
+		    if(data.length > 25) {
+			    data = data.substring(0, 22) + "...";
+		    }
+		    var topic = methodArgs[1].message.topic;
+		    probeData.req.stop({clientid: client.id, data: data, method: method,  topic: methodArgs[0]});
+	    } else if(method == 'send') {
+		    var data = methodArgs[1];
+		    if(data.length > 25) {
+			    data = data.substring(0, 22) + "...";
+		    }
+		    var qos;
+		    var options; // options are optional - check number of arguments.
+		    if(methodArgs.length > 3) {
+			    options = methodArgs[2];
+			    qos = options[0];
+		    }
+		    probeData.req.stop({clientid: client.id, data: data, method: method,  topic: methodArgs[0], qos: qos});
+	    }
+    }
 };
 
 module.exports = MQLightProbe;

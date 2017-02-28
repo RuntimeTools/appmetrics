@@ -79,16 +79,18 @@ LeveldownProbe.prototype.attach = function(name, target){
  
  
 LeveldownProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-	probeData.timer.stop();
-	if (method == 'put'){
-		am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, key: methodArgs[0], value: methodArgs[1], duration: probeData.timer.timeDelta});
-	}
-	else if (method == 'del' || method == 'get'){
-		am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, key: methodArgs[0], duration: probeData.timer.timeDelta});
-	}
-	else if(method == 'batch'){
-		am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, opCount: methodArgs[0].length, duration: probeData.timer.timeDelta});
-	}
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    if (method == 'put'){
+		    am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, key: methodArgs[0], value: methodArgs[1], duration: probeData.timer.timeDelta});
+	    }
+	    else if (method == 'del' || method == 'get'){
+		    am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, key: methodArgs[0], duration: probeData.timer.timeDelta});
+	    }
+	    else if(method == 'batch'){
+		    am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, opCount: methodArgs[0].length, duration: probeData.timer.timeDelta});
+	    }
+    }
 };
 
 /*
@@ -100,7 +102,8 @@ LeveldownProbe.prototype.requestStart = function (probeData, dbTarget, method, m
 };
 
 LeveldownProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-	req.stop({leveldown: methodArgs[0]});
+    if(probeData && probeData.req)
+	    req.stop({leveldown: methodArgs[0]});
 };
 
 module.exports = LeveldownProbe;

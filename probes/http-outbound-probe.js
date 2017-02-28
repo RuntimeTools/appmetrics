@@ -161,9 +161,11 @@ function formatURL(httpOptions) {
  *   statusCode:      HTTP status code
  */
 HttpOutboundProbe.prototype.metricsEnd = function(probeData, method, url, res, headers) {
-    probeData.timer.stop();
-    am.emit('http-outbound', {time: probeData.timer.startTimeMillis, method: method, url: url,
-        duration: probeData.timer.timeDelta, statusCode: res.statusCode, contentType:res.headers?res.headers['content-type']:"undefined", requestHeaders: headers});
+    if(probeData && probeData.timer) {
+        probeData.timer.stop();
+        am.emit('http-outbound', {time: probeData.timer.startTimeMillis, method: method, url: url,
+            duration: probeData.timer.timeDelta, statusCode: res.statusCode, contentType:res.headers?res.headers['content-type']:"undefined", requestHeaders: headers});
+    }
 };
 
 /*
@@ -176,7 +178,8 @@ HttpOutboundProbe.prototype.requestStart = function (probeData, method, url) {
 };
 
 HttpOutboundProbe.prototype.requestEnd = function (probeData, method, url, res, headers) {
-    probeData.req.stop({url: url, statusCode: res.statusCode, contentType:res.headers?res.headers['content-type']:"undefined", requestHeaders: headers});
+    if(probeData && probeData.req)
+        probeData.req.stop({url: url, statusCode: res.statusCode, contentType:res.headers?res.headers['content-type']:"undefined", requestHeaders: headers});
 };
 
 
