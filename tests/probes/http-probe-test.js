@@ -42,10 +42,6 @@ monitor.on('http', function(data) {
 monitor.on('request', function(data) {
     if (completedTests < 4) {
         tap.test("HTTP Request Event", function(t) {
-           // console.log("reqyest");
-            //console.log(JSON.stringify(data.request));
-            console.log("context");
-            console.log(JSON.stringify(data.request.context));
             checkHttpRequestData(data.request.context, t)
             t.end();
             completedTests++;
@@ -54,7 +50,6 @@ monitor.on('request', function(data) {
 });
 
 function checkHttpData(data, t) {
-    // console.log(JSON.stringify(data))
     t.ok(isInteger(data.time), "Timestamp is an integer");
     t.equals(data.method, "GET", "Should report GET as HTTP request method");
     t.equals(data.url, "/", "Should report / as URL");
