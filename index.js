@@ -27,6 +27,8 @@ var fs = require('fs');
 var agent = require("./appmetrics")
 var headlessZip = require("./headless_zip.js")
 var heapdump = require('./heapdump.js');
+var VERSION = require('./package.json').version
+var assert = require('assert')
 
 
 // Set the plugin search path
@@ -116,6 +118,19 @@ var latencyCheckLoop = setInterval(latencyCheck, latencyCheckInterval);
 var latencyReportLoop = setInterval(latencyReport, latencyReportInterval);
 latencyCheckLoop.unref();
 latencyReportLoop.unref();
+
+if(global.Appmetrics) {
+    assert(
+        global.Appmetrics.VERSION === VERSION,
+        'Multiple versions of Node Application Metrics are being initialized.\n' +
+        'This version ' + VERSION + ' is incompatible with already initialized\n' +
+        'version ' + global.Appmetrics.VERSION+ '.\n'
+    );
+    module.exports = global.Appmetrics;
+} else {
+    global.Appmetrics = this;
+    module.exports.VERSION = VERSION;
+}
 
 /*
  * Patch the module require function to run the probe attach function
