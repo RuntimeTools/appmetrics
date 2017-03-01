@@ -128,7 +128,7 @@ if(global.Appmetrics) {
     );
     module.exports = global.Appmetrics;
 } else {
-    global.Appmetrics = this;
+    global.Appmetrics = module.exports;
     module.exports.VERSION = VERSION;
 }
 
