@@ -26,3 +26,12 @@ tap.test('Calling require without start should not break', function(t) {
     // (previously triggered http-outbound probe to emit an event which caused a SIGSEGV)
     http.get('http://localhost:8000', function (res) {server.close(); t.end();});
 });
+
+tap.test('Appmetrics should be a global singleton', function(t) {
+    var appmetrics = require('../');
+    // Delete cached module
+    delete require.cache[require.resolve('../')]
+    var appmetrics2 = require('../');
+    t.equals(appmetrics, appmetrics2);
+    t.end();
+});
