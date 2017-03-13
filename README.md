@@ -17,7 +17,6 @@ Node Application Metrics provides the following built-in data collection sources
  Memory             | Process and system memory usage
  GC                 | Node/V8 garbage collection statistics
  Event Loop         | Event loop latency information
- Express            | Express 4.x Web Framework application request monitoring
  Loop               | Event loop timing metrics
  Function profiling | Node/V8 function profiling (disabled by default)
  HTTP               | HTTP request calls made of the application
@@ -190,14 +189,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
-* `type` (String) the type of event to start generating data for. Values of `eventloop`, `express`, `profiling`, `http`, `http-outbound`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `http-outbound`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type.
-* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `express`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
 
 <a name="set-config"></a>
 ### appmetrics.setConfig(`type`, `config`)
@@ -431,14 +430,6 @@ Emitted when a PostgreSQL query is made to the `pg` module.
     * `query` (String) the query made of the PostgreSQL database.
     * `duration` (Number) the time taken for the PostgreSQL query to be responded to in ms.
 
-### Event: 'express'
-Emitted when an express request finishes its response. Note. appmetrics has only been tested with express 4.x, support is not guaranteed for lower versions.
-* `data` (Object) the data from the Express request/response.
-    * `method` (String) The HTTP method for this request.
-    * `url` (String) The target URL for this request.
-    * `statusCode` (Number) The HTTP status code of the response.
-    * `duration` (Number) The time in ms between receiving the request and sending the response.
-
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
 
@@ -494,6 +485,7 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 3.0.0 development
 
 ## Release History
+`3.0.0` - Remove express probe.  
 `2.0.1` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.  
 `1.2.0` - Add file data collection capability and option configuration via api.  
 `1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
