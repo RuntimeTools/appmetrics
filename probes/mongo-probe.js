@@ -114,9 +114,11 @@ MongoProbe.prototype.attach = function(name, target) {
  *         collection:  the mongo collection
  */
 MongoProbe.prototype.metricsEnd = function(probeData, collectionName, method, methodArgs) {
-    probeData.timer.stop();
-    am.emit('mongo', {time: probeData.timer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: probeData.timer.timeDelta,
-        method: method, collection: collectionName});
+    if(probeData && probeData.timer) {
+        probeData.timer.stop();
+        am.emit('mongo', {time: probeData.timer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: probeData.timer.timeDelta,
+            method: method, collection: collectionName});
+    }
 };
 
 /*
@@ -127,7 +129,8 @@ MongoProbe.prototype.requestStart = function (probeData, target, method, methodA
 };
 
 MongoProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-    probeData.req.stop( { query: JSON.stringify(methodArgs[0]) } );
+    if(probeData && probeData.req)
+        probeData.req.stop( { query: JSON.stringify(methodArgs[0]) } );
 };
 
 module.exports = MongoProbe;

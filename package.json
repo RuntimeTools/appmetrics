@@ -1,6 +1,7 @@
 {
   "name": "appmetrics",
   "version": "3.0.0",
+  "engines": { "node": ">=4" },
   "description": "Node Application Metrics",
   "bin": {
     "node-hc": "bin/appmetrics-cli.js"
@@ -15,6 +16,7 @@
   ],
   "devDependencies": {
     "node-gyp": "3.x",
+    "semver": "^5.3.0",
     "tap": "7.x"
   },
   "scripts": {

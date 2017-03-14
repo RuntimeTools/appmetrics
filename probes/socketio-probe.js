@@ -135,8 +135,10 @@ SocketioProbe.prototype.attach = function(name, target) {
  * 		duration:	the time for the action to complete
  */
 SocketioProbe.prototype.metricsEnd = function(context, methodName, methodArgs) {
-	context.timer.stop();
-	am.emit('socketio', {time: context.timer.startTimeMillis, method: methodName, event: methodArgs[0], duration: context.timer.timeDelta});
+    if(context && context.timer) {
+	    context.timer.stop();
+	    am.emit('socketio', {time: context.timer.startTimeMillis, method: methodName, event: methodArgs[0], duration: context.timer.timeDelta});
+    }
 };
 
 /*
@@ -154,7 +156,8 @@ SocketioProbe.prototype.requestStart = function (context, methodName, methodArgs
 };
 
 SocketioProbe.prototype.requestEnd = function (context, methodName, methodArgs) {
-	context.req.stop({method: methodName, event: methodArgs[0]});
+    if(context && context.req)
+	    context.req.stop({method: methodName, event: methodArgs[0]});
 };
 
 module.exports = SocketioProbe;

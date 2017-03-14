@@ -104,25 +104,27 @@ RiakProbe.prototype.attach = function(name, target) {
  *      duration:   The time for the request to respond
  */
 RiakProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-    probeData.timer.stop();
-    eventTimer = probeData.timer;
+    if(probeData && probeData.timer) {
+        probeData.timer.stop();
+        eventTimer = probeData.timer;
 
-    //Work out if options, command or query are needed. Defaults to just method
-    var jsonToEmit = {time: eventTimer.startTimeMillis, method: method, duration: eventTimer.timeDelta};
-    var key = '';
+        //Work out if options, command or query are needed. Defaults to just method
+        var jsonToEmit = {time: eventTimer.startTimeMillis, method: method, duration: eventTimer.timeDelta};
+        var key = '';
 
-    if (optionsAndCallbackMethods.indexOf(method) > -1) {
-        key = 'options';
-    } else if (commandMethods.indexOf(method) > -1) {
-        key = 'command';
-    } else if (queryMethods.indexOf(method) > -1) {
-        key = 'query';
+        if (optionsAndCallbackMethods.indexOf(method) > -1) {
+            key = 'options';
+        } else if (commandMethods.indexOf(method) > -1) {
+            key = 'command';
+        } else if (queryMethods.indexOf(method) > -1) {
+            key = 'query';
+        }
+
+        if (key != '') {
+            jsonToEmit[key] = methodArgs[0];
+        }
+        am.emit('riak', jsonToEmit);
     }
-
-    if (key != '') {
-        jsonToEmit[key] = methodArgs[0];
-    }
-    am.emit('riak', jsonToEmit);
 };
 
 /*
@@ -133,7 +135,8 @@ RiakProbe.prototype.requestStart = function (probeData, method, methodArgs) {
 };
 
 RiakProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-    probeData.req.stop({method: method});
+    if(probeData && probeData.req)
+        probeData.req.stop({method: method});
 };
 
 module.exports = RiakProbe;

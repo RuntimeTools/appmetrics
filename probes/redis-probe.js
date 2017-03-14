@@ -139,8 +139,10 @@ RedisProbe.prototype.attach = function(name, target) {
  */
 
 RedisProbe.prototype.metricsEnd = function(probeData, cmd, methodArgs) {
-	probeData.timer.stop();
-	am.emit('redis', {time: probeData.timer.startTimeMillis, cmd: cmd, duration: probeData.timer.timeDelta});
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    am.emit('redis', {time: probeData.timer.startTimeMillis, cmd: cmd, duration: probeData.timer.timeDelta});
+    }
 };
 
 /*
@@ -152,9 +154,11 @@ RedisProbe.prototype.requestStart = function (probeData, cmd, methodArgs) {
 };
 
 RedisProbe.prototype.requestEnd = function (probeData, cmd, methodArgs) {
-	var context = {};
-	context.cmd = cmd;
-	probeData.req.stop(context);
+    if(probeData && probeData.req) {
+	    var context = {};
+	    context.cmd = cmd;
+	    probeData.req.stop(context);
+    }
 };
 
 module.exports = RedisProbe;
