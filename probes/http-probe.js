@@ -50,7 +50,7 @@ HttpProbe.prototype.attach = function(name, target) {
 	            	that.requestProbeStart(probeData, httpReq.method, traceUrl);
 	                aspect.after(res, 'end', probeData, function(obj, methodName, args, probeData, ret) {
 	            		that.metricsProbeEnd(probeData, httpReq.method, traceUrl, res, httpReq);
-	            		that.requestProbeEnd(probeData, httpReq.method, traceUrl);
+	            		that.requestProbeEnd(probeData, httpReq.method, traceUrl, res, httpReq);
 	            	});
 	            }
 	        });
@@ -99,8 +99,10 @@ HttpProbe.prototype.filterUrl = function(req) {
  */
 
 HttpProbe.prototype.metricsEnd = function(probeData, method, url, res, httpReq) {
-	probeData.timer.stop();
-	am.emit('http', {time: probeData.timer.startTimeMillis, method: method, url: url, duration: probeData.timer.timeDelta, header: res._header, statusCode: res.statusCode, contentType: res.getHeader('content-type'), requestHeader: httpReq.headers});
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    am.emit('http', {time: probeData.timer.startTimeMillis, method: method, url: url, duration: probeData.timer.timeDelta, header: res._header, statusCode: res.statusCode, contentType: res.getHeader('content-type'), requestHeader: httpReq.headers});
+    }
 };
 
 /*
@@ -113,10 +115,11 @@ HttpProbe.prototype.requestStart = function (probeData, method, url) {
     probeData.req = request.startRequest(reqType, url, true, probeData.timer);
 };
 
-HttpProbe.prototype.requestEnd = function (probeData, method, url) {
-    probeData.req.stop({url: url });
+HttpProbe.prototype.requestEnd = function (probeData, method, url, res, httpReq) {
+    if(probeData && probeData.req)
+        probeData.req.stop({url: url, method: method, requestHeader: httpReq.headers, statusCode: res.statusCode});
 };
-	
+
 /*
  * Set configuration by merging passed in config with current one
  */

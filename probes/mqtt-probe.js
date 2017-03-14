@@ -101,13 +101,15 @@ MqttProbe.prototype.attach = function(name, target) {
  *		duration:	the time for the request to respond
  */
 MqttProbe.prototype.metricsEnd = function(context, methodName, methodArgs) {
-	context.timer.stop();
-	// default to quality of service (qos) 0, as that's what the mqtt module does
-	var qos = 0;
-	if (methodArgs[2] && (typeof(methodArgs[2]) !== 'function')) {
-		qos = methodArgs[2].qos;
-	}
-	am.emit('mqtt', {time: context.timer.startTimeMillis, method: methodName, topic: methodArgs[0], qos: qos, duration: context.timer.timeDelta});
+    if(context && context.timer) {
+	    context.timer.stop();
+	    // default to quality of service (qos) 0, as that's what the mqtt module does
+	    var qos = 0;
+	    if (methodArgs[2] && (typeof(methodArgs[2]) !== 'function')) {
+		    qos = methodArgs[2].qos;
+	    }
+	    am.emit('mqtt', {time: context.timer.startTimeMillis, method: methodName, topic: methodArgs[0], qos: qos, duration: context.timer.timeDelta});
+    }
 };
 
 /*
@@ -122,11 +124,13 @@ MqttProbe.prototype.requestStart = function (context, methodName, methodArgs) {
 };
 
 MqttProbe.prototype.requestEnd = function (context, methodName, methodArgs) {
-	var qos = 0;
-	if (methodArgs[2] && (typeof(methodArgs[2]) !== 'function')) {
-		qos = methodArgs[2].qos;
-	}
-	context.req.stop({topic: methodArgs[0], qos: qos});
+    if(context && context.req) {
+	    var qos = 0;
+	    if (methodArgs[2] && (typeof(methodArgs[2]) !== 'function')) {
+		    qos = methodArgs[2].qos;
+	    }
+	    context.req.stop({topic: methodArgs[0], qos: qos});
+    }
 };
 
 module.exports = MqttProbe;
