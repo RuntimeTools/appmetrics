@@ -187,7 +187,7 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type.
 * `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `http-outbound`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
-* `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#set-config)*) for more information.
+* `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#appmetricssetconfigtype-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
