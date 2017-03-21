@@ -112,8 +112,8 @@ var getSupportedNodeVersionOrExit = function() {
 	if (process.version.indexOf('v7') === 0) {
 		return '7';
 	}
-	console.log('Unsupported version ' + process.version + '. Exiting.');
-	process.exit(1);
+	console.log('Unsupported version ' + process.version + '. Trying rebuild.');
+  tryRebuild();
 };
 
 var getAgentCorePlatformVersionDownloadURL = function() {
@@ -130,25 +130,30 @@ var getWindowsRedisFiles = function() {
 
 var downloadAndExtractTGZ = function(filepath, destDir, agentCoreFlag) {
  	if (agentCoreFlag) {
-		fs.createReadStream('binaries/agentcore/tgz/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
-			console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
-			process.exit(1);
-		})
-		.pipe(tar.Extract({path: destDir})).on('error', function(err) {
-			console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
-			process.exit(1);
-		})
-		.on('close', function() {
-			console.log('Download and extract of ' + filepath + ' finished.');
-		});
+    if(fs.existsSync('binaries/agentcore/tgz/'+filepath)) {
+		  fs.createReadStream('binaries/agentcore/tgz/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
+			  console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
+        tryRebuild();
+		  })
+		  .pipe(tar.Extract({path: destDir})).on('error', function(err) {
+			  console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
+        tryRebuild();
+		  })
+		  .on('close', function() {
+			  console.log('Download and extract of ' + filepath + ' finished.');
+		  });
+    } else {
+      console.log(filepath + " does not exist.")
+      tryRebuild();
+    }
 	} else {
 		fs.createReadStream('binaries/appmetrics/tgz/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
 			console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
-			process.exit(1);
+      tryRebuild();
 		})
 		.pipe(tar.Extract({path: destDir})).on('error', function(err) {
 			console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
-			process.exit(1);
+      tryRebuild();
 		})
 		.on('close', function() {
 			console.log('Download and extract of ' + filepath + ' finished.');
@@ -156,6 +161,17 @@ var downloadAndExtractTGZ = function(filepath, destDir, agentCoreFlag) {
 	}
 	
 };
+
+function tryRebuild() {
+  console.log('Falling back to node-gyp rebuild');
+  var childProcess = require('child_process')
+  var res = childProcess.spawnSync('node-gyp', ['rebuild'], {stdio:'inherit'});
+  if(res.signal) {
+    process.kill(process.pid, signal);
+  } else {
+    process.exit(res.status);
+  }
+}
 
 var installWinRedis = function(filepath, destDir) {
 	fs.createReadStream('binaries/winredis/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {

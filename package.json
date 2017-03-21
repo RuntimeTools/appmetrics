@@ -21,7 +21,7 @@
   },
   "scripts": {
     "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/probes/http-probe-test.js tests/headless_test.js",
-    "install": "node-gyp rebuild"
+    "install": "node extract_all_binaries.js"
   },
   "directories": {
     "lib": "lib",
