@@ -147,17 +147,22 @@ var downloadAndExtractTGZ = function(filepath, destDir, agentCoreFlag) {
       tryRebuild();
     }
 	} else {
-		fs.createReadStream('binaries/appmetrics/tgz/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
-			console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
+    if(fs.existsSync('binaries/appmetrics/tgz/'+filepath)) {
+		  fs.createReadStream('binaries/appmetrics/tgz/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
+			  console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
+        tryRebuild();
+		  })
+		  .pipe(tar.Extract({path: destDir})).on('error', function(err) {
+			  console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
+        tryRebuild();
+		  })
+		  .on('close', function() {
+			  console.log('Download and extract of ' + filepath + ' finished.');
+		  });
+    } else {
+      console.log(filepath + " does not exist.")
       tryRebuild();
-		})
-		.pipe(tar.Extract({path: destDir})).on('error', function(err) {
-			console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
-      tryRebuild();
-		})
-		.on('close', function() {
-			console.log('Download and extract of ' + filepath + ' finished.');
-		});
+    }
 	}
 	
 };
