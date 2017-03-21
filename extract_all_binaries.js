@@ -165,7 +165,7 @@ var downloadAndExtractTGZ = function(filepath, destDir, agentCoreFlag) {
 function tryRebuild() {
   console.log('Falling back to node-gyp rebuild');
   var childProcess = require('child_process')
-  var res = childProcess.spawnSync('node-gyp', ['rebuild'], {stdio:'inherit'});
+  var res = childProcess.spawnSync('node-gyp', ['rebuild'], {stdio:'inherit', shell:true});
   if(res.signal) {
     process.kill(process.pid, signal);
   } else {
