@@ -86,7 +86,7 @@ var ensureSupportedPlatformOrExit = function() {
 	var platform = getPlatform();
 	if (AGENTCORE_PLATFORMS.indexOf(platform) === -1) {
 		console.log(platform + ' is not a currently supported platform. Exiting');
-		process.exit(1);
+	  fail();
 	}
 };
 
@@ -112,8 +112,8 @@ var getSupportedNodeVersionOrExit = function() {
 	if (process.version.indexOf('v7') === 0) {
 		return '7';
 	}
-	console.log('Unsupported version ' + process.version + '. Exiting.');
-	process.exit(1);
+	console.log('Unsupported version ' + process.version + '. Trying rebuild.');
+  fail();
 };
 
 var getAgentCorePlatformVersionDownloadURL = function() {
@@ -130,41 +130,56 @@ var getWindowsRedisFiles = function() {
 
 var downloadAndExtractTGZ = function(filepath, destDir, agentCoreFlag) {
  	if (agentCoreFlag) {
-		fs.createReadStream('binaries/agentcore/tgz/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
-			console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
-			process.exit(1);
-		})
-		.pipe(tar.Extract({path: destDir})).on('error', function(err) {
-			console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
-			process.exit(1);
-		})
-		.on('close', function() {
-			console.log('Download and extract of ' + filepath + ' finished.');
-		});
+    if(fs.existsSync('binaries/agentcore/tgz/'+filepath)) {
+		  fs.createReadStream('binaries/agentcore/tgz/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
+			  console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
+        fail();
+		  })
+		  .pipe(tar.Extract({path: destDir})).on('error', function(err) {
+			  console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
+        fail();
+		  })
+		  .on('close', function() {
+			  console.log('Download and extract of ' + filepath + ' finished.');
+		  });
+    } else {
+      console.log(filepath + " does not exist.")
+      fail();
+    }
 	} else {
-		fs.createReadStream('binaries/appmetrics/tgz/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
-			console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
-			process.exit(1);
-		})
-		.pipe(tar.Extract({path: destDir})).on('error', function(err) {
-			console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
-			process.exit(1);
-		})
-		.on('close', function() {
-			console.log('Download and extract of ' + filepath + ' finished.');
-		});
+    if(fs.existsSync('binaries/appmetrics/tgz/'+filepath)) {
+		  fs.createReadStream('binaries/appmetrics/tgz/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
+			  console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
+        fail();
+		  })
+		  .pipe(tar.Extract({path: destDir})).on('error', function(err) {
+			  console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
+        fail();
+		  })
+		  .on('close', function() {
+			  console.log('Download and extract of ' + filepath + ' finished.');
+		  });
+    } else {
+      console.log(filepath + " does not exist.")
+      fail();
+    }
 	}
 	
 };
 
+function fail() {
+  console.log('Falling back to node-gyp rebuild');
+  process.exit(1);
+}
+
 var installWinRedis = function(filepath, destDir) {
 	fs.createReadStream('binaries/winredis/'+filepath).pipe(zlib.createGunzip()).on('error', function(err) {
 		console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
-		process.exit(1);
+		fail();
 	})
 	.pipe(tar.Extract({path: destDir})).on('error', function(err) {
 		console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
-		process.exit(1);
+		fail();
 	})
 	.on('close', function() {
 		console.log('Download and extract of ' + filepath + ' finished.');
