@@ -231,19 +231,13 @@ Emitted when a CPU monitoring sample is taken.
     * `process` (Number) the percentage of CPU used by the Node.js application itself. This is a value between 0.0 and 1.0.
     * `system` (Number) the percentage of CPU used by the system as a whole. This is a value between 0.0 and 1.0.
 
-### Event: 'memory'
-Emitted when a memory monitoring sample is taken.
-* `data` (Object) the data from the memory sample:
-    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
-    * `physical_total` (Number) the total amount of RAM available on the system in bytes.
-    * `physical_used` (Number) the total amount of RAM in use on the system in bytes.
-    * `physical_free` (Number) the total amount of free RAM available on the system in bytes.
-    * `virtual` (Number) the memory address space used by the Node.js application in bytes.
-    * `private` (Number) the amount of memory used by the Node.js application that cannot be shared with other processes, in bytes.
-    * `physical` (Number) the amount of RAM used by the Node.js application in bytes.
-
-### Event: 'initialized'
-Emitted when all possible environment variables have been collected. Use `appmetrics.monitor.getEnvironment()` to access the available environment variables.
+### Event: 'eventloop'
+Emitted every 5 seconds, summarising sample based information of the event loop latency
+* `data` (Object) the data from the event loop sample:
+    * `time` (Number) the milliseconds when the event was emitted. This can be converted to a Date using `new Date(data.time)`.
+    * `latency.min` (Number) the shortest sampled latency, in milliseconds.
+    * `latency.max` (Number) the longest sampled latency, in milliseconds.
+    * `latency.avg` (Number) the average sampled latency, in milliseconds.
 
 ### Event: 'gc'
 Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime.
@@ -254,13 +248,8 @@ Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime
     * `used` (Number) the amount of memory used on the JavaScript heap in bytes.
     * `duration` (Number) the duration of the GC cycle in milliseconds.
 
-### Event: 'eventloop'
-Emitted every 5 seconds, summarising sample based information of the event loop latency
-* `data` (Object) the data from the event loop sample:
-    * `time` (Number) the milliseconds when the event was emitted. This can be converted to a Date using `new Date(data.time)`.
-    * `latency.min` (Number) the shortest sampled latency, in milliseconds.
-    * `latency.max` (Number) the longest sampled latency, in milliseconds.
-    * `latency.avg` (Number) the average sampled latency, in milliseconds.
+### Event: 'initialized'
+Emitted when all possible environment variables have been collected. Use `appmetrics.monitor.getEnvironment()` to access the available environment variables.
 
 ### Event: 'loop'
 Emitted every 60 seconds, summarising event tick information in time interval
@@ -269,6 +258,17 @@ Emitted every 60 seconds, summarising event tick information in time interval
     * `minimum` (Number) the shortest (i.e. fastest) tick in milliseconds.
     * `maximum` (Number) the longest (slowest) tick in milliseconds.
     * `average` (Number) the average tick time in milliseconds.
+
+### Event: 'memory'
+Emitted when a memory monitoring sample is taken.
+* `data` (Object) the data from the memory sample:
+    * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
+    * `physical_total` (Number) the total amount of RAM available on the system in bytes.
+    * `physical_used` (Number) the total amount of RAM in use on the system in bytes.
+    * `physical_free` (Number) the total amount of free RAM available on the system in bytes.
+    * `virtual` (Number) the memory address space used by the Node.js application in bytes.
+    * `private` (Number) the amount of memory used by the Node.js application that cannot be shared with other processes, in bytes.
+    * `physical` (Number) the amount of RAM used by the Node.js application in bytes.
 
 ### Event: 'profiling'
 Emitted when a profiling sample is available from the underlying V8 runtime.
@@ -281,6 +281,8 @@ Emitted when a profiling sample is available from the underlying V8 runtime.
         * `file` (String) the file in which this function is defined.
         * `line` (Number) the line number in the file.
         * `count` (Number) the number of samples for this function.
+
+## Application Events (probes)
 
 ### Event: 'http'
 Emitted when a HTTP request is made of the application.
@@ -304,20 +306,23 @@ Emitted when the application makes an outbound HTTP request.
     * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
     * 'requestHeaders' (Object) the HTTP request headers.
 
-### Event: 'socketio'
-Emitted when WebSocket data is sent or received by the application using socketio.
-* `data` (Object) the data from the socket.io request:
-    * `time` (Number) the milliseconds when the event occurred. This can be converted to a Date using `new Date(data.time)`.
-    * `method` (String) whether the event is a `broadcast` or `emit` from the application, or a `receive` from a client  .
-    * `event` (String) the name used for the event.
-    * `duration` (Number) the time taken for event to be sent or for a received event to be handled.
+### Event: 'leveldown'
+Emitted when a LevelDB query is made using the `leveldown` module.
+* `data` (Object) the data from the LevelDB query:
+    * `time` (Number) the time in milliseconds when the LevelDB query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `method` (String) The leveldown method being used.
+    * `key` (Object) The key being used for a call to `get`, `put` or `del` (Undefined for other methods)
+    * `value` (Object) The value being added to the LevelDB database using the `put` method (Undefined for other methods) 
+    * `opCount` (Number) The number of operations carried out by a `batch` method (Undefined for other methods) 
+    * `duration` (Number) the time taken for the LevelDB query to be responded to in ms.
 
-### Event: 'mysql'
-Emitted when a MySQL query is made using the `mysql` module.
-* `data` (Object) the data from the MySQL query:
-    * `time` (Number) the milliseconds when the MySQL query was made. This can be converted to a Date using `new Date(data.time)`.
-    * `query` (String) the query made of the MySQL database.
-    * `duration` (Number) the time taken for the MySQL query to be responded to in ms.
+### Event: 'memcached'
+Emitted when a data is stored, retrieved or modified in Memcached using the `memcached` module.
+* `data` (Object) the data from the memcached event:
+    * `time` (Number) the milliseconds when the memcached event occurred. This can be converted to a Date using `new Date(data.time)`
+    * `method` (String) the method used in the memcached client, eg `set`, `get`, `append`, `delete`, etc.
+    * `key` (String) the key associated with the data.
+    * `duration` (Number) the time taken for the operation on the memcached data to occur.
 
 ### Event: 'mongo'
 Emitted when a MongoDB query is made using the `mongodb` module.
@@ -327,15 +332,6 @@ Emitted when a MongoDB query is made using the `mongodb` module.
     * `duration` (Number) the time taken for the MongoDB query to be responded to in ms.
     * `method` (String) the executed method for the query, such as find, update.
     * `collection` (String) the MongoDB collection name.
-
-### Event: 'mqtt'
-Emitted when a MQTT message is sent or received.
-* `data` (Object) the data from the MQTT event:
-    * `time` (Number) the time in milliseconds when the MQTT event occurred. This can be converted to a Date using new Date(data.time).
-    * `method` (String) the name of the call or event (will be one of 'publish' or 'message').
-    * `topic` (String) the topic on which a message is published or received.
-    * `qos` (Number) the QoS level for the message.
-    * `duration` (Number) the time taken in milliseconds.
 
 ### Event: 'mqlight'
 Emitted when a MQLight message is sent or received.
@@ -348,15 +344,42 @@ Emitted when a MQLight message is sent or received.
     * `qos` (Number) the QoS level for a 'send' call, undefined if not set.
     * `duration` (Number) the time taken in milliseconds.
 
-### Event: 'leveldown'
-Emitted when a LevelDB query is made using the `leveldown` module.
-* `data` (Object) the data from the LevelDB query:
-    * `time` (Number) the time in milliseconds when the LevelDB query was made. This can be converted to a Date using `new Date(data.time)`.
-    * `method` (String) The leveldown method being used.
-    * `key` (Object) The key being used for a call to `get`, `put` or `del` (Undefined for other methods)
-    * `value` (Object) The value being added to the LevelDB database using the `put` method (Undefined for other methods) 
-    * `opCount` (Number) The number of operations carried out by a `batch` method (Undefined for other methods) 
-    * `duration` (Number) the time taken for the LevelDB query to be responded to in ms.
+### Event: 'mqtt'
+Emitted when a MQTT message is sent or received.
+* `data` (Object) the data from the MQTT event:
+    * `time` (Number) the time in milliseconds when the MQTT event occurred. This can be converted to a Date using new Date(data.time).
+    * `method` (String) the name of the call or event (will be one of 'publish' or 'message').
+    * `topic` (String) the topic on which a message is published or received.
+    * `qos` (Number) the QoS level for the message.
+    * `duration` (Number) the time taken in milliseconds.
+
+### Event: 'mysql'
+Emitted when a MySQL query is made using the `mysql` module.
+* `data` (Object) the data from the MySQL query:
+    * `time` (Number) the milliseconds when the MySQL query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the MySQL database.
+    * `duration` (Number) the time taken for the MySQL query to be responded to in ms.
+
+### Event: 'oracle'
+Emitted when a query is executed using the `oracle` module.
+* `data` (Object) the data from the Oracle query:
+    * `time` (Number) the milliseconds when the Oracle query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the Oracle database.
+    * `duration` (Number) the time taken for the Oracle query to be responded to in ms.
+
+### Event: 'oracledb'
+Emitted when a query is executed using the `oracledb` module.
+* `data` (Object) the data from the OracleDB query:
+    * `time` (Number) the milliseconds when the OracleDB query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the OracleDB database.
+    * `duration` (Number) the time taken for the OracleDB query to be responded to in ms.
+
+### Event: 'postgres'
+Emitted when a PostgreSQL query is made to the `pg` module.
+* `data` (Object) the data from the PostgreSQL query:
+    * `time` (Number) the milliseconds when the PostgreSQL query was made. This can be converted to a Date using `new Date(data.time)`.
+    * `query` (String) the query made of the PostgreSQL database.
+    * `duration` (Number) the time taken for the PostgreSQL query to be responded to in ms.
 
 ### Event: 'redis'
 Emitted when a Redis command is sent.
@@ -375,27 +398,13 @@ Emitted when a Riak method is called using the `basho-riak-client` module.
     * `query` (String) the query parameter used in the `mapReduce` method.
     * `duration` (Number) the time taken in milliseconds.
 
-### Event: 'memcached'
-Emitted when a data is stored, retrieved or modified in Memcached using the `memcached` module.
-* `data` (Object) the data from the memcached event:
-    * `time` (Number) the milliseconds when the memcached event occurred. This can be converted to a Date using `new Date(data.time)`
-    * `method` (String) the method used in the memcached client, eg `set`, `get`, `append`, `delete`, etc.
-    * `key` (String) the key associated with the data.
-    * `duration` (Number) the time taken for the operation on the memcached data to occur.
-
-### Event: 'oracledb'
-Emitted when a query is executed using the `oracledb` module.
-* `data` (Object) the data from the OracleDB query:
-    * `time` (Number) the milliseconds when the OracleDB query was made. This can be converted to a Date using `new Date(data.time)`.
-    * `query` (String) the query made of the OracleDB database.
-    * `duration` (Number) the time taken for the OracleDB query to be responded to in ms.
-
-### Event: 'oracle'
-Emitted when a query is executed using the `oracle` module.
-* `data` (Object) the data from the Oracle query:
-    * `time` (Number) the milliseconds when the Oracle query was made. This can be converted to a Date using `new Date(data.time)`.
-    * `query` (String) the query made of the Oracle database.
-    * `duration` (Number) the time taken for the Oracle query to be responded to in ms.
+### Event: 'socketio'
+Emitted when WebSocket data is sent or received by the application using socketio.
+* `data` (Object) the data from the socket.io request:
+    * `time` (Number) the milliseconds when the event occurred. This can be converted to a Date using `new Date(data.time)`.
+    * `method` (String) whether the event is a `broadcast` or `emit` from the application, or a `receive` from a client  .
+    * `event` (String) the name used for the event.
+    * `duration` (Number) the time taken for event to be sent or for a received event to be handled.
 
 ### Event: 'strong-oracle'
 Emitted when a query is executed using the `strong-oracle` module.
@@ -403,28 +412,23 @@ Emitted when a query is executed using the `strong-oracle` module.
     * `time` (Number) the milliseconds when the Strong Oracle query was made. This can be converted to a Date using `new Date(data.time)`.
     * `query` (String) the query made of the database.
     * `duration` (Number) the time taken for the Strong Oracle query to be responded to in ms.
+    
+## Requests
 
 ### Event: 'request'
-Emitted when a request is made of the application that involves one or more monitored application level events. Request events are disabled by default.
+Requests are a special type of event emitted by appmetrics.  All the probes named above can also create request events if requests are enabled.  Howver requests are nested within a root incoming request (usually http). Request events are disabled by default.
 * `data` (Object) the data from the request:
     * `time` (Number) the milliseconds when the request occurred. This can be converted to a Date using `new Date(data.time)`.
-    * `type` (String) The type of the request event. This can currently be set to 'HTTP' or 'DB'.
+    * `type` (String) The type of the request event. This is generally the name of the probe that sent the request data, e.g. HTTP, socketio etc.
     * `name` (String) The name of the request event. This is the request task, eg. the url, or the method being used.
     * `request` (Object) the detailed data for the root request event:
-        * `type` (String) The type of the request event. This can currently be set to 'HTTP' or 'DB'.
+        * `type` (String) The type of the request event. This is generally the name of the probe that sent the request data, e.g. HTTP, socketio etc.
         * `name` (String) The name of the request event. This is the request task, eg. the url, or the method being used.
-        * `context` (Object) A map of any additional context information for the request event.
+        * `context` (Object) Additional context data (usually contains the same data as the associated non-request metric event).
         * `stack` (String) An optional stack trace for the event call.
         * `children` (Array) An array of child request events that occurred as part of the overall request event. Child request events may include function trace entries, which will have a `type` of null.
         * `duration` (Number) the time taken for the request to complete in ms.
     * `duration` (Number) the time taken for the overall request to complete in ms.
-
-### Event: 'postgres'
-Emitted when a PostgreSQL query is made to the `pg` module.
-* `data` (Object) the data from the PostgreSQL query:
-    * `time` (Number) the milliseconds when the PostgreSQL query was made. This can be converted to a Date using `new Date(data.time)`.
-    * `query` (String) the query made of the PostgreSQL database.
-    * `duration` (Number) the time taken for the PostgreSQL query to be responded to in ms.
 
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
