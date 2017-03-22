@@ -97,7 +97,7 @@ LeveldownProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for leveldown queries
  */
 LeveldownProbe.prototype.requestStart = function (probeData, dbTarget, method, methodArgs) {
-	 req = request.startRequest( 'DB', "query" );
+	 req = request.startRequest( 'leveldown', "query" );
 	 req.setContext({leveldown: methodArgs[0]});
 };
 

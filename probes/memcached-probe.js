@@ -96,7 +96,7 @@ MemcachedProbe.prototype.metricsEnd = function(context, method, methodArgs) {
  * Heavyweight request probes for Memcached data store
  */
 MemcachedProbe.prototype.requestStart = function (context, methodName, methodArgs) {
-	context.req = request.startRequest( 'Memcached', methodName, false, context.timer);
+	context.req = request.startRequest( 'memcached', methodName, false, context.timer);
 };
 
 MemcachedProbe.prototype.requestEnd = function (context, methodName, methodArgs) {

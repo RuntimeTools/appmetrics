@@ -135,10 +135,10 @@ Strong_MQProbe.prototype.metricsEnd = function(context, methodName, methodArgs, 
  */
 Strong_MQProbe.prototype.requestStart = function (context, methodName, methodArgs, socketType) {
 	if (methodName === 'publish') {
-		context.req = request.startRequest('STRONG-MQ', methodName, false, context.timer);
+		context.req = request.startRequest('strong-mq', methodName, false, context.timer);
 	} else {
 		/* Received messages mark the start of requests. */
-		context.req = request.startRequest('STRONG-MQ', 'message', true, context.timer);
+		context.req = request.startRequest('strong-mq', 'message', true, context.timer);
 	}
 };
 

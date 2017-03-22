@@ -76,7 +76,7 @@ MySqlProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for MySQL queries
  */
 MySqlProbe.prototype.requestStart = function (probeData, method, methodArgs) {
-	probeData.req = request.startRequest( 'DB', "query", false, probeData.timer );
+	probeData.req = request.startRequest( 'mysql', "query", false, probeData.timer );
 };
 
 MySqlProbe.prototype.requestEnd = function (probeData, method, methodArgs) {

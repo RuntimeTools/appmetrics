@@ -136,9 +136,9 @@ AxonProbe.prototype.metricsEnd = function(context, methodName, methodArgs, socke
  */
 AxonProbe.prototype.requestStart = function (context, methodName, methodArgs) {
 	if (methodName === 'message') {
-		context.req = request.startRequest('AXON', methodName, true, context.timer);
+		context.req = request.startRequest('axon', methodName, true, context.timer);
 	} else {
-		context.req = request.startRequest('AXON', methodName, false, context.timer);
+		context.req = request.startRequest('axon', methodName, false, context.timer);
 	}
 };
 

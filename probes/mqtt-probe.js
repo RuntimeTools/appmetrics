@@ -117,9 +117,9 @@ MqttProbe.prototype.metricsEnd = function(context, methodName, methodArgs) {
  */
 MqttProbe.prototype.requestStart = function (context, methodName, methodArgs) {
 	if (methodName === 'message') {
-		context.req = request.startRequest('MQTT', methodName, true, context.timer);
+		context.req = request.startRequest('mqtt', methodName, true, context.timer);
 	} else {
-		context.req = request.startRequest('MQTT', methodName, false, context.timer);
+		context.req = request.startRequest('mqtt', methodName, false, context.timer);
 	}
 };
 

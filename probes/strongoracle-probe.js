@@ -106,7 +106,7 @@ StrongOracleProbe.prototype.metricsEnd = function(probeData, method, methodArgs)
  * Heavyweight request probes for StrongOracle queries
  */
 StrongOracleProbe.prototype.requestStart = function (probeData, method, methodArgs) {
-	probeData.req = request.startRequest('StrongOracle', method, false, probeData.timer);
+	probeData.req = request.startRequest('strong-oracle', method, false, probeData.timer);
 };
 
 StrongOracleProbe.prototype.requestEnd = function (probeData, method, methodArgs) {

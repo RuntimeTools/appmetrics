@@ -125,7 +125,7 @@ MongoProbe.prototype.metricsEnd = function(probeData, collectionName, method, me
  * Heavyweight request probes for MongoDB queries
  */
 MongoProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
-    probeData.req = request.startRequest( 'DB', method + "("+target.collectionName+")", false, probeData.timer );
+    probeData.req = request.startRequest( 'mongo', method + "("+target.collectionName+")", false, probeData.timer );
 };
 
 MongoProbe.prototype.requestEnd = function (probeData, method, methodArgs) {

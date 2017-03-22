@@ -110,7 +110,7 @@ HttpProbe.prototype.metricsEnd = function(probeData, method, url, res, httpReq) 
  */
 
 HttpProbe.prototype.requestStart = function (probeData, method, url) {
-    var reqType = 'HTTP';
+    var reqType = 'http';
     // Mark as a root request as this happens due to an external event
     probeData.req = request.startRequest(reqType, url, true, probeData.timer);
 };
