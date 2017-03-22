@@ -83,7 +83,7 @@ loopbackDJProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for juggler commands
  */
 loopbackDJProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
-	 probeData.req = request.startRequest( 'DB', "query" );
+	 probeData.req = request.startRequest( 'loopback', "query" );
 	 probeData.req.setContext({loopbackDJProbe: methodArgs[0]});
 };
 

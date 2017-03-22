@@ -131,7 +131,7 @@ RiakProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for Riak queries
  */
 RiakProbe.prototype.requestStart = function (probeData, method, methodArgs) {
-    probeData.req = request.startRequest( 'DB', 'query', false, probeData.timer );
+    probeData.req = request.startRequest( 'basho-riak-client', 'query', false, probeData.timer );
 };
 
 RiakProbe.prototype.requestEnd = function (probeData, method, methodArgs) {

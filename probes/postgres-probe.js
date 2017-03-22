@@ -123,7 +123,7 @@ PostgresProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for Postgres queries
  */
 PostgresProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
-  probeData.req = request.startRequest( 'DB', "query", false, probeData.timer );
+  probeData.req = request.startRequest( 'postgres', "query", false, probeData.timer );
   probeData.req.setContext({sql: methodArgs[0]});
 };
 

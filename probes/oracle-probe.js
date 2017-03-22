@@ -104,7 +104,7 @@ OracleProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for Oracle queries
  */
 OracleProbe.prototype.requestStart = function (probeData, method, methodArgs) {
-	probeData.req = request.startRequest('Oracle', method, false, probeData.timer);
+	probeData.req = request.startRequest('oracle', method, false, probeData.timer);
 };
 
 OracleProbe.prototype.requestEnd = function (probeData, method, methodArgs) {

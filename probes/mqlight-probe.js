@@ -144,9 +144,9 @@ MQLightProbe.prototype.metricsEnd = function(probeData, method, methodArgs, clie
  */
 MQLightProbe.prototype.requestStart = function (probeData, method, methodArgs) {
 	if(method == 'message') {
-		probeData.req = request.startRequest('MQLight', method, true, probeData.timer);
+		probeData.req = request.startRequest('mqlight', method, true, probeData.timer);
 	} else {
-		probeData.req = request.startRequest('MQLight', method, false, probeData.timer);
+		probeData.req = request.startRequest('mqlight', method, false, probeData.timer);
 	}
 };
 

@@ -172,7 +172,7 @@ HttpOutboundProbe.prototype.metricsEnd = function(probeData, method, url, res, h
  * Heavyweight request probes for HTTP outbound requests
  */
 HttpOutboundProbe.prototype.requestStart = function (probeData, method, url) {
-    var reqType = 'HTTP Outbound';
+    var reqType = 'http-outbound';
     // Do not mark as a root request
     probeData.req = request.startRequest(reqType, url, false, probeData.timer);
 };
