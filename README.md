@@ -282,7 +282,7 @@ Emitted when a profiling sample is available from the underlying V8 runtime.
         * `line` (Number) the line number in the file.
         * `count` (Number) the number of samples for this function.
 
-## Application Events (probes)
+## API: Dependency Events (probes)
 
 ### Event: 'http'
 Emitted when a HTTP request is made of the application.
@@ -413,7 +413,7 @@ Emitted when a query is executed using the `strong-oracle` module.
     * `query` (String) the query made of the database.
     * `duration` (Number) the time taken for the Strong Oracle query to be responded to in ms.
     
-## Requests
+## API: Requests
 
 ### Event: 'request'
 Requests are a special type of event emitted by appmetrics.  All the probes named above can also create request events if requests are enabled.  Howver requests are nested within a root incoming request (usually http). Request events are disabled by default.
