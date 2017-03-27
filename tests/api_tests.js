@@ -232,6 +232,7 @@ function runCommonEnvTests(commonEnvData, t) {
   for (var entry in OSES) {
     if ((commonEnvData['os.name']).indexOf(OSES[entry]) > -1) {
       found = true;
+      break;
     }
   }
   t.ok(found, "Contains a recognised value for os.name");
