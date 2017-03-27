@@ -75,6 +75,10 @@ function checkHttpRequestData(data, t) {
     t.ok(isInteger(data.statusCode), "statusCode is an integer");
     t.equals(data.hasOwnProperty('requestHeader'), true,
             "Should have HTTP property requestHeader;")
+    t.equals(data.hasOwnProperty('header'), true,
+            "Should have HTTP property header;")
+    t.equals(data.hasOwnProperty('contentType'), true,
+            "Should have HTTP property contentType;")
 }
 
 function isInteger(n) {
