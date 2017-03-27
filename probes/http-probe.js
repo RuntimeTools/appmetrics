@@ -117,7 +117,7 @@ HttpProbe.prototype.requestStart = function (probeData, method, url) {
 
 HttpProbe.prototype.requestEnd = function (probeData, method, url, res, httpReq) {
     if(probeData && probeData.req)
-        probeData.req.stop({url: url, method: method, requestHeader: httpReq.headers, statusCode: res.statusCode});
+        probeData.req.stop({url: url, method: method, requestHeader: httpReq.headers, statusCode: res.statusCode, header: res._header, contentType: res.getHeader('content-type')});
 };
 
 /*
