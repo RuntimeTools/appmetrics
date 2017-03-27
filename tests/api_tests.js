@@ -223,13 +223,19 @@ monitor.once('initialized', function() {
 function runCommonEnvTests(commonEnvData, t) {
 
   var ARCHS = ['x86', 'x86_64', 'ppc32', 'ppc64', 'ppc64le', 's390', 's390x'];
-  var OSES = ['AIX', 'Linux', 'Windows 7', 'Mac OS X'];
+  var OSES = ['AIX', 'Linux', 'Windows', 'Mac OS X'];
 
   t.ok(ARCHS.indexOf(commonEnvData['os.arch']) != -1,
        "Contains a recognised value for os.arch");
 
-  t.ok(OSES.indexOf(commonEnvData['os.name']) != -1,
-       "Contains a recognised value for os.name");
+  var found = false;
+  for (var entry in OSES) {
+    if ((commonEnvData['os.name']).indexOf(OSES[entry]) > -1) {
+      found = true;
+      break;
+    }
+  }
+  t.ok(found, "Contains a recognised value for os.name");
 
   t.match(commonEnvData['os.version'],/\S/,
           "os.version isn't empty");
