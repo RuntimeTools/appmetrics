@@ -341,6 +341,11 @@ module.exports.start = function start () {
   var am = this;
   agent.start();
   process.on('exit', function () {
+    // take the event loop latency methods off the loop
+    if (latencyRunning === true) {
+        clearInterval(latencyCheckLoop);
+        clearInterval(latencyReportLoop);
+    }
     var headlessMode = agent.getOption('com.ibm.diagnostics.healthcenter.headless');
     am.stop();
     if(headlessMode == 'on') {
