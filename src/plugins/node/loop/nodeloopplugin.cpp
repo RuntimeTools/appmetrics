@@ -73,21 +73,22 @@ static void GetLoopInformation(uv_timer_s *data, int status) {
 		mean = sum / num;
 	}
 
-#if defined(_WINDOWS)
-    std::string content = "NodeLoopData," + std::to_string(min) + "," +
-        std::to_string(max) + "," + std::to_string(num) + "," +
-        std::to_string(mean) + "\n";
-#else
 	std::stringstream contentss;
 	contentss << "NodeLoopData";
-	contentss << "," << min;
-	contentss << "," << max;
-	contentss << "," << num;
-	contentss << "," << mean;
+#if defined(_WINDOWS)
+	contentss << "," << std::to_string(min);
+	contentss << "," << std::to_string(max);
+	contentss << "," << std::to_string(num);
+	contentss << "," << std::to_string(mean);
+#else
+    contentss << "," << min;
+    contentss << "," << max;
+    contentss << "," << num;
+    contentss << "," << mean;
+#endif
 	contentss << '\n';
 
 	std::string content = contentss.str();
-#endif
 
 	min = 9999;
 	max = 0;

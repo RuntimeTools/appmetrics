@@ -154,11 +154,19 @@ void afterGC(GCType type, GCCallbackFlags flags) {
 
 	std::stringstream contentss;
 	contentss << "NodeGCData";
+#if defined(_WINDOWS)
 	contentss << "," << std::to_string(gcRealEnd); 
 	contentss << "," << gcType;
 	contentss << "," << std::to_string(hs.total_heap_size());
 	contentss << "," << std::to_string(hs.used_heap_size());
 	contentss << "," << std::to_string(gcDuration);
+#else
+    contentss << "," << gcRealEnd;
+    contentss << "," << gcType;
+    contentss << "," << hs.total_heap_size();
+    contentss << "," << hs.used_heap_size();
+    contentss << "," << gcDuration;
+#endif
 	contentss << '\n';
 	
 	std::string content = contentss.str();
