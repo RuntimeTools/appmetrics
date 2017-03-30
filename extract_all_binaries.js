@@ -38,7 +38,7 @@ var AGENTCORE_PLATFORMS = ['aix-ppc',
                            'linux-x64',
                            'win32-ia32',
                            'win32-x64'];
-var AGENTCORE_VERSION = "3.2.0";
+var AGENTCORE_VERSION = "3.2.1";
 var APPMETRICS_VERSION = "3.0.0";
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
