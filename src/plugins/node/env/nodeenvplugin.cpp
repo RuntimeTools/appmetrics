@@ -251,16 +251,15 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 		if (plugin::nodeName != "") {
 			contentss << "runtime.name=" << plugin::nodeName << '\n';
 		}
-
-		contentss << "heap.size.limit=" << plugin::heapSizeLimit << '\n';
+        contentss << "heap.size.limit=" << std::to_string(plugin::heapSizeLimit) << '\n';
 		if (plugin::maxSemiSpaceSizeGuess > 0) {
-			contentss << "max.semi.space.size=" << plugin::maxSemiSpaceSizeGuess << '\n';
+			contentss << "max.semi.space.size=" << std::to_string(plugin::maxSemiSpaceSizeGuess) << '\n';
 		}
 		if (plugin::maxOldSpaceSizeGuess > 0) {
-			contentss << "max.old.space.size=" << plugin::maxOldSpaceSizeGuess << '\n';
+			contentss << "max.old.space.size=" << std::to_string(plugin::maxOldSpaceSizeGuess) << '\n';
 		}
 		if (plugin::maxHeapSizeGuess > 0) {
-			contentss << "max.heap.size=" << plugin::maxHeapSizeGuess << '\n';
+			contentss << "max.heap.size=" << std::to_string(plugin::maxHeapSizeGuess) << '\n';
 		}
 
 

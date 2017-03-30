@@ -155,15 +155,15 @@ static void ConstructNodeData(const CpuProfileNode *node, int id, int parentId, 
 
 		result << "{" << "\"functionName\":\"" << strFunction << "\",";
 		result << "\"url\":\"" << strScript << "\",";
-		result << "\"lineNumber\":" << line << ",";
-		result << "\"hitCount\":" << selfSamples << ",";
-		result << "\"id\":" << id << ",";
+		result << "\"lineNumber\":" << std::to_string(line) << ",";
+		result << "\"hitCount\":" << std::to_string(selfSamples) << ",";
+		result << "\"id\":" << std::to_string(id) << ",";
 		result << "\"children\":[";
 	}
 	
 	else{
-		result << "NodeProfData,Node," << id << ',' << parentId << ',';
-		result << script << ',' << function << ',' << line << ',' << selfSamples << '\n';
+		result << "NodeProfData,Node," << std::to_string(id) << ',' << std::to_string(parentId) << ',';
+		result << script << ',' << function << ',' << std::to_string(line) << ',' << std::to_string(selfSamples) << '\n';
 	}
 	
 	// clean up
@@ -195,10 +195,10 @@ static char * ConstructData(const CpuProfile *profile) {
 
 	std::stringstream result;
 	if (jsonEnabled){
-		result << "{\"date\":" << GetRealTime() << ",";
+		result << "{\"date\":" << std::to_string(GetRealTime()) << ",";
 		result << "\"head\":";
 	}
-	else result << "NodeProfData,Start," << GetRealTime() << '\n';	
+	else result << "NodeProfData,Start," << std::to_string(GetRealTime()) << '\n';	
 	visit(topRoot, ConstructNodeData, 0, result);
 	if (jsonEnabled){
 		result << "}";
