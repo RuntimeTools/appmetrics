@@ -75,17 +75,10 @@ static void GetLoopInformation(uv_timer_s *data, int status) {
 
 	std::stringstream contentss;
 	contentss << "NodeLoopData";
-#if defined(_WINDOWS)
-	contentss << "," << std::to_string(min);
-	contentss << "," << std::to_string(max);
-	contentss << "," << std::to_string(num);
-	contentss << "," << std::to_string(mean);
-#else
-    contentss << "," << min;
-    contentss << "," << max;
-    contentss << "," << num;
-    contentss << "," << mean;
-#endif
+	contentss << "," << min;
+	contentss << "," << max;
+	contentss << "," << num;
+	contentss << "," << mean;
 	contentss << '\n';
 
 	std::string content = contentss.str();
