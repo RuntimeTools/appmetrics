@@ -155,26 +155,15 @@ static void ConstructNodeData(const CpuProfileNode *node, int id, int parentId, 
 
 		result << "{" << "\"functionName\":\"" << strFunction << "\",";
 		result << "\"url\":\"" << strScript << "\",";
-#if defined(_WINDOWS)
-		result << "\"lineNumber\":" << std::to_string(line) << ",";
-		result << "\"hitCount\":" << std::to_string(selfSamples) << ",";
-		result << "\"id\":" << std::to_string(id) << ",";
-#else
-        result << "\"lineNumber\":" << line << ",";
+		result << "\"lineNumber\":" << line << ",";
 		result << "\"hitCount\":" << selfSamples << ",";
 		result << "\"id\":" << id << ",";
-#endif
 		result << "\"children\":[";
 	}
 	
 	else{
-#if defined(_WINDOWS)
-		result << "NodeProfData,Node," << std::to_string(id) << ',' << std::to_string(parentId) << ',';
-		result << script << ',' << function << ',' << std::to_string(line) << ',' << std::to_string(selfSamples) << '\n';
-#else
-        result << "NodeProfData,Node," << id << ',' << parentId << ',';
-        result << script << ',' << function << ',' << line << ',' << selfSamples << '\n';
-#endif
+		result << "NodeProfData,Node," << id << ',' << parentId << ',';
+		result << script << ',' << function << ',' << line << ',' << selfSamples << '\n';
 	}
 	
 	// clean up
@@ -206,18 +195,10 @@ static char * ConstructData(const CpuProfile *profile) {
 
 	std::stringstream result;
 	if (jsonEnabled){
-#if defined(_WINDOWS)
-		result << "{\"date\":" << std::to_string(GetRealTime()) << ",";
-#else
 		result << "{\"date\":" << GetRealTime() << ",";
-#endif
 		result << "\"head\":";
 	}
-#if defined(_WINDOWS)
-	else result << "NodeProfData,Start," << std::to_string(GetRealTime()) << '\n';
-#else
-	else result << "NodeProfData,Start," << GetRealTime() << '\n';
-#endif
+	else result << "NodeProfData,Start," << GetRealTime() << '\n';	
 	visit(topRoot, ConstructNodeData, 0, result);
 	if (jsonEnabled){
 		result << "}";
