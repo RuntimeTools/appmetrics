@@ -41,8 +41,33 @@ MongoProbe.prototype.aspectCollectionMethod = function(coll, method) {
                     if (typeof(callbackPosition) != 'undefined') {
                         aspect.strongTraceTransactionLink('mongodb: ', methodName, methodArgs[callbackPosition]);
                     }
-
-                    that.metricsProbeEnd(probeData, collectionName, method, methodArgs);
+                    var count = undefined;
+                     
+                    if (args && args.length > 1) {
+	                    var res = args[1];
+                      if (res) {
+                        if (res.hasOwnProperty('matchedCount')) {
+                          count = res.matchedCount;
+                        } else if (res.hasOwnProperty('modifiedCount')) {
+                          count = res.modifiedCount;
+                        } else if (res.hasOwnProperty('insertedCount')) {
+                          count = res.insertedCount;
+                        } else if (res.hasOwnProperty('upsertedCount')) {
+                          count = res.upsertedCount;
+                        } else if (res.hasOwnProperty('deletedCount')) {
+                          count = res.deletedCount;
+                        } else if (res.hasOwnProperty('length')) {
+                          count = res.length;
+                        } else if (typeof res === "number") {
+                          count = res;
+                        }
+                        if(methodName === 'bulkWrite') {
+                          count = res.modifiedCount + res.insertedCount + res.deletedCount + res.upsertedCount;
+                        }
+                      }
+                    }
+                      
+                    that.metricsProbeEnd(probeData, collectionName, method, methodArgs, count);
                     that.requestProbeEnd(probeData, method, methodArgs);
                 } );
             } 
@@ -67,7 +92,7 @@ MongoProbe.prototype.attach = function(name, target) {
 
     var coll = target['Collection'].prototype;
     var method = 'find';
-    aspect.around( coll, "find",
+    aspect.around( coll, method,
         function(target, methodName, methodArgs, probeData){
             that.metricsProbeStart(probeData, target, method, methodArgs);
             that.requestProbeStart(probeData, target, method, methodArgs);
@@ -81,23 +106,51 @@ MongoProbe.prototype.attach = function(name, target) {
             } else {
                 aspect.before( rc, "toArray", function(target, methodName, args, context){
                     aspect.aroundCallback( args, probeData, function(target, args, probeData){
-                        that.metricsProbeEnd(probeData, collectionName, method, findArgs);
-                        that.requestProbeEnd(probeData, method, findArgs);
+                      var count = undefined;
+                       
+                      if (args && args.length > 1) {
+	                      var res = args[1];
+                        if (res && res.hasOwnProperty('length')) {
+                          count = res.length;
+                        }
+                      }
+                      that.metricsProbeEnd(probeData, collectionName, method, findArgs, count);
+                      that.requestProbeEnd(probeData, method, findArgs);
                     });
                 });
             }
             return rc;
       });
 
-    that.aspectCollectionMethod(coll, "insert");
-    that.aspectCollectionMethod(coll, "save");
-    that.aspectCollectionMethod(coll, "update");
-    that.aspectCollectionMethod(coll, "remove");
-    that.aspectCollectionMethod(coll, "findOne");
-    that.aspectCollectionMethod(coll, "count");
-    that.aspectCollectionMethod(coll, "findAndModify");
-    that.aspectCollectionMethod(coll, "findAndRemove");
     that.aspectCollectionMethod(coll, "aggregate");
+    that.aspectCollectionMethod(coll, "bulkWrite");
+    that.aspectCollectionMethod(coll, "count");
+    that.aspectCollectionMethod(coll, "createIndex");
+    that.aspectCollectionMethod(coll, "createIndexes");
+    that.aspectCollectionMethod(coll, "deleteMany");
+    that.aspectCollectionMethod(coll, "deleteOne");
+    that.aspectCollectionMethod(coll, "distinct")
+    that.aspectCollectionMethod(coll, "drop");
+    that.aspectCollectionMethod(coll, "dropIndex");
+    that.aspectCollectionMethod(coll, "dropIndexes");
+    that.aspectCollectionMethod(coll, "findOne");
+    that.aspectCollectionMethod(coll, "findOneAndDelete");
+    that.aspectCollectionMethod(coll, "findOneAndReplace");
+    that.aspectCollectionMethod(coll, "findOneAndUpdate");
+    that.aspectCollectionMethod(coll, "geoHaystackSearch");
+    that.aspectCollectionMethod(coll, "geoNear");
+    that.aspectCollectionMethod(coll, "group");
+    that.aspectCollectionMethod(coll, "indexes");
+    that.aspectCollectionMethod(coll, "indexExists");
+    that.aspectCollectionMethod(coll, "indexInformation");
+    that.aspectCollectionMethod(coll, "insertMany");
+    that.aspectCollectionMethod(coll, "insertOne");
+    that.aspectCollectionMethod(coll, "mapReduce");
+    that.aspectCollectionMethod(coll, "reIndex");
+    that.aspectCollectionMethod(coll, "rename");
+    that.aspectCollectionMethod(coll, "replaceOne");
+    that.aspectCollectionMethod(coll, "updateMany");
+    that.aspectCollectionMethod(coll, "updateOne");
 
     return target;
 
@@ -113,11 +166,11 @@ MongoProbe.prototype.attach = function(name, target) {
  *         method:      the executed method for the query, such as find, update
  *         collection:  the mongo collection
  */
-MongoProbe.prototype.metricsEnd = function(probeData, collectionName, method, methodArgs) {
+MongoProbe.prototype.metricsEnd = function(probeData, collectionName, method, methodArgs, count) {
     if(probeData && probeData.timer) {
         probeData.timer.stop();
         am.emit('mongo', {time: probeData.timer.startTimeMillis, query: JSON.stringify(methodArgs[0]), duration: probeData.timer.timeDelta,
-            method: method, collection: collectionName});
+            method: method, collection: collectionName, count: count});
     }
 };
 
