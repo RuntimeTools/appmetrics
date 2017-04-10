@@ -68,8 +68,8 @@ static void GetHeapInformation(uv_timer_s *data, int status) {
 
 	std::stringstream contentss;
 	contentss << "NodeHeapData";
-	contentss << "," << hs.total_heap_size();
-	contentss << "," << hs.used_heap_size();
+	contentss << "," <<  static_cast<uint64_t>(hs.total_heap_size());
+	contentss << "," <<  static_cast<uint64_t>(hs.used_heap_size());
 	contentss << '\n';
 	
 	std::string content = contentss.str();

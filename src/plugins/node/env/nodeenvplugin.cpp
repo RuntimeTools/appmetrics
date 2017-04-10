@@ -252,15 +252,16 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 			contentss << "runtime.name=" << plugin::nodeName << '\n';
 		}
 
-		contentss << "heap.size.limit=" << plugin::heapSizeLimit << '\n';
+    // Cast the next 4 integers to uint64_t to work around a bug pushing uint32_t into stringstreams on Windows7/Node.js 7.7.3+
+		contentss << "heap.size.limit=" << static_cast<uint64_t>(plugin::heapSizeLimit) << '\n';
 		if (plugin::maxSemiSpaceSizeGuess > 0) {
-			contentss << "max.semi.space.size=" << plugin::maxSemiSpaceSizeGuess << '\n';
+			contentss << "max.semi.space.size=" << static_cast<uint64_t>(plugin::maxSemiSpaceSizeGuess) << '\n';
 		}
 		if (plugin::maxOldSpaceSizeGuess > 0) {
-			contentss << "max.old.space.size=" << plugin::maxOldSpaceSizeGuess << '\n';
+			contentss << "max.old.space.size=" << static_cast<uint64_t>(plugin::maxOldSpaceSizeGuess) << '\n';
 		}
 		if (plugin::maxHeapSizeGuess > 0) {
-			contentss << "max.heap.size=" << plugin::maxHeapSizeGuess << '\n';
+			contentss << "max.heap.size=" << static_cast<uint64_t>(plugin::maxHeapSizeGuess) << '\n';
 		}
 
 
