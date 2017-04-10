@@ -156,8 +156,8 @@ void afterGC(GCType type, GCCallbackFlags flags) {
 	contentss << "NodeGCData";
 	contentss << "," << gcRealEnd; 
 	contentss << "," << gcType;
-	contentss << "," << hs.total_heap_size();
-	contentss << "," << hs.used_heap_size();
+	contentss << "," << static_cast<uint64_t>(hs.total_heap_size());
+	contentss << "," << static_cast<uint64_t>(hs.used_heap_size());
 	contentss << "," << gcDuration;
 	contentss << '\n';
 	
