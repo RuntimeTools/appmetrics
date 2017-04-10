@@ -56,11 +56,10 @@ static void cleanupHandle(uv_handle_t *handle) {
 }
 
 uv_check_t check_handle;
-uint32_t statistics[4];
-uint32_t& min = statistics[0];
-uint32_t& max = statistics[1];
-uint32_t& num = statistics[2];
-uint32_t& sum = statistics[3];
+int32_t min = 9999;
+int32_t max = 0;
+int32_t num = 0;
+int32_t sum = 0;
 
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
@@ -68,35 +67,35 @@ static void GetLoopInformation(uv_timer_s *data) {
 #else
 static void GetLoopInformation(uv_timer_s *data, int status) {
 #endif
-	double mean = 0;
 	if (num != 0) {
+	  double mean = 0;
 		mean = sum / num;
-	}
 
-	std::stringstream contentss;
-	contentss << "NodeLoopData";
-	contentss << "," << min;
-	contentss << "," << max;
-	contentss << "," << num;
-	contentss << "," << mean;
-	contentss << '\n';
+	  std::stringstream contentss;
+	  contentss << "NodeLoopData";
+	  contentss << "," << min;
+	  contentss << "," << max;
+	  contentss << "," << num;
+	  contentss << "," << mean;
+	  contentss << '\n';
 
-	std::string content = contentss.str();
+	  std::string content = contentss.str();
 
-	min = 9999;
-	max = 0;
-	num = 0;
-	sum = 0;
+	  min = 9999;
+	  max = 0;
+	  num = 0;
+	  sum = 0;
 
 
-	// Send data
-	monitordata mdata;
-	mdata.persistent = false;
-	mdata.provID = plugin::provid;
-	mdata.sourceID = 0;
-	mdata.size = static_cast<uint32>(content.length());
-	mdata.data = content.c_str();
-	plugin::api.agentPushData(&mdata);
+	  // Send data
+	  monitordata mdata;
+	  mdata.persistent = false;
+	  mdata.provID = plugin::provid;
+	  mdata.sourceID = 0;
+	  mdata.size = static_cast<uint32>(content.length());
+	  mdata.data = content.c_str();
+	  plugin::api.agentPushData(&mdata);
+  }
 
 }
 
@@ -116,7 +115,7 @@ void OnCheck(uv_check_t* handle) {
 	const uv_loop_t* const loop = handle->loop;
 	const uint64_t now = uv_hrtime() / static_cast<uint64_t>(1e6);
 
-	const uint32_t delta = static_cast<uint32_t>(
+	const int32_t delta = static_cast<int32_t>(
 			now <= loop->time ? 0 : (now - loop->time));
 
 	if (delta < min) {
