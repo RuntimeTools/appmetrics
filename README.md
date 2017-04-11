@@ -2,6 +2,8 @@
 Node Application Metrics monitoring and profiling agent
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/8caec03a401f4a37823ac547d7a0a272)](https://www.codacy.com/app/dancunnington/appmetrics?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RuntimeTools/appmetrics&amp;utm_campaign=Badge_Grade)
+[![Build Status](https://travis-ci.org/RuntimeTools/appmetrics.svg?branch=master)](https://travis-ci.org/RuntimeTools/appmetrics)
+[![Homepage](https://img.shields.io/badge/homepage-Node%20Application%20Metrics-blue.svg)](https://developer.ibm.com/node/monitoring-post-mortem/application-metrics-node-js/)
 
 Node Application Metrics instruments the Node.js runtime for performance monitoring, providing the monitoring data via an API. 
 Additionally the data can be visualized in an Eclipse IDE using the [IBM Monitoring and Diagnostics Tools - Health Center][1] client.
@@ -485,7 +487,7 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 3.0.0
 
 ## Release History
-`3.0.0` - Remove express probe.  
+`3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.  
 `2.0.1` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.  
 `1.2.0` - Add file data collection capability and option configuration via api.  
 `1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
