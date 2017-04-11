@@ -485,7 +485,7 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 3.0.0
 
 ## Release History
-`3.0.0` - Remove express probe.  
+`3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.  
 `2.0.1` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.  
 `1.2.0` - Add file data collection capability and option configuration via api.  
 `1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
