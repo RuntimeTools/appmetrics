@@ -18,7 +18,7 @@ var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
 var url = require('url');
-var am = require('appmetrics');
+var am = require('../');
 
 /**
  * Probe to instrument the Oracle npm client
@@ -64,6 +64,13 @@ function addMonitoring(connection, probe) {
 		// Advise the callback for 'execute'. Will do nothing if no callback is registered
 		aspect.aroundCallback(args, probeData, function(target, callbackArgs, probeData){
 			// 'execute' has completed and the callback has been called, so end the monitoring
+
+			//Call the transaction link with a name and the callback for strong trace
+            var callbackPosition = aspect.findCallbackArg(args);
+            if (typeof(callbackPosition) != 'undefined') {
+                aspect.strongTraceTransactionLink('oracle: ', methodName, args[callbackPosition]);
+            }
+
 			probe.metricsProbeEnd(probeData, methodName, args);
 			probe.requestProbeEnd(probeData, methodName, args);
 		});
@@ -82,25 +89,28 @@ function addMonitoring(connection, probe) {
  * Lightweight metrics probe end for Oracle queries
  */
 OracleProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-	probeData.timer.stop();
-	var query = methodArgs[0];
-	am.emit('oracle', {
-		time : probeData.timer.startTimeMillis,
-		query : query,
-		duration : probeData.timer.timeDelta
-	});
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    var query = methodArgs[0];
+	    am.emit('oracle', {
+		    time : probeData.timer.startTimeMillis,
+		    query : query,
+		    duration : probeData.timer.timeDelta
+	    });
+    }
 };
 
 /*
  * Heavyweight request probes for Oracle queries
  */
 OracleProbe.prototype.requestStart = function (probeData, method, methodArgs) {
-	probeData.req = request.startRequest('Oracle', method, false, probeData.timer);
+	probeData.req = request.startRequest('oracle', method, false, probeData.timer);
 };
 
 OracleProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-	var query = methodArgs[0];
-	probeData.req.stop({query:query});
+    if(probeData && probeData.req)
+	    var query = methodArgs[0];
+	    probeData.req.stop({query:query});
 };
 
 module.exports = OracleProbe;

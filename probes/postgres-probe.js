@@ -17,7 +17,7 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var am = require('appmetrics');
+var am = require('../');
 
 function PostgresProbe() {
   Probe.call(this, 'pg');
@@ -89,6 +89,13 @@ function monitorQuery(client,that) {
 
           //Here, the query has executed and returned it's callback. Then
           //stop monitoring
+
+          //Call the transaction link with a name and the callback for strong trace
+          var callbackPosition = aspect.findCallbackArg(methodArgs);
+          if (typeof(callbackPosition) != 'undefined') {
+              aspect.strongTraceTransactionLink('pg: ', method, methodArgs[callbackPosition]);
+          }
+
           that.metricsProbeEnd(probeData, method, methodArgs);
           that.requestProbeEnd(probeData, method, methodArgs);
         });
@@ -106,20 +113,23 @@ function monitorQuery(client,that) {
  *      duration:   the time for the request to respond
  */
 PostgresProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-  probeData.timer.stop();
-  am.emit('postgres', {time: probeData.timer.startTimeMillis, query: methodArgs[0], duration: probeData.timer.timeDelta});
+  if(probeData && probeData.timer) {
+    probeData.timer.stop();
+    am.emit('postgres', {time: probeData.timer.startTimeMillis, query: methodArgs[0], duration: probeData.timer.timeDelta});
+  }
 };
 
 /*
  * Heavyweight request probes for Postgres queries
  */
 PostgresProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
-  probeData.req = request.startRequest( 'DB', "query", false, probeData.timer );
+  probeData.req = request.startRequest( 'postgres', "query", false, probeData.timer );
   probeData.req.setContext({sql: methodArgs[0]});
 };
 
 PostgresProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-  probeData.req.stop({sql: methodArgs[0]});
+  if(probeData && probeData.req)
+    probeData.req.stop({sql: methodArgs[0]});
 };
 
 module.exports = PostgresProbe;

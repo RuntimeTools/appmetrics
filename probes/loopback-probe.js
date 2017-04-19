@@ -17,7 +17,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
-var am = require('appmetrics');
+var am = require('../');
 var util = require('util');
 
 function loopbackDJProbe(){
@@ -31,6 +31,13 @@ function aspectJugglerMethod (target, methods, probe){
 		probe.requestProbeStart(probeData, target, methodName, methodArgs);
 		if (aspect.findCallbackArg(methodArgs) != undefined){
 			aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData){
+
+				//Call the transaction link with a name and the callback for strong trace
+				var callbackPosition = aspect.findCallbackArg(methodArgs);
+				if (typeof(callbackPosition) != 'undefined') {
+					aspect.strongTraceTransactionLink('loopback-datasource-juggler: ', methodName, methodArgs[callbackPosition]);
+				}
+				
 				probe.metricsProbeEnd(probeData, methodName, methodArgs);
 				probe.requestProbeEnd(probeData, methodName, methodArgs);
 			});
@@ -65,22 +72,24 @@ loopbackDJProbe.prototype.attach = function(name, target){
  * 		duration:	the time for the request to respond
  */
 loopbackDJProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-	probeData.timer.stop();
-	eventTimer = probeData.timer;
-	am.emit('loopback-datasource-juggler', {time: eventTimer.startTimeMillis, method: method, duration: eventTimer.timeDelta});
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    eventTimer = probeData.timer;
+	    am.emit('loopback-datasource-juggler', {time: eventTimer.startTimeMillis, method: method, duration: eventTimer.timeDelta});
+    }
 }
 
 /*
  * Heavyweight request probes for juggler commands
  */
 loopbackDJProbe.prototype.requestStart = function (probeData, target, method, methodArgs) {
-	 req = request.startRequest( 'DB', "query" );
-	 req.setContext({loopbackDJProbe: methodArgs[0]});
+	 probeData.req = request.startRequest( 'loopback', "query" );
+	 probeData.req.setContext({loopbackDJProbe: methodArgs[0]});
 };
 
 loopbackDJProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-	console.log("requestEnd called");
-	req.stop({loopbackDJProbe: methodArgs[0]});
+	if(probeData && probeData.req)
+	    probeData.req.stop({loopbackDJProbe: methodArgs[0]});
 };
 
 module.exports = loopbackDJProbe;

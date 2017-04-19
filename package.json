@@ -1,22 +1,29 @@
 {
   "name": "appmetrics",
-  "version": "1.0.11",
+  "version": "3.0.1",
+  "engines": { "node": ">=4" },
   "description": "Node Application Metrics",
   "bin": {
     "node-hc": "bin/appmetrics-cli.js"
   },
   "dependencies": {
     "nan": "2.x",
-    "node-gyp": "2.x",
     "tar": "2.x",
-    "request":"2.x"
+    "jszip": "2.5.x"
+  },
+  "bundleDependencies": [
+    "tar"
+  ],
+  "devDependencies": {
+    "node-gyp": "3.x",
+    "semver": "^5.3.0",
+    "tap": "7.x"
   },
   "scripts": {
-    "test": "node tests/test_runner.js",
-    "install": "node download_licenses.js && node download_binaries.js && node-gyp rebuild"
+    "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/probes/http-probe-test.js tests/headless_test.js",
+    "install": "node extract_all_binaries.js || node-gyp rebuild"
   },
   "directories": {
-    "licenses": "licenses",
     "lib": "lib",
     "probes": "probes"
   },
@@ -25,5 +32,5 @@
     "url": "git://github.com/RuntimeTools/appmetrics.git"
   },
   "author": "",
-  "license": "Apache-2.0 and proprietary"
+  "license": "Apache-2.0"
 }

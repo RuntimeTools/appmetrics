@@ -13,41 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+ 
+var tap = require('tap');
 
-var global = false;
-process.argv.forEach(function(elem) {
-  if (elem == '-g')
-    global = true;
+// Regression test for issue #375
+tap.test('Calling require without start should not break', function(t) {
+    var appmetrics = require('../');
+    var server = require('./test_http_server').server;
+    var http = require('http');
+
+    // HTTP outbound request 
+    // (previously triggered http-outbound probe to emit an event which caused a SIGSEGV)
+    http.get('http://localhost:8000', function (res) {server.close(); t.end();});
 });
 
-var agent;
-if (!global)
-{
-  agent = require('../');
-  agent.start();
-
-  // Make agent visible for other script files.
-  module.exports.agent = agent;
-  require('./api_tests');
-}
-
-// Set how long the tests will run for. Default: 30s.
-var duration_secs = process.argv[2] || 30;
-
-var t = null;
-var ih = setInterval(function() {
-  var dummy = new Buffer(1024*1024);
-  dummy.write("hello");
-  t = dummy.toString()[0];
-}, 100);
-
-if (duration_secs != null)
-{
-  setTimeout(function() {
-    clearInterval(ih);
-    if (agent) {
-      agent.stop();
-      setTimeout(function() {}, 500);
-    }
-  }, duration_secs*1000);
-}
+tap.test('Appmetrics should be a global singleton', function(t) {
+    var appmetrics = require('../');
+    // Delete cached module
+    delete require.cache[require.resolve('../')]
+    var appmetrics2 = require('../');
+    t.equals(appmetrics, appmetrics2);
+    t.end();
+});

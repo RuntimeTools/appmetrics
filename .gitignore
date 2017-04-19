@@ -5,3 +5,8 @@ libagentcore.so
 licenses
 node_modules
 plugins
+.project
+/agentcore.dll
+/heapdump.node
+headlesstestoutput*
+

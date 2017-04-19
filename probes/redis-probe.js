@@ -16,7 +16,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
-var am = require('appmetrics');
+var am = require('../');
 var util = require('util');
 
 /**
@@ -83,6 +83,11 @@ RedisProbe.prototype.attach = function(name, target) {
 		 * callback to stop the timer.
 		 */
 		aspect.aroundCallback( methodArgs, probeData, function(target, args) {
+
+			//Call the transaction link with a name and the callback for strong trace
+			var callbackPosition = aspect.findCallbackArg(methodArgs); 
+			aspect.strongTraceTransactionLink('redis: ', eventName, methodArgs[callbackPosition]);
+
 			that.metricsProbeEnd(probeData, eventName, methodArgs);
 			that.requestProbeEnd(probeData, eventName, methodArgs);
 		});
@@ -134,8 +139,10 @@ RedisProbe.prototype.attach = function(name, target) {
  */
 
 RedisProbe.prototype.metricsEnd = function(probeData, cmd, methodArgs) {
-	probeData.timer.stop();
-	am.emit('redis', {time: probeData.timer.startTimeMillis, cmd: cmd, duration: probeData.timer.timeDelta});
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    am.emit('redis', {time: probeData.timer.startTimeMillis, cmd: cmd, duration: probeData.timer.timeDelta});
+    }
 };
 
 /*
@@ -147,9 +154,11 @@ RedisProbe.prototype.requestStart = function (probeData, cmd, methodArgs) {
 };
 
 RedisProbe.prototype.requestEnd = function (probeData, cmd, methodArgs) {
-	var context = {};
-	context.cmd = cmd;
-	probeData.req.stop(context);
+    if(probeData && probeData.req) {
+	    var context = {};
+	    context.cmd = cmd;
+	    probeData.req.stop(context);
+    }
 };
 
 module.exports = RedisProbe;

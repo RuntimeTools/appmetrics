@@ -18,7 +18,7 @@ var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
 var url = require('url');
-var am = require('appmetrics');
+var am = require('../');
 
 /**
  * Probe to instrument the MQLight npm client
@@ -47,6 +47,13 @@ MQLightProbe.prototype.attach = function(name, target) {
 			// Advise the callback for the method.  Will do nothing if no callback is registered
 			aspect.aroundCallback(args, probeData, function(target, callbackArgs, probeData){
 				// method has completed and the callback has been called, so end the monitoring
+
+				//Call the transaction link with a name and the callback for strong trace
+                var callbackPosition = aspect.findCallbackArg(methodArgs);
+                if (typeof(callbackPosition) != 'undefined') {
+                    aspect.strongTraceTransactionLink('mqlight: ', methodName, methodArgs[callbackPosition]);
+                }
+
 				that.metricsProbeEnd(probeData, methodName, args, thisClient);
 				that.requestProbeEnd(probeData, methodName, args, thisClient);
 			});
@@ -70,6 +77,13 @@ MQLightProbe.prototype.attach = function(name, target) {
 					that.requestProbeStart(probeData, 'message', callbackArgs);
 				}, function (target, callbackArgs, probeData, ret) {
 					// method has completed and the callback has been called, so end the monitoring
+
+					//Call the transaction link with a name and the callback for strong trace
+	                var callbackPosition = aspect.findCallbackArg(callbackArgs);
+	                if (typeof(callbackPosition) != 'undefined') {
+	                    aspect.strongTraceTransactionLink('mqlight: ', methodName, callbackArgs[callbackPosition]);
+	                }
+
 					that.metricsProbeEnd(probeData, 'message', callbackArgs, thisClient);
 					that.requestProbeEnd(probeData, 'message', callbackArgs, thisClient);
 					return ret;
@@ -85,42 +99,44 @@ MQLightProbe.prototype.attach = function(name, target) {
  * Lightweight metrics probe end for MQLight messages
  */
 MQLightProbe.prototype.metricsEnd = function(probeData, method, methodArgs, client) {
-	probeData.timer.stop();
-	if(method == 'message') {
-		var data = methodArgs[0];
-		if(data.length > 25) {
-			data = data.substring(0, 22) + "...";
-		}
-		var topic = methodArgs[1].message.topic;
-		am.emit('mqlight', {
-			time : probeData.timer.startTimeMillis,
-			clientid : client.id,
-			data : data,
-			method : method,
-			topic : topic,
-			duration : probeData.timer.timeDelta
-		});
-	} else if(method == 'send') {
-		var data = methodArgs[1];
-		if(data.length > 25) {
-			data = data.substring(0, 22) + "...";
-		}
-		var qos;
-		var options; // options are optional - check number of arguments.
-		if(methodArgs.length > 3) {
-			options = methodArgs[2];
-			qos = options[0];
-		}
-		am.emit('mqlight', {
-			time : probeData.timer.startTimeMillis,
-			clientid : client.id,
-			data : data,
-			method : method,
-			topic : methodArgs[0],
-			qos : qos,
-			duration : probeData.timer.timeDelta
-		});
-	}
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    if(method == 'message') {
+		    var data = methodArgs[0];
+		    if(data.length > 25) {
+			    data = data.substring(0, 22) + "...";
+		    }
+		    var topic = methodArgs[1].message.topic;
+		    am.emit('mqlight', {
+			    time : probeData.timer.startTimeMillis,
+			    clientid : client.id,
+			    data : data,
+			    method : method,
+			    topic : topic,
+			    duration : probeData.timer.timeDelta
+		    });
+	    } else if(method == 'send') {
+		    var data = methodArgs[1];
+		    if(data.length > 25) {
+			    data = data.substring(0, 22) + "...";
+		    }
+		    var qos;
+		    var options; // options are optional - check number of arguments.
+		    if(methodArgs.length > 3) {
+			    options = methodArgs[2];
+			    qos = options[0];
+		    }
+		    am.emit('mqlight', {
+			    time : probeData.timer.startTimeMillis,
+			    clientid : client.id,
+			    data : data,
+			    method : method,
+			    topic : methodArgs[0],
+			    qos : qos,
+			    duration : probeData.timer.timeDelta
+		    });
+	    }
+    }
 };
 
 /*
@@ -128,33 +144,35 @@ MQLightProbe.prototype.metricsEnd = function(probeData, method, methodArgs, clie
  */
 MQLightProbe.prototype.requestStart = function (probeData, method, methodArgs) {
 	if(method == 'message') {
-		probeData.req = request.startRequest('MQLight', method, true, probeData.timer);
+		probeData.req = request.startRequest('mqlight', method, true, probeData.timer);
 	} else {
-		probeData.req = request.startRequest('MQLight', method, false, probeData.timer);
+		probeData.req = request.startRequest('mqlight', method, false, probeData.timer);
 	}
 };
 
 MQLightProbe.prototype.requestEnd = function (probeData, method, methodArgs, client) {
-	if(method == 'message') {
-		var data = methodArgs[0];
-		if(data.length > 25) {
-			data = data.substring(0, 22) + "...";
-		}
-		var topic = methodArgs[1].message.topic;
-		probeData.req.stop({clientid: client.id, data: data, method: method,  topic: methodArgs[0]});
-	} else if(method == 'send') {
-		var data = methodArgs[1];
-		if(data.length > 25) {
-			data = data.substring(0, 22) + "...";
-		}
-		var qos;
-		var options; // options are optional - check number of arguments.
-		if(methodArgs.length > 3) {
-			options = methodArgs[2];
-			qos = options[0];
-		}
-		probeData.req.stop({clientid: client.id, data: data, method: method,  topic: methodArgs[0], qos: qos});
-	}
+    if(probeData && probeData.req) {
+	    if(method == 'message') {
+		    var data = methodArgs[0];
+		    if(data.length > 25) {
+			    data = data.substring(0, 22) + "...";
+		    }
+		    var topic = methodArgs[1].message.topic;
+		    probeData.req.stop({clientid: client.id, data: data, method: method,  topic: methodArgs[0]});
+	    } else if(method == 'send') {
+		    var data = methodArgs[1];
+		    if(data.length > 25) {
+			    data = data.substring(0, 22) + "...";
+		    }
+		    var qos;
+		    var options; // options are optional - check number of arguments.
+		    if(methodArgs.length > 3) {
+			    options = methodArgs[2];
+			    qos = options[0];
+		    }
+		    probeData.req.stop({clientid: client.id, data: data, method: method,  topic: methodArgs[0], qos: qos});
+	    }
+    }
 };
 
 module.exports = MQLightProbe;

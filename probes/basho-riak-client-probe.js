@@ -17,7 +17,7 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var am = require('appmetrics');
+var am = require('../');
 
 //Riak methods can have different arguments.
 //Methods which only have a 'callback' parameter
@@ -65,7 +65,14 @@ RiakProbe.prototype.attach = function(name, target) {
 
                 //If the method contains a callback, finish probing when the callback returns
                 if (aspect.findCallbackArg(methodArgs) != undefined) {
-                    aspect.aroundCallback(methodArgs, probeData, function(target,args, probeData) {
+                    aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
+
+                        //Call the transaction link with a name and the callback for strong trace
+                        var callbackPosition = aspect.findCallbackArg(methodArgs);
+                        if (typeof(callbackPosition) != 'undefined') {
+                            aspect.strongTraceTransactionLink('basho-riak-client: ', methodName, methodArgs[callbackPosition]);
+                        }
+
                         that.metricsProbeEnd(probeData, methodName, methodArgs);
                         that.requestProbeEnd(probeData, methodName, methodArgs);
                     });
@@ -97,36 +104,39 @@ RiakProbe.prototype.attach = function(name, target) {
  *      duration:   The time for the request to respond
  */
 RiakProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-    probeData.timer.stop();
-    eventTimer = probeData.timer;
+    if(probeData && probeData.timer) {
+        probeData.timer.stop();
+        eventTimer = probeData.timer;
 
-    //Work out if options, command or query are needed. Defaults to just method
-    var jsonToEmit = {time: eventTimer.startTimeMillis, method: method, duration: eventTimer.timeDelta};
-    var key = '';
+        //Work out if options, command or query are needed. Defaults to just method
+        var jsonToEmit = {time: eventTimer.startTimeMillis, method: method, duration: eventTimer.timeDelta};
+        var key = '';
 
-    if (optionsAndCallbackMethods.indexOf(method) > -1) {
-        key = 'options';
-    } else if (commandMethods.indexOf(method) > -1) {
-        key = 'command';
-    } else if (queryMethods.indexOf(method) > -1) {
-        key = 'query';
+        if (optionsAndCallbackMethods.indexOf(method) > -1) {
+            key = 'options';
+        } else if (commandMethods.indexOf(method) > -1) {
+            key = 'command';
+        } else if (queryMethods.indexOf(method) > -1) {
+            key = 'query';
+        }
+
+        if (key != '') {
+            jsonToEmit[key] = methodArgs[0];
+        }
+        am.emit('riak', jsonToEmit);
     }
-
-    if (key != '') {
-        jsonToEmit[key] = methodArgs[0];
-    }
-    am.emit('riak', jsonToEmit);
 };
 
 /*
  * Heavyweight request probes for Riak queries
  */
 RiakProbe.prototype.requestStart = function (probeData, method, methodArgs) {
-    probeData.req = request.startRequest( 'DB', 'query', false, probeData.timer );
+    probeData.req = request.startRequest( 'basho-riak-client', 'query', false, probeData.timer );
 };
 
 RiakProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-    probeData.req.stop({method: method});
+    if(probeData && probeData.req)
+        probeData.req.stop({method: method});
 };
 
 module.exports = RiakProbe;

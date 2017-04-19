@@ -1,5 +1,4 @@
 /*******************************************************************************
- * Copyright 2014, 2015 IBM Corp.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,28 +29,42 @@ function API(agent, appmetrics) {
     var that = this;
 
     var raiseEvent = function (topic, message) {
-        if (topic === 'common_cpu' || topic === 'cpu') {
+        if ((typeof(topic) != 'string') || (typeof(message) != 'string')) {
+            return;
+        }
+        switch (topic) {
+            case 'common_cpu':
+            case 'cpu':
                 formatCPU(message);
-        } else if (topic === 'common_env') {
+                break;
+            case 'common_env':
                 formatOSEnv(message);
-        } else if (topic === 'environment_node') {
+                break;
+            case 'environment_node':
                 formatRuntimeEnv(message);
-        } else if (topic === 'common_memory' || topic === 'memory') {
+                break;
+            case 'common_memory':
+            case 'memory':
                 formatMemory(message);
-        } else if (topic === 'gc_node') {
+                break;
+            case 'gc_node':
                 formatGC(message);
-        } else if (topic === 'profiling_node') {
-        		formatProfiling(message);
-        } else if (topic === 'api') {
+                break;
+            case 'profiling_node':
+                formatProfiling(message);
+                break;
+            case 'api':
                 formatApi(message);
-        } else {
-        /*
-         * Just raise any unknown message as an event so someone can parse it themselves
-         */
+                break;
+            case 'loop_node':
+                formatLoop(message);
+                break;
+            default:
+                //Just raise any unknown message as an event so someone can parse it themselves
                 that.emit(topic, message);
         }
     };
-
+    
     var formatCPU = function(message) {
     	// cpu : startCPU@#1412609879696@#0.000499877@#0.137468
         var values = message.trim().split('@#'); // needs to be trimmed because of leading \n character
@@ -145,22 +158,42 @@ function API(agent, appmetrics) {
     };
 
 	var formatProfiling = function (message) {
-		var lines = message.trim().split('\n');
-		var prof = {
-			date: 0,
-			functions: [],
-		};
-		lines.forEach(function (line) {
-			var values = line.split(',');
-			if (values[1] == 'Node') {
-				prof.functions.push({self: parseInt(values[2]), parent: parseInt(values[3]), file: values[4], name: values[5], line: parseInt(values[6]), count: parseInt(values[7])});
-			} else if (values[1] == 'Start') {
-				prof.time = parseInt(values[2]);
-			}
-		});
-	 	that.emit('profiling', prof);	
-	};
+        if (appmetrics.getJSONProfilingMode()) {
+            that.emit('profiling', JSON.parse(message));
+        } else {
+            var lines = message.trim().split('\n');
+            var prof = {
+                date: 0,
+                functions: [],
+            };
+            lines.forEach(function (line) {
+                var values = line.split(',');
+                if (values[1] == 'Node') {
+                    prof.functions.push({self: parseInt(values[2]), parent: parseInt(values[3]), file: values[4], name: values[5], line: parseInt(values[6]), count: parseInt(values[7])});
+                } else if (values[1] == 'Start') {
+                    prof.time = parseInt(values[2]);
+                }
+            });
+            that.emit('profiling', prof);
+        }
+            
+    };
 
+  var formatLoop = function(message) {
+    
+    /* loop_node: NodeLoopData,min,max,num,sum
+    *
+    */
+    var lines = message.trim().split('\n');
+    /* Split each line into the comma-separated values. */
+    lines.forEach(function (line) {
+        var values = line.split(/[,]+/);
+        var loop = {minimum: parseInt(values[1]), maximum: parseInt(values[2]), count: parseInt(values[3]), average: parseInt(values[4])};
+        that.emit('loop', loop);
+    });
+
+}	
+	
     var formatApi = function (message) {
     	var lines = message.trim().split('\n');
     	lines.forEach(function (line) {

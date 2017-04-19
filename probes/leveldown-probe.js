@@ -17,7 +17,7 @@
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
-var am = require('appmetrics');
+var am = require('../');
 var util = require('util');
 
 function LeveldownProbe(){
@@ -31,6 +31,13 @@ function aspectLvldownMethod(dbTarget, methods, probe){
 		probe.requestProbeStart(probeData, dbTarget, methodName, methodArgs);
 		if (aspect.findCallbackArg(methodArgs) != undefined){
 			aspect.aroundCallback(methodArgs, probeData, function(dbTarget, args, probeData){
+
+				//Call the transaction link with a name and the callback for strong trace
+				var callbackPosition = aspect.findCallbackArg(methodArgs);
+				if (typeof(callbackPosition) != 'undefined') {
+					aspect.strongTraceTransactionLink('leveldown: ', methodName, methodArgs[callbackPosition]);
+				}
+				
 				probe.metricsProbeEnd(probeData, methodName, methodArgs);
 				probe.requestProbeEnd(probeData, methodName, methodArgs);
 			});
@@ -72,28 +79,31 @@ LeveldownProbe.prototype.attach = function(name, target){
  
  
 LeveldownProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
-	probeData.timer.stop();
-	if (method == 'put'){
-		am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, key: methodArgs[0], value: methodArgs[1], duration: probeData.timer.timeDelta});
-	}
-	else if (method == 'del' || method == 'get'){
-		am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, key: methodArgs[0], duration: probeData.timer.timeDelta});
-	}
-	else if(method == 'batch'){
-		am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, opCount: methodArgs[0].length, duration: probeData.timer.timeDelta});
-	}
+    if(probeData && probeData.timer) {
+	    probeData.timer.stop();
+	    if (method == 'put'){
+		    am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, key: methodArgs[0], value: methodArgs[1], duration: probeData.timer.timeDelta});
+	    }
+	    else if (method == 'del' || method == 'get'){
+		    am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, key: methodArgs[0], duration: probeData.timer.timeDelta});
+	    }
+	    else if(method == 'batch'){
+		    am.emit('leveldown', {time: probeData.timer.startTimeMillis, method: method, opCount: methodArgs[0].length, duration: probeData.timer.timeDelta});
+	    }
+    }
 };
 
 /*
  * Heavyweight request probes for leveldown queries
  */
 LeveldownProbe.prototype.requestStart = function (probeData, dbTarget, method, methodArgs) {
-	 req = request.startRequest( 'DB', "query" );
+	 req = request.startRequest( 'leveldown', "query" );
 	 req.setContext({leveldown: methodArgs[0]});
 };
 
 LeveldownProbe.prototype.requestEnd = function (probeData, method, methodArgs) {
-	req.stop({leveldown: methodArgs[0]});
+    if(probeData && probeData.req)
+	    req.stop({leveldown: methodArgs[0]});
 };
 
 module.exports = LeveldownProbe;
