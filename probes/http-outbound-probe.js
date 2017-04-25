@@ -19,6 +19,14 @@ var request = require('../lib/request.js');
 var util = require('util');
 var url = require('url');
 var am = require('../');
+var semver = require('semver');
+
+var methods;
+if (semver.lt(process.version, '8.0.0')) {
+	methods = ['request'];
+} else {
+	methods = ['request', 'get'];
+}
 
 // Probe to instrument outbound http requests
 
@@ -33,7 +41,7 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
         if(target.__outboundProbeAttached__) return target;
         target.__outboundProbeAttached__ = true;
        
-        aspect.around(target, 'request',
+        aspect.around(target, methods,
           // Before 'http.request' function
           function(obj, methodName, methodArgs, probeData) {
 
@@ -184,4 +192,5 @@ HttpOutboundProbe.prototype.requestEnd = function (probeData, method, url, res, 
 
 
 module.exports = HttpOutboundProbe;
+
 
