@@ -9,6 +9,7 @@
   "dependencies": {
     "nan": "2.x",
     "tar": "2.x",
+    "semver": "^5.3.0",
     "jszip": "2.5.x"
   },
   "bundleDependencies": [
@@ -16,7 +17,6 @@
   ],
   "devDependencies": {
     "node-gyp": "3.x",
-    "semver": "^5.3.0",
     "tap": "7.x"
   },
   "scripts": {
