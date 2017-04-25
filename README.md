@@ -7,9 +7,9 @@ Node Application Metrics monitoring and profiling agent
 [![Homepage](https://img.shields.io/badge/homepage-Node%20Application%20Metrics-blue.svg)](https://developer.ibm.com/node/monitoring-post-mortem/application-metrics-node-js/)
 
 Node Application Metrics instruments the Node.js runtime for performance monitoring, providing the monitoring data via an API. 
-Additionally the data can be visualized in an Eclipse IDE using the [IBM Monitoring and Diagnostics Tools - Health Center][1] client.
+Additionally the data can be visualized by using the [Node Application Metrics Dashboard](https://github.com/RuntimeTools/appmetrics-dash). 
 
-See https://www.ibm.com/developerworks/java/jdk/tools/healthcenter/ for more details.
+The data can also be visualized in Eclipse using the [IBM Monitoring and Diagnostics Tools - Health Center][1] client. Profiling data is available in Health Center, but is not yet available in the Dashboard. See https://www.ibm.com/developerworks/java/jdk/tools/healthcenter/ for more details.
 
 Node Application Metrics provides the following built-in data collection sources:
 
