@@ -65,7 +65,13 @@ The Node Application Metrics agent supports the following runtime environments:
 
 ### Installation
 
-Node Application Metrics can be installed using **npm** either locally or globally.
+You can get Node Application Metrics from 3 different places:
+
+  * npmjs.org (install by running `npm install appmetrics`. Native libraries are prebuilt)
+  * Github ([install from source](https://github.com/RuntimeTools/appmetrics/wiki/Install-direct-from-github-source) by cloning the git repository. Requires a compiler)
+  * [IBM SDK for Node.js](https://developer.ibm.com/node/sdk/) (packaged with the SDK, native libraries are prebuilt)
+
+Using **npm** you can install Node Application Metrics either locally or globally.
 
 **When installed locally** you can access monitoring data via both the API and the Health Center client by modifying your application to use appmetrics (see *[Modifying your application to use the local installation](#modifying-your-application-to-use-the-local-installation)*).
 
