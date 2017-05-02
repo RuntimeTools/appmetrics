@@ -324,6 +324,13 @@ Emitted when a LevelDB query is made using the `leveldown` module.
     * `value` (Object) The value being added to the LevelDB database using the `put` method (Undefined for other methods) 
     * `opCount` (Number) The number of operations carried out by a `batch` method (Undefined for other methods) 
     * `duration` (Number) the time taken for the LevelDB query to be responded to in ms.
+    
+### Event: 'loopback-datasource-juggler'
+Emitted when a function is called on the `loopback-datasource-juggler` module
+* `data` (Object) the data from the loopback-datasource-juggler event:
+    * `time` (Number) the time in milliseconds when the event occurred. This can be converted to a Date using `new Date(data.time)`
+    * `method` (String) the function the juggler has executed
+    * `duration` (Number) the time taken for the operation to complete.
 
 ### Event: 'memcached'
 Emitted when a data is stored, retrieved or modified in Memcached using the `memcached` module.
