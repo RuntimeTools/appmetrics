@@ -112,6 +112,9 @@ var getSupportedNodeVersionOrExit = function() {
 	if (process.version.indexOf('v7') === 0) {
 		return '7';
 	}
+	if (process.version.indexOf('v8') === 0) {
+		return '8';
+	}
 	console.log('Unsupported version ' + process.version + '. Trying rebuild.');
   fail();
 };
