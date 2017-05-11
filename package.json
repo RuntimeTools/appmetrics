@@ -16,11 +16,13 @@
     "tar"
   ],
   "devDependencies": {
+    "codecov": "2.x",
     "node-gyp": "3.x",
     "tap": "7.x"
   },
   "scripts": {
-    "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/probes/http-probe-test.js tests/headless_test.js",
+    "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/probes/http-probe-test.js tests/headless_test.js --coverage",
+    "posttest": "tap --coverage-report=lcov && codecov",
     "install": "node extract_all_binaries.js || node-gyp rebuild"
   },
   "directories": {
