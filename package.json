@@ -24,7 +24,7 @@
     "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/probes/http-probe-test.js tests/headless_test.js",
     "travis": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/probes/http-probe-test.js tests/headless_test.js --coverage",
     "posttravis": "./get_code_cov.sh && tap --coverage-report=lcov && codecov",
-    "install": "node extract_all_binaries.js || node-gyp --verbose rebuild"
+    "install": "node extract_all_binaries.js || node-gyp --silly rebuild"
   },
   "directories": {
     "lib": "lib",
