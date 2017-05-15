@@ -26,6 +26,9 @@
           },{
           }],
         ],
+      },
+      '$TRAVIS=="true"', {
+        "cflags_cc+": [ '-fprofile-arcs -ftest-coverage' ],
       }],
     ],
     "conditions": [
