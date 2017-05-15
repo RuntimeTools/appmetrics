@@ -36,7 +36,7 @@
         ],
       }],
       ['travis=="true"', {
-        "cflags+": [ '-fprofile-arcs -ftest-coverage' ],
+        "cflags_cc": [ '-fprofile-arcs -ftest-coverage' ],
       }],
     ],
     "conditions": [
