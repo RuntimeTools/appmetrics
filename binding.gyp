@@ -17,6 +17,14 @@
   "target_defaults": {
     "cflags_cc!": [ '-fno-exceptions' ],
     "include_dirs": [ '<(srcdir)', '<(nandir)', '<(agentcoredir)/src'],
+    "variables": {
+      'travis%': "false"
+    },
+    "conditions": [
+      ['OS=="linux"', {
+        'travis': "<!echo $TRAVIS)"
+      }]
+    ],
     "target_conditions": [
       ['_type=="shared_library"', {
         'product_prefix': '<(SHARED_LIB_PREFIX)',
@@ -26,8 +34,8 @@
           },{
           }],
         ],
-      },
-      '$TRAVIS=="true"', {
+      }],
+      ['travis=="true"', {
         "cflags_cc+": [ '-fprofile-arcs -ftest-coverage' ],
       }],
     ],
@@ -57,6 +65,8 @@
       }]
     ],
   },
+
+
 
   "targets": [
     {
