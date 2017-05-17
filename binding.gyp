@@ -20,11 +20,6 @@
     "variables": {
       'travis%': "false"
     },
-    "conditions": [
-      ['OS=="linux"', {
-        'travis': "<!echo $TRAVIS)"
-      }]
-    ],
     "target_conditions": [
       ['_type=="shared_library"', {
         'product_prefix': '<(SHARED_LIB_PREFIX)',
@@ -36,7 +31,7 @@
         ],
       }],
       ['travis=="true"', {
-        "cflags_cc": [ '-fprofile-arcs -ftest-coverage' ],
+        "cflags_cc": [ '--coverage' ],
       }],
     ],
     "conditions": [
@@ -50,6 +45,9 @@
       }],
       ['OS=="linux"', {
         "defines": [ "_LINUX", "LINUX" ],
+        "variables": {
+          'travis': "<!(echo $TRAVIS)",
+        },
       }],
       ['OS=="win"', {
         "defines": [ "_WINDOWS", "WINDOWS"  ],
