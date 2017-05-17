@@ -32,6 +32,7 @@
       }],
       ['travis=="true"', {
         "cflags_cc": [ '--coverage' ],
+        "libraries": [ '--coverage' ],
       }],
     ],
     "conditions": [
