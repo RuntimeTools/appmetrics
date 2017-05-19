@@ -393,7 +393,7 @@ static void emitMessage(uv_async_t *handle, int status) {
     uv_mutex_unlock(messageListMutex);
 
     while(currentMessage != NULL ) {
-        TryCatch try_catch;
+        TryCatch try_catch(v8::Isolate::GetCurrent());
         const unsigned argc = 2;
         Local<Value> argv[argc];
         const char * source = (*currentMessage->source).c_str();
