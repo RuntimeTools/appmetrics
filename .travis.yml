@@ -8,4 +8,5 @@ node_js:
   - "node"
 os:
   - linux
+script: npm run-script travis
 
