@@ -594,7 +594,7 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 static Local<Object> getRequireCache(Local<Object> module) {
     Nan::EscapableHandleScope scope;
     Local<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
-    Local<Value> m = module->Get(Nan::New<String>("require").ToLocalChecked())->ToObject()->CallAsFunction(Nan::GetCurrentContext()->Global(), 1, args);
+    Local<Value> m = module->Get(Nan::New<String>("require").ToLocalChecked())->ToObject()->CallAsFunction(Nan::GetCurrentContext(), Nan::GetCurrentContext()->Global(), 1, args).ToLocalChecked();
     Local<Object> cache = m->ToObject()->Get(Nan::New<String>("_cache").ToLocalChecked())->ToObject();
     return scope.Escape(cache);
 }
