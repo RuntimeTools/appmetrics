@@ -41,29 +41,13 @@ Node Application Metrics provides the following built-in data collection sources
  Riak               | Riak methods called by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
+## Performance overhead
+
+Our testing has shown that the performance overhead in terms of processing is minimal, adding less than 0.5 % to the CPU usage of your application. The additional memory required is around 20 MB to gather information about your system and application. 
+
+We gathered this information by monitoring the sample application [Acme Air][3]. We used MongoDB as our datastore and used JMeter to drive load though the program.  We have performed this testing with Node.js version 6.10.3
 
 ## Getting Started
-### Prerequisites
-
-The Node Application Metrics agent supports the following runtime environments:
-
-* **Node.js v7** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
-  * 64-bit runtime on Mac OS X (x64)
-* **Node.js v6** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
-  * 64-bit runtime on Mac OS X (x64)
-* **Node.js v4** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
-  * 64-bit runtime on Mac OS X (x64)
-* **IBM SDK for Node.js 4** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
-  * 64-bit or 32-bit runtime on AIX (PPC32, PPC64)
-  * 64-bit runtime on Mac OS X (x64)
 
 ### Installation
 
@@ -447,6 +431,16 @@ Requests are a special type of event emitted by appmetrics.  All the probes name
         * `children` (Array) An array of child request events that occurred as part of the overall request event. Child request events may include function trace entries, which will have a `type` of null.
         * `duration` (Number) the time taken for the request to complete in ms.
     * `duration` (Number) the time taken for the overall request to complete in ms.
+
+### Supported platforms
+
+The Node Application Metrics agent supports the following runtime environments:
+
+* **Node.js v4, v6 and v7** on:
+  * 64-bit or 32-bit runtime on Windows (x64 or x86)
+  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
+  * 64-bit or 32-bit runtime on AIX (PPC64)
+  * 64-bit runtime on Mac OS X (x64)
 
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
