@@ -12,9 +12,6 @@
     "semver": "^5.3.0",
     "jszip": "2.5.x"
   },
-  "bundleDependencies": [
-    "tar"
-  ],
   "devDependencies": {
     "codecov": "2.x",
     "node-gyp": "3.x",
