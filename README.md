@@ -434,9 +434,9 @@ Requests are a special type of event emitted by appmetrics.  All the probes name
 
 ### Supported platforms
 
-The Node Application Metrics agent supports the following runtime environments:
+The Node Application Metrics agent supports the following runtime environments where a Node.js runtime is available:
 
-* **Node.js v4, v6 and v7** on:
+* **Node.js v4, v6 ,v7 and v8** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
   * 64-bit or 32-bit runtime on AIX (PPC64)
@@ -494,9 +494,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-3.0.2-development
+3.0.2
 
 ## Release History
+`3.0.2` - Probe defect for Node 8 support.  
 `3.0.1` - Packaging bug fix to allow build from source if binary not present.  
 `3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.  
 `2.0.1` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.  
