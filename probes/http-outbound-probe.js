@@ -140,8 +140,8 @@ function formatURL(httpOptions) {
     }
     if(httpOptions.host) {
        url += httpOptions.host
-    } else  if(httpOptions.hostname) {
-       url += httpOptions.host
+    } else if(httpOptions.hostname) {
+       url += httpOptions.hostname
     } else {
        url += "localhost"
     }
