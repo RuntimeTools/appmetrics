@@ -44,6 +44,10 @@
         "defines": [ "__MACH__", "__APPLE__",  ],
          "libraries": [ "-undefined dynamic_lookup" ],
       }],
+      ['OS=="os390"', {
+        "defines": [ "_ZOS" ],
+        'libraries': [ '-Wl,lp64,dll,xplink,-Wc,lp64,warn64,expo -Wc,"LANG(EXTENDED),COMPACT,COMPRESS,NOCONVLIT"' ],
+      }],
       ['OS=="linux"', {
         "defines": [ "_LINUX", "LINUX" ],
         "variables": {
