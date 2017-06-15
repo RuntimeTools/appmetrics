@@ -16,23 +16,22 @@
 
 /* A test for the appmetrics axon probe.
  * A self contained test that calls makes calls to and from local sockets.
- * 
+ *
  * It tests that user the probes are triggered for every function
  * and that user call backs to axon calls are run correctly.
- * 
+ *
  * Debug code is included commented out for use if the test fails.
  */
 
 var appmetrics = require('appmetrics');
 var process = require('process');
 
-
 var methodpairs = {
-		pushpull : {send:'push', receive:'pull'},
-		pubsub : {send:'pub', receive:'sub'},
-		topicpubsub : {send:'pub', receive:'sub'},
-		reqrep : {send:'req', receive: 'rep'},
-		pubemitsubemit : {send:'pub-emitter', receive:'sub-emitter'},
+  pushpull: { send: 'push', receive: 'pull' },
+  pubsub: { send: 'pub', receive: 'sub' },
+  topicpubsub: { send: 'pub', receive: 'sub' },
+  reqrep: { send: 'req', receive: 'rep' },
+  pubemitsubemit: { send: 'pub-emitter', receive: 'sub-emitter' },
 };
 
 var messagecounts = {};
@@ -42,67 +41,80 @@ var callbackcounts = {};
 var TESTCOUNT = 10;
 
 var monitoring = appmetrics.monitor();
-monitoring.on('axon', function (data) {
-//	console.dir(data);
-	if( !eventcounts[data.type] ) {
-		eventcounts[data.type] = 0;
-	}
-	eventcounts[data.type]++;
+monitoring.on('axon', function(data) {
+  //	console.dir(data);
+  if (!eventcounts[data.type]) {
+    eventcounts[data.type] = 0;
+  }
+  eventcounts[data.type]++;
 });
 
-/* Check the test results on exit and report any failures. 
+/* Check the test results on exit and report any failures.
  */
 process.on('exit', function(code) {
-	
-	console.log('*** TEST EXITING - Results:');
-	
-//	console.dir( messagecounts );
-	
-	// Check messages sent/received from each source matches.
-	var sentreceivedpassed = true;
-	for (type in methodpairs) {
-		var methods = methodpairs[type];
-		if( messagecounts[methods.send] != messagecounts[methods.receive] ) {
-			console.log('** Counts for ' + methods.send + " and " + methods.receive + ' did not match, sent '
-					+ messagecounts[methods.send] + ' received '
-					+ messagecounts[methods.receive]);
-			sentreceivedpassed = false;
-		} else {
-//			console.log('** Counts for ' + methods.send + " and " + methods.receive + ' matched, sent '
-//					+ messagecounts[methods.send] + ' received '
-//					+ messagecounts[methods.receive]);
-		}
-	}
-	if( !sentreceivedpassed ) {
-		console.log('Not all messages sent and received. - FAIL');
-	} else {
-		console.log('All messages sent and received. - PASS');
-	}
-	// Check monitored events from each source matches messages sent/received.
-	
-//	console.dir( eventcounts );
-	
-	var eventcountspassed = true;
-	for (pair in methodpairs) {
-		for( method in methodpairs[pair] ) {
-			var name = methodpairs[pair][method];
-			if( messagecounts[name] != eventcounts[name] ) {
-				console.log('** Counts for ' + name + " calls and " + name + ' events did not match, sent '
-						+ messagecounts[name] + ' received '
-						+ eventcounts[name]);
-				eventcountspassed = false;
-			} else {
-//				console.log('** Counts for ' + name + " calls and " + name + ' events matched, sent '
-//						+ messagecounts[name] + ' received '
-//						+ eventcounts[name]);
-			}
-		}
-	}
-	if( !eventcountspassed ) {
-		console.log('Not all messages triggered events. - FAIL');
-	} else {
-		console.log('All messages triggered events. - PASS');
-	}
+  console.log('*** TEST EXITING - Results:');
+
+  //	console.dir( messagecounts );
+
+  // Check messages sent/received from each source matches.
+  var sentreceivedpassed = true;
+  for (type in methodpairs) {
+    var methods = methodpairs[type];
+    if (messagecounts[methods.send] != messagecounts[methods.receive]) {
+      console.log(
+        '** Counts for ' +
+          methods.send +
+          ' and ' +
+          methods.receive +
+          ' did not match, sent ' +
+          messagecounts[methods.send] +
+          ' received ' +
+          messagecounts[methods.receive]
+      );
+      sentreceivedpassed = false;
+    } else {
+      //			console.log('** Counts for ' + methods.send + " and " + methods.receive + ' matched, sent '
+      //					+ messagecounts[methods.send] + ' received '
+      //					+ messagecounts[methods.receive]);
+    }
+  }
+  if (!sentreceivedpassed) {
+    console.log('Not all messages sent and received. - FAIL');
+  } else {
+    console.log('All messages sent and received. - PASS');
+  }
+  // Check monitored events from each source matches messages sent/received.
+
+  //	console.dir( eventcounts );
+
+  var eventcountspassed = true;
+  for (pair in methodpairs) {
+    for (method in methodpairs[pair]) {
+      var name = methodpairs[pair][method];
+      if (messagecounts[name] != eventcounts[name]) {
+        console.log(
+          '** Counts for ' +
+            name +
+            ' calls and ' +
+            name +
+            ' events did not match, sent ' +
+            messagecounts[name] +
+            ' received ' +
+            eventcounts[name]
+        );
+        eventcountspassed = false;
+      } else {
+        //				console.log('** Counts for ' + name + " calls and " + name + ' events matched, sent '
+        //						+ messagecounts[name] + ' received '
+        //						+ eventcounts[name]);
+      }
+    }
+  }
+  if (!eventcountspassed) {
+    console.log('Not all messages triggered events. - FAIL');
+  } else {
+    console.log('All messages triggered events. - PASS');
+  }
 });
 
 // Require axon after appmetrics so it is instrumented.
@@ -113,7 +125,6 @@ var axon = require('axon');
  */
 
 // Modes: Push/Pull, Pub/Sub, Req/Rep and PubEmitter/SubEmitter
-
 
 // Push / Pull - 'push' and 'pull' sock.send(msg) and sock.on('message', ...)
 
@@ -131,12 +142,12 @@ pullsock.connect(pushpullnum);
 messagecounts[methodpairs.pushpull.receive] = 0;
 
 pullsock.on('message', function(msg) {
-//	console.log('pullsock received: '+ msg);
-	messagecounts[methodpairs.pushpull.receive]++;
-	if( count == TESTCOUNT ) {
-		pullsock.close();
-		pushsock.close();
-	}
+  //	console.log('pullsock received: '+ msg);
+  messagecounts[methodpairs.pushpull.receive]++;
+  if (count == TESTCOUNT) {
+    pullsock.close();
+    pushsock.close();
+  }
 });
 
 // Pub / Sub - 'pub' and 'sub' sock.send(msg) and sock.on('message', ....) as well as sock.subscribe('testtopic')
@@ -155,12 +166,12 @@ subsock.connect(pubsubnum);
 messagecounts[methodpairs.pubsub.receive] = 0;
 
 subsock.on('message', function(msg) {
-//	console.log('subsock received: '+ msg);
-	messagecounts[methodpairs.pubsub.receive]++;
-	if( count == TESTCOUNT ) {
-		subsock.close();
-		pubsock.close();
-	}
+  //	console.log('subsock received: '+ msg);
+  messagecounts[methodpairs.pubsub.receive]++;
+  if (count == TESTCOUNT) {
+    subsock.close();
+    pubsock.close();
+  }
 });
 
 /** Setup a pub/sub pair with a subscription. **/
@@ -174,15 +185,15 @@ var topicsubsock = axon.socket('sub');
 
 topicsubsock.connect(topicpubsubnum);
 
-topicsubsock.subscribe('testtopic1')
+topicsubsock.subscribe('testtopic1');
 
 topicsubsock.on('message', function(topic, msg) {
-//	console.log('topicsubsock received: '+ msg);
-	messagecounts[methodpairs.topicpubsub.receive]++;
-	if( count == TESTCOUNT ) {
-		topicsubsock.close();
-		topicpubsock.close();
-	}
+  //	console.log('topicsubsock received: '+ msg);
+  messagecounts[methodpairs.topicpubsub.receive]++;
+  if (count == TESTCOUNT) {
+    topicsubsock.close();
+    topicpubsock.close();
+  }
 });
 
 // Req / Rep - 'req' and 'rep' sock.send(msg, func(response) ) and sock.on('message', ....)
@@ -201,12 +212,12 @@ repsock.connect(reqrepnum);
 messagecounts[methodpairs.reqrep.receive] = 0;
 
 repsock.on('message', function(message, count, reply) {
-//	console.log('repsock received: '+ message + " " + count);
-	messagecounts[methodpairs.reqrep.receive]++;
-	reply(count);
+  //	console.log('repsock received: '+ message + " " + count);
+  messagecounts[methodpairs.reqrep.receive]++;
+  reply(count);
 });
 
-//PubEmitter / SubEmitter - 'pub-emitter' and 'sub-emitter' - sock.emit('event-name', json_msg) and sock.on(msg, ....);
+// PubEmitter / SubEmitter - 'pub-emitter' and 'sub-emitter' - sock.emit('event-name', json_msg) and sock.on(msg, ....);
 
 var pubemitsubemitnum = 3004;
 
@@ -222,12 +233,12 @@ subemitsock.connect(pubemitsubemitnum);
 messagecounts[methodpairs.pubemitsubemit.receive] = 0;
 
 subemitsock.on('testtopic2', function(msg) {
-//	console.log('sub-emitter received: '+ msg +  ' count: ' + count);
-	messagecounts[methodpairs.pubemitsubemit.receive]++;
-	if( count == TESTCOUNT ) {
-		subemitsock.close();
-		pubemitsock.close();
-	}
+  //	console.log('sub-emitter received: '+ msg +  ' count: ' + count);
+  messagecounts[methodpairs.pubemitsubemit.receive]++;
+  if (count == TESTCOUNT) {
+    subemitsock.close();
+    pubemitsock.close();
+  }
 });
 
 /* Create the message sending loop and
@@ -241,34 +252,34 @@ messagecounts[methodpairs.topicpubsub.send] = 0;
 messagecounts[methodpairs.reqrep.send] = 0;
 messagecounts[methodpairs.pubemitsubemit.send] = 0;
 
-var intervalId = setInterval(function(){
-	count++;
-	if( count == TESTCOUNT ) {
-		clearInterval(intervalId);
-	}
-	pushsock.send('pushpulltest', count);
-	messagecounts[methodpairs.pushpull.send]++;
-	
-	pubsock.send('pubsubtest', count);
-	messagecounts[methodpairs.pubsub.send]++;
-	
-	topicpubsock.send('testtopic1', {message: 'topicpubsubtest'});
-	messagecounts[methodpairs.topicpubsub.send]++;
-	
-	pubemitsock.emit('testtopic2', 'pubemitsubemittest');
-	messagecounts[methodpairs.pubemitsubemit.send]++;
-	
-	/* Increment the message count in the reply function to confirm the callback works. */
-	reqsock.send('reqreptest', count, function(reply_count) {
-		messagecounts[methodpairs.reqrep.send]++;
-//		console.log("Reply was: " + reply_count);
-		// Close the sockets on this side once we receive the last reply.
-		// (Use the returned count as our count may be 10 before any replies are sent.)
-		if( reply_count == TESTCOUNT ) {
-			repsock.close();
-			reqsock.close();
-		}
-	});
+var intervalId = setInterval(function() {
+  count++;
+  if (count == TESTCOUNT) {
+    clearInterval(intervalId);
+  }
+  pushsock.send('pushpulltest', count);
+  messagecounts[methodpairs.pushpull.send]++;
+
+  pubsock.send('pubsubtest', count);
+  messagecounts[methodpairs.pubsub.send]++;
+
+  topicpubsock.send('testtopic1', { message: 'topicpubsubtest' });
+  messagecounts[methodpairs.topicpubsub.send]++;
+
+  pubemitsock.emit('testtopic2', 'pubemitsubemittest');
+  messagecounts[methodpairs.pubemitsubemit.send]++;
+
+  /* Increment the message count in the reply function to confirm the callback works. */
+  reqsock.send('reqreptest', count, function(reply_count) {
+    messagecounts[methodpairs.reqrep.send]++;
+    //		console.log("Reply was: " + reply_count);
+    // Close the sockets on this side once we receive the last reply.
+    // (Use the returned count as our count may be 10 before any replies are sent.)
+    if (reply_count == TESTCOUNT) {
+      repsock.close();
+      reqsock.close();
+    }
+  });
 }, 150);
 
-/*** End ***/
+/** * End ***/

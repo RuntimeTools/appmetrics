@@ -13,25 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
- 
+
 var tap = require('tap');
 
 // Regression test for issue #375
 tap.test('Calling require without start should not break', function(t) {
-    var appmetrics = require('../');
-    var server = require('./test_http_server').server;
-    var http = require('http');
+  var appmetrics = require('../');
+  var server = require('./test_http_server').server;
+  var http = require('http');
 
-    // HTTP outbound request 
-    // (previously triggered http-outbound probe to emit an event which caused a SIGSEGV)
-    http.get('http://localhost:8000', function (res) {server.close(); t.end();});
+  // HTTP outbound request
+  // (previously triggered http-outbound probe to emit an event which caused a SIGSEGV)
+  http.get('http://localhost:8000', function(res) {
+    server.close();
+    t.end();
+  });
 });
 
 tap.test('Appmetrics should be a global singleton', function(t) {
-    var appmetrics = require('../');
-    // Delete cached module
-    delete require.cache[require.resolve('../')]
-    var appmetrics2 = require('../');
-    t.equals(appmetrics, appmetrics2);
-    t.end();
+  var appmetrics = require('../');
+  // Delete cached module
+  delete require.cache[require.resolve('../')];
+  var appmetrics2 = require('../');
+  t.equals(appmetrics, appmetrics2);
+  t.end();
 });

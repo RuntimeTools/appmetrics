@@ -25,11 +25,11 @@ function StrongExpressMetricsProbe() {
 
 util.inherits(StrongExpressMetricsProbe, Probe);
 
-//This method attaches our probe to the instance of the strong-express-metrics module (target)
+// This method attaches our probe to the instance of the strong-express-metrics module (target)
 StrongExpressMetricsProbe.prototype.attach = function(name, target) {
   var that = this;
-  if( name != "strong-express-metrics" ) return target;
-  if(target.__ddProbeAttached__) return target;
+  if (name != 'strong-express-metrics') return target;
+  if (target.__ddProbeAttached__) return target;
   target.__ddProbeAttached__ = true;
 
   // Call the onRecord function and emit an appmetrics event
@@ -37,6 +37,6 @@ StrongExpressMetricsProbe.prototype.attach = function(name, target) {
     am.emit('express:usage-record', record);
   });
   return target;
-}
+};
 
 module.exports = StrongExpressMetricsProbe;

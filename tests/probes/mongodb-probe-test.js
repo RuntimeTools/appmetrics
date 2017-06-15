@@ -29,39 +29,38 @@ var tap = require('tap');
 
 tap.plan(13);
 
-
 tap.test('probe attached', function(t) {
   t.ok(mongo.__ddProbeAttached__);
   t.end();
 });
 
-monitoring.on('mongo', function (data) {
+monitoring.on('mongo', function(data) {
   console.log('mongo probe emitted ' + data.method);
-  tap.test(data.method, function(t){
+  tap.test(data.method, function(t) {
     t.equal(data.collection, 'documents', 'collection name should be provided');
     switch (data.method) {
-      case 'insertMany' :
+      case 'insertMany':
         t.equal(data.count, 3, 'should have inserted 3 documents');
         break;
-      case 'insertOne' :
+      case 'insertOne':
         t.equal(data.count, 1, 'should have inserted 1 document');
         break;
-      case 'bulkWrite': 
+      case 'bulkWrite':
         t.equal(data.count, 2, 'should have modified 2 documents');
         break;
-      case 'deleteMany' :
+      case 'deleteMany':
         t.equal(data.count, 1, 'should have deleted 1 document');
         break;
-      case 'deleteOne' :
+      case 'deleteOne':
         t.equal(data.count, 1, 'should have deleted 1 document');
         break;
-      case 'find' :
+      case 'find':
         t.equal(data.count, 3, 'should have found 3 documents');
         break;
-      case 'count' :
+      case 'count':
         t.equal(data.count, 3, 'should have found 3 documents');
         break;
-      case 'indexes' :
+      case 'indexes':
         t.equal(data.count, 2, 'should have found 2 indexes');
         break;
     }
@@ -70,72 +69,76 @@ monitoring.on('mongo', function (data) {
   });
 });
 
-
-
 function run() {
   // Connection OneURL
   var url = 'mongodb://localhost:27017/myproject';
   // Use connect method to connect to the Server
   client.connect(url, function(err, db) {
-    console.log("Connected correctly to server");
+    console.log('Connected correctly to server');
 
     // Get the documents collection
     var collection0 = db.collection('documents');
     // Insert some documents
-    collection0.insertOne({b : 1}, function(err, result) {
-      console.log("Inserted 1 document into the document collection");
-      collection0.drop(function(err,result) {
-       
+    collection0.insertOne({ b: 1 }, function(err, result) {
+      console.log('Inserted 1 document into the document collection');
+      collection0.drop(function(err, result) {
         var collection = db.collection('documents');
         // Insert some documents
-        collection.insertMany([
-          {a : 1}, {a : 2}, {a : 3}
-        ], function(err, result) {
-          console.log("Inserted 3 documents into the document collection");
-          collection.createIndex({a:1, a:2}
-            , {unique:true, background:true, w:1}, function(err, indexName) {            
-            collection.indexes(function(err, indexes) {            
-              collection.dropIndexes(function(err, indexes) {
+        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], function(
+          err,
+          result
+        ) {
+          console.log('Inserted 3 documents into the document collection');
+          collection.createIndex(
+            { a: 1, a: 2 },
+            { unique: true, background: true, w: 1 },
+            function(err, indexName) {
+              collection.indexes(function(err, indexes) {
+                collection.dropIndexes(function(err, indexes) {
+                  var res = collection.find();
 
-                var res = collection.find();
+                  res.toArray(function(err, docs) {
+                    collection.count(function(err, count) {
+                      if (err) {
+                        console.log(err);
+                      } else {
+                        console.log('counted ' + count + ' documents');
+                      }
+                      // Delete
+                      collection.deleteOne({ a: 1 }, function(err, result) {
+                        console.log(
+                          'Deleted 1 document from the document collection'
+                        );
+                        collection.deleteMany({ a: 2 }, function(err, result) {
+                          // console.log(err);
+                          console.log(
+                            'Deleted 2 documents from the document collection'
+                          );
 
-                res.toArray(function(err, docs) {
-                  collection.count(function(err, count) {
-                    if(err) {
-                      console.log(err)
-                    } else {
-                      console.log("counted " + count + " documents")
-                    }
-                     // Delete
-                    collection.deleteOne(
-                      {a : 1}, function(err, result) {
-                        console.log("Deleted 1 document from the document collection");
-                        collection.deleteMany({a : 2}, function(err, result) {
-                          //console.log(err);
-                          console.log("Deleted 2 documents from the document collection");
-
-
-                          collection.bulkWrite([
-                            { insertOne: { document: { c: 1 } } }
-                          , { deleteOne: { filter: {c:1} } }
-                          ], function(err, result) {
-                            console.log("Did a bulk write with one insert and one delete");
-                            db.close();
+                          collection.bulkWrite(
+                            [
+                              { insertOne: { document: { c: 1 } } },
+                              { deleteOne: { filter: { c: 1 } } },
+                            ],
+                            function(err, result) {
+                              console.log(
+                                'Did a bulk write with one insert and one delete'
+                              );
+                              db.close();
+                            }
+                          );
                         });
-                      }); 
-                    }); 
+                      });
+                    });
                   });
                 });
               });
-            });
-          }); 
+            }
+          );
         });
       });
     });
   });
 }
 
-
 run();
-
-
