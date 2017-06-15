@@ -23,10 +23,6 @@ var dirToWriteTo;
 var filesToKeep = 10;
 var filesWritten = [];
 
-function onError(err) {
-  console.error('Headless Zip: an error occurred:', err);
-}
-
 function deleteDir(directory) {
   // Delete temporary directory
   if (fs.existsSync(directory)) {
@@ -109,6 +105,9 @@ module.exports.headlessZip = function headlessZip(dirToZip) {
 module.exports.tryZipOnExit = function tryZipOnExit() {
   var outputDir = dirToWriteTo;
   if (!outputDir) {
+    // FIXME(sam) not sure what to do here, this code probably never did
+    // anything but I don't want to enable it in error (btw,  cwd() always
+    // returns a string).
     ouputDir = process.cwd().toString();
   }
   if (fs.existsSync(outputDir)) {

@@ -34,7 +34,6 @@ var methodpairs = {
 
 var messagecounts = {};
 var eventcounts = {};
-var callbackcounts = {};
 
 var TESTCOUNT = 10;
 
@@ -56,7 +55,7 @@ process.on('exit', function(code) {
 
   // Check messages sent/received from each source matches.
   var sentreceivedpassed = true;
-  for (type in methodpairs) {
+  for (var type in methodpairs) {
     var methods = methodpairs[type];
     if (messagecounts[methods.send] != messagecounts[methods.receive]) {
       console.log(
@@ -86,8 +85,8 @@ process.on('exit', function(code) {
   //	console.dir( eventcounts );
 
   var eventcountspassed = true;
-  for (pair in methodpairs) {
-    for (method in methodpairs[pair]) {
+  for (var pair in methodpairs) {
+    for (var method in methodpairs[pair]) {
       var name = methodpairs[pair][method];
       if (messagecounts[name] != eventcounts[name]) {
         console.log(

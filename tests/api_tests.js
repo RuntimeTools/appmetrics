@@ -14,7 +14,6 @@
  * limitations under the License.
  *******************************************************************************/
 'use strict';
-
 var app = require('./test_app');
 var appmetrics = app.start();
 var monitor = app.appmetrics.monitor();
@@ -43,8 +42,6 @@ tap.test('lrtime is a function or undefined', function(t) {
   }
   t.end();
 });
-
-var completedTests = {}; // Stores which tests have been run, ensures single run per test
 
 tap.test('CPU Data', function(t) {
   monitor.once('cpu', function(cpuData) {

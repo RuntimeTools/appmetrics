@@ -18,7 +18,6 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var url = require('url');
 var am = require('../');
 
 /**
@@ -63,7 +62,7 @@ MQLightProbe.prototype.attach = function(name, target) {
           // method has completed and the callback has been called, so end the monitoring
 
           // Call the transaction link with a name and the callback for strong trace
-          var callbackPosition = aspect.findCallbackArg(methodArgs);
+          var callbackPosition = aspect.findCallbackArg(methodArgs); // FIXME(sam) methodArgs does not exist!
           if (typeof callbackPosition != 'undefined') {
             aspect.strongTraceTransactionLink(
               'mqlight: ',
@@ -98,7 +97,7 @@ MQLightProbe.prototype.attach = function(name, target) {
         // Must be a callback so no need to check for it
         aspect.aroundCallback(
           args,
-          new Object(),
+          {},
           function(obj, callbackArgs, probeData) {
             that.metricsProbeStart(probeData, 'message', callbackArgs);
             that.requestProbeStart(probeData, 'message', callbackArgs);
@@ -149,6 +148,7 @@ MQLightProbe.prototype.metricsEnd = function(
 ) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
+    /* eslint no-redeclare:0 */
     if (method == 'message') {
       var data = methodArgs[0];
       if (data.length > 25) {
@@ -220,7 +220,6 @@ MQLightProbe.prototype.requestEnd = function(
       if (data.length > 25) {
         data = data.substring(0, 22) + '...';
       }
-      var topic = methodArgs[1].message.topic;
       probeData.req.stop({
         clientid: client.id,
         data: data,

@@ -101,7 +101,7 @@ loopbackDJProbe.prototype.attach = function(name, target) {
 loopbackDJProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
-    eventTimer = probeData.timer;
+    var eventTimer = probeData.timer;
     am.emit('loopback-datasource-juggler', {
       time: eventTimer.startTimeMillis,
       method: method,

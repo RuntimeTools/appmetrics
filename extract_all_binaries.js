@@ -17,7 +17,6 @@
 
 var fs = require('fs');
 var util = require('util');
-var url = require('url');
 var path = require('path');
 var zlib = require('zlib');
 var tar = require('tar');

@@ -64,6 +64,5 @@ if (process.argv.length > 1) {
   require('repl').start({});
 } else {
   // Should not happen, but just in case write a message
-  var err = new Error('node-hc does not support this method of invocation');
-  throw err;
+  throw new Error('node-hc does not support this method of invocation');
 }

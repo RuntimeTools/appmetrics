@@ -27,6 +27,7 @@ var mongo = require('mongodb');
 var client = mongo.MongoClient;
 
 var tap = require('tap');
+var assert = require('assert');
 
 tap.plan(13);
 
@@ -75,31 +76,40 @@ function run() {
   var url = 'mongodb://localhost:27017/myproject';
   // Use connect method to connect to the Server
   client.connect(url, function(err, db) {
+    assert.ifError(err);
     console.log('Connected correctly to server');
 
     // Get the documents collection
     var collection0 = db.collection('documents');
     // Insert some documents
     collection0.insertOne({ b: 1 }, function(err, result) {
+      assert.ifError(err);
       console.log('Inserted 1 document into the document collection');
       collection0.drop(function(err, result) {
+        assert.ifError(err);
         var collection = db.collection('documents');
         // Insert some documents
         collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], function(
           err,
           result
         ) {
+          assert.ifError(err);
           console.log('Inserted 3 documents into the document collection');
           collection.createIndex(
-            { a: 1, a: 2 },
+            { a: 2 },
             { unique: true, background: true, w: 1 },
             function(err, indexName) {
+              assert.ifError(err);
               collection.indexes(function(err, indexes) {
+                assert.ifError(err);
                 collection.dropIndexes(function(err, indexes) {
+                  assert.ifError(err);
                   var res = collection.find();
 
                   res.toArray(function(err, docs) {
+                    assert.ifError(err);
                     collection.count(function(err, count) {
+                      assert.ifError(err);
                       if (err) {
                         console.log(err);
                       } else {
@@ -107,10 +117,12 @@ function run() {
                       }
                       // Delete
                       collection.deleteOne({ a: 1 }, function(err, result) {
+                        assert.ifError(err);
                         console.log(
                           'Deleted 1 document from the document collection'
                         );
                         collection.deleteMany({ a: 2 }, function(err, result) {
+                          assert.ifError(err);
                           // console.log(err);
                           console.log(
                             'Deleted 2 documents from the document collection'
@@ -122,6 +134,7 @@ function run() {
                               { deleteOne: { filter: { c: 1 } } },
                             ],
                             function(err, result) {
+                              assert.ifError(err);
                               console.log(
                                 'Did a bulk write with one insert and one delete'
                               );

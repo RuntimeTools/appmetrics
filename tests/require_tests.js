@@ -19,7 +19,7 @@ var tap = require('tap');
 
 // Regression test for issue #375
 tap.test('Calling require without start should not break', function(t) {
-  var appmetrics = require('../');
+  require('../');
   var server = require('./test_http_server').server;
   var http = require('http');
 

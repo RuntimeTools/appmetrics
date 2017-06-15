@@ -80,7 +80,7 @@ MySqlProbe.prototype.attach = function(name, target) {
 MySqlProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
-    eventTimer = probeData.timer;
+    var eventTimer = probeData.timer;
     am.emit('mysql', {
       time: eventTimer.startTimeMillis,
       query: JSON.stringify(methodArgs[0]),

@@ -13,7 +13,7 @@
  * limitations under the License.
  *******************************************************************************/
 'use strict';
-
+/* eslint radix:0 */
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var serializer = require('./lib/serializer');
@@ -239,8 +239,7 @@ function API(agent, appmetrics) {
       // API events are passed by copy
       return;
     }
-    message = data.toString();
-    raiseEvent(topic, message);
+    raiseEvent(topic, data.toString());
   });
   //    agent.sendControlCommand("history", "");
 }

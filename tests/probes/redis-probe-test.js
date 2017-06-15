@@ -24,16 +24,11 @@
  * Debug code is included commented out for if the test fails.
  */
 
+var assert = require('assert');
 var results = {};
-var actualProbeCounts = new Object();
-var expectedProbeCounts = new Object();
+var actualProbeCounts = {};
+var expectedProbeCounts = {};
 var exitCode = 0;
-
-function addRedisCommandTest(testName, testFunc) {
-  /* Mark test as having failed. */
-  results[testName] = false;
-  testFunc();
-}
 
 /* Setup tracking so we know how many metric events ought to have fired
  * and can validate that we instrumented methods correctly.
@@ -55,7 +50,7 @@ process.on('exit', function(code) {
   console.log('*** TEST EXITING - Results:');
 
   var probesPassed = true;
-  for (method in actualProbeCounts) {
+  for (var method in actualProbeCounts) {
     if (expectedProbeCounts[method] !== actualProbeCounts[method]) {
       console.log(
         '** Counts for ' +
@@ -81,7 +76,7 @@ process.on('exit', function(code) {
 
   var passCount = 0;
   var failCount = 0;
-  for (test in results) {
+  for (var test in results) {
     //		console.log(test + ': \t' + results[test]);
     if (!results[test]) {
       // Make sure we exit with an error if a test failed.
@@ -140,24 +135,28 @@ console.log('Async calls');
 results['set_test'] = false;
 addExpectedEvent('set');
 client.set('akey', 'somevalue', function(err, reply) {
+  assert.ifError(err);
   results['set_test'] = true;
 });
 
 results['SET_TEST'] = false;
 addExpectedEvent('set');
 client.SET('AKEY', 'SOMEVALUE', function(err, reply) {
+  assert.ifError(err);
   results['SET_TEST'] = true;
 });
 
 results['get_test'] = false;
 addExpectedEvent('get');
 client.get('akey', function(err, reply) {
+  assert.ifError(err);
   results['get_test'] = true;
 });
 
 results['GET_TEST'] = false;
 addExpectedEvent('get');
 client.GET('AKEY', function(err, reply) {
+  assert.ifError(err);
   results['GET_TEST'] = true;
 });
 console.log('Async calls done.');
@@ -192,6 +191,7 @@ addExpectedEvent('batch.exec');
 batchObject1.set('batchkey', 'batchvalue');
 batchObject1.get('batchkey');
 batchObject1.exec(function(err, reply) {
+  assert.ifError(err);
   results['batch_test'] = true;
 });
 
@@ -205,11 +205,11 @@ batchObject2.exec();
 var batchObject3 = client.batch();
 
 results['BATCH_TEST'] = false;
-var batchObject = client.BATCH();
 addExpectedEvent('batch.exec');
 batchObject3.set('BATCHKEY', 'BATCHVALUE');
 batchObject3.get('BATCHKEY');
 batchObject3.EXEC(function(err, reply) {
+  assert.ifError(err);
   results['BATCH_TEST'] = true;
 });
 
@@ -231,6 +231,7 @@ addExpectedEvent('multi.exec');
 multiObject1.set('multikey', 'multivalue');
 multiObject1.get('multikey');
 multiObject1.exec(function(err, reply) {
+  assert.ifError(err);
   results['multi_test'] = true;
 });
 
@@ -248,6 +249,7 @@ addExpectedEvent('multi.exec');
 multiObject3.set('MULTIKEY', 'MULTIVALUE');
 multiObject3.get('MULTIKEY');
 multiObject3.EXEC(function(err, reply) {
+  assert.ifError(err);
   results['MULTI_TEST'] = true;
 });
 
@@ -267,9 +269,9 @@ client.quit();
 
 /* Test pub/sub monitoring */
 addExpectedEvent('info');
-subClient = redis.createClient();
+var subClient = redis.createClient();
 addExpectedEvent('info');
-pubClient = redis.createClient();
+var pubClient = redis.createClient();
 
 console.log('Setting up pub/sub:');
 

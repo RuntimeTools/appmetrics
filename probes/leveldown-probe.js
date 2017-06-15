@@ -127,6 +127,9 @@ LeveldownProbe.prototype.requestStart = function(
   method,
   methodArgs
 ) {
+  // FIXME(sam) req is used as a global to communicate with requestEnd, almost
+  // certainly a bug, what happens if two requests are started before the first
+  // ends?
   req = request.startRequest('leveldown', 'query');
   req.setContext({ leveldown: methodArgs[0] });
 };

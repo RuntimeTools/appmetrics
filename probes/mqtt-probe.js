@@ -37,10 +37,9 @@ MqttProbe.prototype.attach = function(name, target) {
     context,
     client
   ) {
-    var methods = 'publish';
     aspect.around(
       client,
-      methods,
+      'publish',
       function(target, methodName, methodArgs, context) {
         that.metricsProbeStart(context, methodName, methodArgs);
         that.requestProbeStart(context, methodName, methodArgs);

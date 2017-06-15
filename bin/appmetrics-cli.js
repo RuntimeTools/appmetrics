@@ -15,13 +15,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
-
+'use strict';
 var node_args = process.execArgv;
 
 // First argv[0] should be 'node' and argv[1] the name of this file.
 var args = process.argv.splice(0);
-var node_exe = args.shift();
-var this_filename = args.shift();
 
 var arg = args.shift();
 while (typeof arg != 'undefined') {

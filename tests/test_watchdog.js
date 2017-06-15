@@ -14,6 +14,8 @@
  * limitations under the License.
  *******************************************************************************/
 
+'use strict';
+
 if (process.platform !== 'linux') {
   console.log('1..0 # SKIP watchdog is Linux-only for now');
   return;
@@ -93,7 +95,7 @@ function runProfilingTests(profData, t) {
 
   t.ok(isInteger(profData.time), 'Timestamp is an integer');
   t.ok(
-    isReasonableTimestamp(parseInt(profData.time)),
+    isReasonableTimestamp(parseInt(profData.time, 10)),
     'Timestamp is a reasonable value (expected to contain current year)'
   );
 
@@ -106,7 +108,7 @@ function runProfilingTests(profData, t) {
   for (var currentFunction in functions) {
     for (var entry in currentFunction) {
       if (entry != 'file' || entry != 'name')
-        currentFunction[entry] = parseInt(currentFunction[entry]);
+        currentFunction[entry] = parseInt(currentFunction[entry], 10);
     }
   }
 

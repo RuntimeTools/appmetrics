@@ -147,7 +147,7 @@ RiakProbe.prototype.attach = function(name, target) {
 RiakProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
-    eventTimer = probeData.timer;
+    var eventTimer = probeData.timer;
 
     // Work out if options, command or query are needed. Defaults to just method
     var jsonToEmit = {

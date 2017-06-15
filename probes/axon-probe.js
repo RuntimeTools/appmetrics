@@ -93,8 +93,7 @@ AxonProbe.prototype.attach = function(name, target) {
         }
       );
     } else {
-      var methods = ['on', 'addListener'];
-      aspect.before(client, methods, function(
+      aspect.before(client, ['on', 'addListener'], function(
         target,
         methodName,
         methodArgs,

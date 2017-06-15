@@ -15,13 +15,8 @@
  *******************************************************************************/
 'use strict';
 var path = require('path');
-if (require.main != null) {
-  var main_filename = require.main.filename;
-} else {
-  var main_filename = '';
-}
+var main_filename = require.main != null ? require.main.filename : '';
 var module_dir = path.dirname(module.filename);
-var os = require('os');
 var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
 var fs = require('fs');
@@ -111,7 +106,6 @@ var latencyReport = function() {
     max: latencyData.max,
     avg: latencyData.total / latencyData.count,
   };
-  var avg = latencyData.total / latencyData.count;
   exports.emit('eventloop', { time: Date.now(), latency: latency });
   latencyData.count = 0;
   latencyData.min = 1 * 60 * 1000;
@@ -150,6 +144,7 @@ if (global.Appmetrics) {
  */
 var data = {};
 
+/* eslint no-proto:0 */
 aspect.after(module.__proto__, 'require', data, function(
   obj,
   methodName,

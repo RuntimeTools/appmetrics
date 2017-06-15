@@ -15,8 +15,6 @@
 *******************************************************************************/
 'use strict';
 var Probe = require('../lib/probe.js');
-var aspect = require('../lib/aspect.js');
-var request = require('../lib/request.js');
 var util = require('util');
 var am = require('../');
 
@@ -28,7 +26,6 @@ util.inherits(StrongExpressMetricsProbe, Probe);
 
 // This method attaches our probe to the instance of the strong-express-metrics module (target)
 StrongExpressMetricsProbe.prototype.attach = function(name, target) {
-  var that = this;
   if (name != 'strong-express-metrics') return target;
   if (target.__ddProbeAttached__) return target;
   target.__ddProbeAttached__ = true;

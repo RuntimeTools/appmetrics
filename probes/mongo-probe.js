@@ -27,7 +27,6 @@ util.inherits(MongoProbe, Probe);
 
 MongoProbe.prototype.aspectCollectionMethod = function(coll, method) {
   var that = this;
-  var req;
   aspect.around(
     coll,
     method,
@@ -51,7 +50,7 @@ MongoProbe.prototype.aspectCollectionMethod = function(coll, method) {
               methodArgs[callbackPosition]
             );
           }
-          var count = undefined;
+          var count;
 
           if (args && args.length > 1) {
             var res = args[1];
@@ -137,7 +136,7 @@ MongoProbe.prototype.attach = function(name, target) {
             args,
             probeData
           ) {
-            var count = undefined;
+            var count;
 
             if (args && args.length > 1) {
               var res = args[1];

@@ -18,7 +18,6 @@ var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var url = require('url');
 var am = require('../');
 
 /**

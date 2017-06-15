@@ -17,7 +17,6 @@
 var Probe = require('../lib/probe.js');
 var request = require('../lib/request.js');
 var util = require('util');
-var path = require('path');
 
 function TraceProbe() {
   Probe.call(this, 'trace');
@@ -129,12 +128,12 @@ function instrument(target, name, method, fullName) {
           argumentList[i] = ident;
           ident = incrementIdentifier(ident);
         }
-        result = eval(
+        /* eslint no-eval: 0 */
+        return eval(
           'x = function(' +
             argumentList.join(',') +
             ') {return fn.apply(this,arguments);};'
         );
-        return result;
     }
 
     function incrementIdentifier(identifier) {
@@ -150,7 +149,6 @@ function instrument(target, name, method, fullName) {
   }
 
   var f = function() {
-    var instrumentedMethodKNJ = true;
     var req = request.startMethod(fullName);
     var args = arguments;
 
