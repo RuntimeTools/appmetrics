@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+'use strict';
 
 /* A test for the appmetrics redis probe.
  * It assumes a redis server is running on the local host.

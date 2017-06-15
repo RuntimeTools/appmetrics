@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+'use strict';
 
 /* A test for the appmetrics axon probe.
  * A self contained test that calls makes calls to and from local sockets.

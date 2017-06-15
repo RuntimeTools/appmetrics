@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+'use strict';
 
 // This script tests the client pooling functionality of the pg module.
 // It assumes a postgres server is running on the local host.

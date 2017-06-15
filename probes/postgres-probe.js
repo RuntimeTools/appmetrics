@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 *******************************************************************************/
+'use strict';
 var Probe = require('../lib/probe.js');
 var aspect = require('../lib/aspect.js');
 var request = require('../lib/request.js');

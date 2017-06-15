@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+'use strict';
 
 // Default behaviour for npm test - app will be closed with endRun() so timeout not needed
 var timeout = false;
@@ -55,11 +56,10 @@ module.exports.start = function start() {
 };
 
 // Write a string to memory on timer
-var test = null;
 var ih = setInterval(function() {
   var dummy = new Buffer(1024 * 1024);
   dummy.write('hello');
-  test = dummy.toString()[0];
+  dummy.toString()[0];
 }, 100);
 
 module.exports.endRun = function() {

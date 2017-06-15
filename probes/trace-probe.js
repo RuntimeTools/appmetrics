@@ -13,6 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+'use strict';
 var Probe = require('../lib/probe.js');
 var request = require('../lib/request.js');
 var util = require('util');

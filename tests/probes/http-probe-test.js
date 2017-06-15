@@ -13,6 +13,7 @@
  * License for the specific language governing permissions and limitations under
  * the License.
  ******************************************************************************/
+'use strict';
 
 var appmetrics = (appmetrics = require('../../'));
 var monitor = appmetrics.monitor();
