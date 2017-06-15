@@ -25,7 +25,9 @@ var tap = require('tap');
 tap.plan(3);
 
 tap.tearDown(function() {
+  setTimeout(function() {
     server.close();
+  }, 1000);
 });
 
 var completedTests = 0;
