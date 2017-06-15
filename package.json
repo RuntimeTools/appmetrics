@@ -21,8 +21,8 @@
     "tap": "7.x"
   },
   "scripts": {
-    "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/probes/http-probe-test.js tests/headless_test.js",
-    "travis": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/probes/http-probe-test.js tests/headless_test.js --coverage",
+    "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http*test.js tests/headless_test.js",
+    "travis": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http*test.js tests/headless_test.js --coverage",
     "posttravis": "./get_code_cov.sh && tap --coverage-report=lcov && codecov --disable=gcov",
     "install": "node extract_all_binaries.js || node-gyp rebuild"
   },
