@@ -89,66 +89,50 @@ function run() {
         assert.ifError(err);
         var collection = db.collection('documents');
         // Insert some documents
-        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], function(
-          err,
-          result
-        ) {
+        collection.insertMany([{ a: 1 }, { a: 2 }, { a: 3 }], function(err, result) {
           assert.ifError(err);
           console.log('Inserted 3 documents into the document collection');
-          collection.createIndex(
-            { a: 2 },
-            { unique: true, background: true, w: 1 },
-            function(err, indexName) {
+          collection.createIndex({ a: 2 }, { unique: true, background: true, w: 1 }, function(err, indexName) {
+            assert.ifError(err);
+            collection.indexes(function(err, indexes) {
               assert.ifError(err);
-              collection.indexes(function(err, indexes) {
+              collection.dropIndexes(function(err, indexes) {
                 assert.ifError(err);
-                collection.dropIndexes(function(err, indexes) {
+                var res = collection.find();
+
+                res.toArray(function(err, docs) {
                   assert.ifError(err);
-                  var res = collection.find();
-
-                  res.toArray(function(err, docs) {
+                  collection.count(function(err, count) {
                     assert.ifError(err);
-                    collection.count(function(err, count) {
+                    if (err) {
+                      console.log(err);
+                    } else {
+                      console.log('counted ' + count + ' documents');
+                    }
+                    // Delete
+                    collection.deleteOne({ a: 1 }, function(err, result) {
                       assert.ifError(err);
-                      if (err) {
-                        console.log(err);
-                      } else {
-                        console.log('counted ' + count + ' documents');
-                      }
-                      // Delete
-                      collection.deleteOne({ a: 1 }, function(err, result) {
+                      console.log('Deleted 1 document from the document collection');
+                      collection.deleteMany({ a: 2 }, function(err, result) {
                         assert.ifError(err);
-                        console.log(
-                          'Deleted 1 document from the document collection'
-                        );
-                        collection.deleteMany({ a: 2 }, function(err, result) {
-                          assert.ifError(err);
-                          // console.log(err);
-                          console.log(
-                            'Deleted 2 documents from the document collection'
-                          );
+                        // console.log(err);
+                        console.log('Deleted 2 documents from the document collection');
 
-                          collection.bulkWrite(
-                            [
-                              { insertOne: { document: { c: 1 } } },
-                              { deleteOne: { filter: { c: 1 } } },
-                            ],
-                            function(err, result) {
-                              assert.ifError(err);
-                              console.log(
-                                'Did a bulk write with one insert and one delete'
-                              );
-                              db.close();
-                            }
-                          );
-                        });
+                        collection.bulkWrite(
+                          [{ insertOne: { document: { c: 1 } } }, { deleteOne: { filter: { c: 1 } } }],
+                          function(err, result) {
+                            assert.ifError(err);
+                            console.log('Did a bulk write with one insert and one delete');
+                            db.close();
+                          }
+                        );
                       });
                     });
                   });
                 });
               });
-            }
-          );
+            });
+          });
         });
       });
     });

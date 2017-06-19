@@ -96,11 +96,7 @@ function clientQuery(index) {
       }
 
       // Callback for this connection
-      if (
-        FIRST_BLOCK_RETURNED &&
-        SECOND_BLOCK_RETURNED &&
-        THIRD_BLOCK_RETURNED
-      ) {
+      if (FIRST_BLOCK_RETURNED && SECOND_BLOCK_RETURNED && THIRD_BLOCK_RETURNED) {
         // We are finished with this client
         client.end();
         finishedTesting(index);

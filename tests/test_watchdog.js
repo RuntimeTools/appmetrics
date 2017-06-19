@@ -52,26 +52,23 @@ tap.test('Profiling Data using Watchdog', function(t) {
   });
 });
 
-tap.test(
-  'Setting Watchdog threshold to high value, no profiling data expected',
-  function(t) {
-    app.appmetrics.disable('profiling');
-    delay(100);
-    app.appmetrics.setConfig('advancedProfiling', { threshold: 1000 });
-    app.appmetrics.enable('profiling');
-    monitor.on('profiling', function(data) {
-      t.fail('Profiling data was produced in error');
-    });
-    delay(200);
-    delay(200);
-    delay(200);
-    delay(200);
-    delay(200);
-    setTimeout(function() {
-      t.end();
-    }, 5000);
-  }
-);
+tap.test('Setting Watchdog threshold to high value, no profiling data expected', function(t) {
+  app.appmetrics.disable('profiling');
+  delay(100);
+  app.appmetrics.setConfig('advancedProfiling', { threshold: 1000 });
+  app.appmetrics.enable('profiling');
+  monitor.on('profiling', function(data) {
+    t.fail('Profiling data was produced in error');
+  });
+  delay(200);
+  delay(200);
+  delay(200);
+  delay(200);
+  delay(200);
+  setTimeout(function() {
+    t.end();
+  }, 5000);
+});
 
 function delay(ms) {
   var start = Date.now();
@@ -107,8 +104,7 @@ function runProfilingTests(profData, t) {
   // Parse values of all functions for next tests
   for (var currentFunction in functions) {
     for (var entry in currentFunction) {
-      if (entry != 'file' || entry != 'name')
-        currentFunction[entry] = parseInt(currentFunction[entry], 10);
+      if (entry != 'file' || entry != 'name') currentFunction[entry] = parseInt(currentFunction[entry], 10);
     }
   }
 
@@ -121,13 +117,7 @@ function runProfilingTests(profData, t) {
   function testValuesAreIntegers(keyName) {
     for (var index in functions) {
       if (!isInteger(functions[index][keyName])) {
-        t.fail(
-          'Value of ' +
-            keyName +
-            ' should be an integer (' +
-            functions[index][keyName] +
-            ')'
-        );
+        t.fail('Value of ' + keyName + ' should be an integer (' + functions[index][keyName] + ')');
         return;
       }
     }
@@ -137,20 +127,10 @@ function runProfilingTests(profData, t) {
   function testValuesAreGreaterThan(keyName, val) {
     for (var index in functions) {
       if (!(functions[index][keyName] > val)) {
-        t.fail(
-          "Value of '" +
-            keyName +
-            "' should be greater than " +
-            val +
-            ' (' +
-            functions[index][keyName] +
-            ')'
-        );
+        t.fail("Value of '" + keyName + "' should be greater than " + val + ' (' + functions[index][keyName] + ')');
         return;
       }
     }
-    t.pass(
-      "Value of '" + keyName + "' is greater than " + val + ' for all functions'
-    );
+    t.pass("Value of '" + keyName + "' is greater than " + val + ' for all functions');
   }
 }

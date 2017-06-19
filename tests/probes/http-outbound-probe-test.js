@@ -43,17 +43,9 @@ monitor.on('http-outbound', function(data) {
 function checkHttpOutboundData(data, t) {
   t.ok(isInteger(data.time), 'Timestamp is an integer');
   t.equals(data.method, 'GET', 'Should report GET as HTTP request method');
-  t.equals(
-    data.url,
-    'http://localhost:8000/',
-    'Should report http://localhost:8000/ as URL'
-  );
+  t.equals(data.url, 'http://localhost:8000/', 'Should report http://localhost:8000/ as URL');
   if (data.requestHeaders) {
-    t.equals(
-      data.requestHeaders.hello,
-      'world',
-      'Should report world as value of hello header'
-    );
+    t.equals(data.requestHeaders.hello, 'world', 'Should report world as value of hello header');
   }
 }
 

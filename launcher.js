@@ -46,8 +46,7 @@ var dir = path.dirname(module.filename);
 var agent_module = path.join(dir, 'index.js');
 if (process.argv.length > 1) {
   /* Remove any leading "./" in front of the name of the script - e.g. ./app.js => app.js  */
-  if (process.argv[1].indexOf('./') === 0)
-    process.argv[1] = process.argv[1].substring(2, process.argv[1].length);
+  if (process.argv[1].indexOf('./') === 0) process.argv[1] = process.argv[1].substring(2, process.argv[1].length);
 
   /* Mock the main module for the benefit of the agent (just the bit it needs) */
   process.mainModule = { filename: require.resolve(process.argv[1]) };

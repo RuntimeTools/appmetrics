@@ -37,12 +37,7 @@ OracleProbe.prototype.attach = function(name, target) {
   console.dir(target);
 
   // After 'connect' (single-user connection model)
-  aspect.before(target, 'connect', function(
-    target,
-    methodName,
-    args,
-    probeData
-  ) {
+  aspect.before(target, 'connect', function(target, methodName, args, probeData) {
     aspect.aroundCallback(args, {}, function(target, callbackArgs, probeData) {
       var err = callbackArgs[0];
       if (!err) {
@@ -51,13 +46,7 @@ OracleProbe.prototype.attach = function(name, target) {
         addMonitoring(connection, that);
 
         // Add monitoring to prepared statements
-        aspect.after(connection, 'prepare', function(
-          target,
-          methodName,
-          args,
-          context,
-          ret
-        ) {
+        aspect.after(connection, 'prepare', function(target, methodName, args, context, ret) {
           addMonitoring(ret, that);
         });
       }
@@ -76,21 +65,13 @@ function addMonitoring(connection, probe) {
       probe.metricsProbeStart(probeData, methodName, args);
       probe.requestProbeStart(probeData, methodName, args);
       // Advise the callback for 'execute'. Will do nothing if no callback is registered
-      aspect.aroundCallback(args, probeData, function(
-        target,
-        callbackArgs,
-        probeData
-      ) {
+      aspect.aroundCallback(args, probeData, function(target, callbackArgs, probeData) {
         // 'execute' has completed and the callback has been called, so end the monitoring
 
         // Call the transaction link with a name and the callback for strong trace
         var callbackPosition = aspect.findCallbackArg(args);
         if (typeof callbackPosition != 'undefined') {
-          aspect.strongTraceTransactionLink(
-            'oracle: ',
-            methodName,
-            args[callbackPosition]
-          );
+          aspect.strongTraceTransactionLink('oracle: ', methodName, args[callbackPosition]);
         }
 
         probe.metricsProbeEnd(probeData, methodName, args);
@@ -127,12 +108,7 @@ OracleProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for Oracle queries
  */
 OracleProbe.prototype.requestStart = function(probeData, method, methodArgs) {
-  probeData.req = request.startRequest(
-    'oracle',
-    method,
-    false,
-    probeData.timer
-  );
+  probeData.req = request.startRequest('oracle', method, false, probeData.timer);
 };
 
 OracleProbe.prototype.requestEnd = function(probeData, method, methodArgs) {

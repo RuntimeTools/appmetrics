@@ -81,20 +81,8 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
           probeData,
           function(target, args, probeData) {
             methodArgs.statusCode = args[0].statusCode;
-            that.metricsProbeEnd(
-              probeData,
-              requestMethod,
-              urlRequested,
-              args[0],
-              headers
-            );
-            that.requestProbeEnd(
-              probeData,
-              requestMethod,
-              urlRequested,
-              args[0],
-              headers
-            );
+            that.metricsProbeEnd(probeData, requestMethod, urlRequested, args[0], headers);
+            that.requestProbeEnd(probeData, requestMethod, urlRequested, args[0], headers);
           },
           function(target, args, probeData, ret) {
             // Don't need to do anything after the callback
@@ -131,20 +119,8 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
           }
 
           // End metrics (no response available so pass empty object)
-          that.metricsProbeEnd(
-            probeData,
-            requestMethod,
-            urlRequested,
-            {},
-            headers
-          );
-          that.requestProbeEnd(
-            probeData,
-            requestMethod,
-            urlRequested,
-            {},
-            headers
-          );
+          that.metricsProbeEnd(probeData, requestMethod, urlRequested, {}, headers);
+          that.requestProbeEnd(probeData, requestMethod, urlRequested, {}, headers);
         }
         return rc;
       }
@@ -196,13 +172,7 @@ function formatURL(httpOptions) {
  *   contentType:     HTTP content-type
  *   statusCode:      HTTP status code
  */
-HttpOutboundProbe.prototype.metricsEnd = function(
-  probeData,
-  method,
-  url,
-  res,
-  headers
-) {
+HttpOutboundProbe.prototype.metricsEnd = function(probeData, method, url, res, headers) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
     am.emit('http-outbound', {
@@ -226,13 +196,7 @@ HttpOutboundProbe.prototype.requestStart = function(probeData, method, url) {
   probeData.req = request.startRequest(reqType, url, false, probeData.timer);
 };
 
-HttpOutboundProbe.prototype.requestEnd = function(
-  probeData,
-  method,
-  url,
-  res,
-  headers
-) {
+HttpOutboundProbe.prototype.requestEnd = function(probeData, method, url, res, headers) {
   if (probeData && probeData.req)
     probeData.req.stop({
       url: url,

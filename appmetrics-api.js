@@ -140,9 +140,7 @@ function API(agent, appmetrics) {
     var values = message.split(/[,=]+/);
     var physicalTotal = parseInt(values[3]);
     var physicalFree = parseInt(values[11]);
-    var physicalUsed = physicalTotal >= 0 && physicalFree >= 0
-      ? physicalTotal - physicalFree
-      : -1;
+    var physicalUsed = physicalTotal >= 0 && physicalFree >= 0 ? physicalTotal - physicalFree : -1;
     var memory = {
       time: parseInt(values[1]),
       physical_total: physicalTotal,

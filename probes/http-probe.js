@@ -35,12 +35,7 @@ HttpProbe.prototype.attach = function(name, target) {
     target.__probeAttached__ = true;
     var methods = ['on', 'addListener'];
 
-    aspect.before(target.Server.prototype, methods, function(
-      obj,
-      methodName,
-      args,
-      probeData
-    ) {
+    aspect.before(target.Server.prototype, methods, function(obj, methodName, args, probeData) {
       if (args[0] !== 'request') return;
       if (obj.__httpProbe__) return;
       obj.__httpProbe__ = true;
@@ -52,27 +47,9 @@ HttpProbe.prototype.attach = function(name, target) {
         if (traceUrl !== '') {
           that.metricsProbeStart(probeData, httpReq.method, traceUrl);
           that.requestProbeStart(probeData, httpReq.method, traceUrl);
-          aspect.after(res, 'end', probeData, function(
-            obj,
-            methodName,
-            args,
-            probeData,
-            ret
-          ) {
-            that.metricsProbeEnd(
-              probeData,
-              httpReq.method,
-              traceUrl,
-              res,
-              httpReq
-            );
-            that.requestProbeEnd(
-              probeData,
-              httpReq.method,
-              traceUrl,
-              res,
-              httpReq
-            );
+          aspect.after(res, 'end', probeData, function(obj, methodName, args, probeData, ret) {
+            that.metricsProbeEnd(probeData, httpReq.method, traceUrl, res, httpReq);
+            that.requestProbeEnd(probeData, httpReq.method, traceUrl, res, httpReq);
           });
         }
       });
@@ -120,13 +97,7 @@ HttpProbe.prototype.filterUrl = function(req) {
  * 		duration:	the time for the request to respond
  */
 
-HttpProbe.prototype.metricsEnd = function(
-  probeData,
-  method,
-  url,
-  res,
-  httpReq
-) {
+HttpProbe.prototype.metricsEnd = function(probeData, method, url, res, httpReq) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
     am.emit('http', {
@@ -152,13 +123,7 @@ HttpProbe.prototype.requestStart = function(probeData, method, url) {
   probeData.req = request.startRequest(reqType, url, true, probeData.timer);
 };
 
-HttpProbe.prototype.requestEnd = function(
-  probeData,
-  method,
-  url,
-  res,
-  httpReq
-) {
+HttpProbe.prototype.requestEnd = function(probeData, method, url, res, httpReq) {
   if (probeData && probeData.req)
     probeData.req.stop({
       url: url,

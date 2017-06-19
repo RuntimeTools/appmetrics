@@ -45,12 +45,7 @@ TraceProbe.prototype.attach = function(moduleName, target) {
   } else {
     instrumentMethods(moduleName, target.prototype);
     ret = target;
-    if (
-      target &&
-      target.prototype &&
-      Object.keys(target.prototype).length == 0 &&
-      Object.keys(target).length == 0
-    ) {
+    if (target && target.prototype && Object.keys(target.prototype).length == 0 && Object.keys(target).length == 0) {
       ret = function() {
         var rc = target.apply(this, arguments);
         instrumentMethods(moduleName, rc);
@@ -69,11 +64,7 @@ var stopList = { './commands/base_command': true, './aspects': true };
 
 function instrument(target, name, method, fullName) {
   var methodString = '' + method;
-  var methodargs = methodString
-    .toString()
-    .split(')')[0]
-    .split('(')[1]
-    .split(',');
+  var methodargs = methodString.toString().split(')')[0].split('(')[1].split(',');
   var lastMethodArg = methodargs[methodargs.length - 1].replace(/ /g, '');
   if (lastMethodArg == '') lastMethodArg = 'undefined';
 
@@ -129,11 +120,7 @@ function instrument(target, name, method, fullName) {
           ident = incrementIdentifier(ident);
         }
         /* eslint no-eval: 0 */
-        return eval(
-          'x = function(' +
-            argumentList.join(',') +
-            ') {return fn.apply(this,arguments);};'
-        );
+        return eval('x = function(' + argumentList.join(',') + ') {return fn.apply(this,arguments);};');
     }
 
     function incrementIdentifier(identifier) {
@@ -193,12 +180,10 @@ function instrument(target, name, method, fullName) {
       // Add to deal with no prototype
       (!arguments[arguments.length - 1].hasOwnProperty('prototype') ||
         (arguments[arguments.length - 1].prototype &&
-          Object.keys(arguments[arguments.length - 1].prototype).length ==
-            0)) &&
+          Object.keys(arguments[arguments.length - 1].prototype).length == 0)) &&
       methodString.indexOf(lastMethodArg + '.call') < 0 &&
       methodString.indexOf(lastMethodArg + '.apply') < 0 &&
-      ('' + arguments[arguments.length - 1]).indexOf('instrumentedMethodKNJ') <
-        0
+      ('' + arguments[arguments.length - 1]).indexOf('instrumentedMethodKNJ') < 0
     ) {
       isCallback = true;
       if (isResponseMethod(arguments)) {
@@ -286,9 +271,7 @@ function instrumentMethods(moduleName, target) {
     if (!target.__lookupGetter__(name) && typeof target[name] == 'function') {
       if (
         !target[name].__super__ &&
-        (target[name].prototype ||
-          (target[name].prototype &&
-            Object.keys(target[name].prototype).length == 0)) &&
+        (target[name].prototype || (target[name].prototype && Object.keys(target[name].prototype).length == 0)) &&
         Object.keys(target[name]).length == 0
       ) {
         traceMethod(moduleName, target, name);

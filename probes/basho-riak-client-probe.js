@@ -74,13 +74,7 @@ RiakProbe.prototype.attach = function(name, target) {
   target.__ddProbeAttached__ = true;
 
   var data = {};
-  aspect.after(target, 'Client', data, function(
-    clientTarget,
-    methodName,
-    args,
-    probeData,
-    rc
-  ) {
+  aspect.after(target, 'Client', data, function(clientTarget, methodName, args, probeData, rc) {
     // For all methods
     var methods = callbackOnlyMethods.concat(
       optionsAndCallbackMethods,
@@ -99,19 +93,11 @@ RiakProbe.prototype.attach = function(name, target) {
 
         // If the method contains a callback, finish probing when the callback returns
         if (aspect.findCallbackArg(methodArgs) != undefined) {
-          aspect.aroundCallback(methodArgs, probeData, function(
-            target,
-            args,
-            probeData
-          ) {
+          aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
             // Call the transaction link with a name and the callback for strong trace
             var callbackPosition = aspect.findCallbackArg(methodArgs);
             if (typeof callbackPosition != 'undefined') {
-              aspect.strongTraceTransactionLink(
-                'basho-riak-client: ',
-                methodName,
-                methodArgs[callbackPosition]
-              );
+              aspect.strongTraceTransactionLink('basho-riak-client: ', methodName, methodArgs[callbackPosition]);
             }
 
             that.metricsProbeEnd(probeData, methodName, methodArgs);
@@ -176,12 +162,7 @@ RiakProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for Riak queries
  */
 RiakProbe.prototype.requestStart = function(probeData, method, methodArgs) {
-  probeData.req = request.startRequest(
-    'basho-riak-client',
-    'query',
-    false,
-    probeData.timer
-  );
+  probeData.req = request.startRequest('basho-riak-client', 'query', false, probeData.timer);
 };
 
 RiakProbe.prototype.requestEnd = function(probeData, method, methodArgs) {

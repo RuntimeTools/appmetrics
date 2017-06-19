@@ -72,10 +72,7 @@ function pad(numberString) {
 module.exports.headlessZip = function headlessZip(dirToZip) {
   var outputFileName;
   if (dirToWriteTo) {
-    outputFileName = path.join(
-      dirToWriteTo,
-      'nodeappmetrics' + timestamp() + '.hcd'
-    );
+    outputFileName = path.join(dirToWriteTo, 'nodeappmetrics' + timestamp() + '.hcd');
   } else {
     outputFileName = 'nodeappmetrics' + timestamp() + '.hcd';
   }
@@ -94,10 +91,7 @@ module.exports.headlessZip = function headlessZip(dirToZip) {
         compression: 'DEFLATE',
       });
     }
-    fs.writeFileSync(
-      outputFileName,
-      zip.generate({ type: 'nodebuffer', compression: 'DEFLATE' })
-    );
+    fs.writeFileSync(outputFileName, zip.generate({ type: 'nodebuffer', compression: 'DEFLATE' }));
     deleteDir(dirToZip);
   }
 };

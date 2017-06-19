@@ -27,28 +27,15 @@ function LeveldownProbe() {
 util.inherits(LeveldownProbe, Probe);
 
 function aspectLvldownMethod(dbTarget, methods, probe) {
-  aspect.before(dbTarget, methods, function(
-    dbTarget,
-    methodName,
-    methodArgs,
-    probeData
-  ) {
+  aspect.before(dbTarget, methods, function(dbTarget, methodName, methodArgs, probeData) {
     probe.metricsProbeStart(probeData, dbTarget, methodName, methodArgs);
     probe.requestProbeStart(probeData, dbTarget, methodName, methodArgs);
     if (aspect.findCallbackArg(methodArgs) != undefined) {
-      aspect.aroundCallback(methodArgs, probeData, function(
-        dbTarget,
-        args,
-        probeData
-      ) {
+      aspect.aroundCallback(methodArgs, probeData, function(dbTarget, args, probeData) {
         // Call the transaction link with a name and the callback for strong trace
         var callbackPosition = aspect.findCallbackArg(methodArgs);
         if (typeof callbackPosition != 'undefined') {
-          aspect.strongTraceTransactionLink(
-            'leveldown: ',
-            methodName,
-            methodArgs[callbackPosition]
-          );
+          aspect.strongTraceTransactionLink('leveldown: ', methodName, methodArgs[callbackPosition]);
         }
 
         probe.metricsProbeEnd(probeData, methodName, methodArgs);
@@ -121,12 +108,7 @@ LeveldownProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
 /*
  * Heavyweight request probes for leveldown queries
  */
-LeveldownProbe.prototype.requestStart = function(
-  probeData,
-  dbTarget,
-  method,
-  methodArgs
-) {
+LeveldownProbe.prototype.requestStart = function(probeData, dbTarget, method, methodArgs) {
   // FIXME(sam) req is used as a global to communicate with requestEnd, almost
   // certainly a bug, what happens if two requests are started before the first
   // ends? This is a bug, but it is being marked to be skipped by eslint

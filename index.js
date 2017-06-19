@@ -30,8 +30,7 @@ var assert = require('assert');
 agent.spath(path.join(module_dir, 'plugins'));
 
 // Edit LIBPATH on AIX to enable libagentcore to be loaded
-if (process.platform == 'aix')
-  process.env.LIBPATH = module_dir + ':' + process.env.LIBPATH;
+if (process.platform == 'aix') process.env.LIBPATH = module_dir + ':' + process.env.LIBPATH;
 
 var hcAPI = require('./appmetrics-api.js');
 var jsonProfilingMode = false;
@@ -44,20 +43,13 @@ var propertyMappings = {
 };
 var headlessPropertyMappings = {
   'appmetrics.file.collection': 'com.ibm.diagnostics.healthcenter.headless',
-  'appmetrics.file.max.size':
-    'com.ibm.diagnostics.healthcenter.headless.files.max.size',
-  'appmetrics.file.run.duration':
-    'com.ibm.diagnostics.healthcenter.headless.run.duration',
-  'appmetrics.file.delay.start':
-    'com.ibm.diagnostics.healthcenter.headless.delay.start',
-  'appmetrics.file.run.pause.duration':
-    'com.ibm.diagnostics.healthcenter.headless.run.pause.duration',
-  'appmetrics.file.run.number.of.runs':
-    'com.ibm.diagnostics.healthcenter.headless.run.number.of.runs',
-  'appmetrics.file.files.to.keep':
-    'com.ibm.diagnostics.healthcenter.headless.files.to.keep',
-  'appmetrics.file.output.directory':
-    'com.ibm.diagnostics.healthcenter.headless.output.directory',
+  'appmetrics.file.max.size': 'com.ibm.diagnostics.healthcenter.headless.files.max.size',
+  'appmetrics.file.run.duration': 'com.ibm.diagnostics.healthcenter.headless.run.duration',
+  'appmetrics.file.delay.start': 'com.ibm.diagnostics.healthcenter.headless.delay.start',
+  'appmetrics.file.run.pause.duration': 'com.ibm.diagnostics.healthcenter.headless.run.pause.duration',
+  'appmetrics.file.run.number.of.runs': 'com.ibm.diagnostics.healthcenter.headless.run.number.of.runs',
+  'appmetrics.file.files.to.keep': 'com.ibm.diagnostics.healthcenter.headless.files.to.keep',
+  'appmetrics.file.output.directory': 'com.ibm.diagnostics.healthcenter.headless.output.directory',
 };
 
 /*
@@ -145,13 +137,7 @@ if (global.Appmetrics) {
 var data = {};
 
 /* eslint no-proto:0 */
-aspect.after(module.__proto__, 'require', data, function(
-  obj,
-  methodName,
-  args,
-  context,
-  ret
-) {
+aspect.after(module.__proto__, 'require', data, function(obj, methodName, args, context, ret) {
   if (ret == null || ret.__ddProbeAttached__) {
     return ret;
   } else {
@@ -214,10 +200,7 @@ module.exports.enable = function(data, config) {
 module.exports.disable = function(data) {
   switch (data) {
     case 'profiling':
-      agent.sendControlCommand(
-        'profiling_node',
-        'off,profiling_node_subsystem'
-      );
+      agent.sendControlCommand('profiling_node', 'off,profiling_node_subsystem');
       break;
     case 'requests':
       probes.forEach(function(probe) {
@@ -261,10 +244,7 @@ module.exports.setConfig = function(data, config) {
       break;
     case 'advancedProfiling':
       if (typeof config.threshold !== 'undefined')
-        agent.sendControlCommand(
-          'profiling_node',
-          config.threshold + ',profiling_node_threshold'
-        );
+        agent.sendControlCommand('profiling_node', config.threshold + ',profiling_node_threshold');
       break;
     default:
       probes.forEach(function(probe) {
@@ -290,12 +270,7 @@ module.exports.emit = function(topic, data) {
     this.api.raiseLocalEvent(topic, data);
   }
   // Publish data that can be visualised in Health Center
-  if (
-    topic == 'http' ||
-    topic == 'mqlight' ||
-    topic == 'mongo' ||
-    topic == 'mysql'
-  ) {
+  if (topic == 'http' || topic == 'mqlight' || topic == 'mongo' || topic == 'mysql') {
     data = JSON.stringify(data);
     agent.nativeEmit(topic, String(data));
   }
@@ -314,9 +289,7 @@ module.exports.lrtime = agent.lrtime;
 
 module.exports.configure = function(options) {
   options = options || {};
-  this.strongTracerInstrument = options.strongTracer
-    ? options.strongTracer.tracer
-    : null;
+  this.strongTracerInstrument = options.strongTracer ? options.strongTracer.tracer : null;
   for (var key in options) {
     if (propertyMappings[key]) {
       agent.setOption(propertyMappings[key], options[key]);
@@ -354,20 +327,12 @@ module.exports.start = function start() {
       agent.setOption(headlessPropertyMappings[property], prop);
     }
   }
-  var headlessOutputDir = agent.getOption(
-    'com.ibm.diagnostics.healthcenter.headless.output.directory'
-  );
+  var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
   if (headlessOutputDir) {
     headlessZip.setHeadlessOutputDir(headlessOutputDir);
   }
-  var headlessFilesToKeep = agent.getOption(
-    'com.ibm.diagnostics.healthcenter.headless.files.to.keep'
-  );
-  if (
-    headlessFilesToKeep &&
-    !isNaN(headlessFilesToKeep) &&
-    headlessFilesToKeep > 0
-  ) {
+  var headlessFilesToKeep = agent.getOption('com.ibm.diagnostics.healthcenter.headless.files.to.keep');
+  if (headlessFilesToKeep && !isNaN(headlessFilesToKeep) && headlessFilesToKeep > 0) {
     headlessZip.setFilesToKeep(headlessFilesToKeep);
   }
   var am = this;
@@ -378,9 +343,7 @@ module.exports.start = function start() {
       clearInterval(latencyCheckLoop);
       clearInterval(latencyReportLoop);
     }
-    var headlessMode = agent.getOption(
-      'com.ibm.diagnostics.healthcenter.headless'
-    );
+    var headlessMode = agent.getOption('com.ibm.diagnostics.healthcenter.headless');
     am.stop();
     if (headlessMode == 'on') {
       headlessZip.tryZipOnExit();

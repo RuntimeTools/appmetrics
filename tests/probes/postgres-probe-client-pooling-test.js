@@ -102,11 +102,7 @@ function makeANewConnection(index) {
       }
 
       // Callback for this connection
-      if (
-        FIRST_BLOCK_RETURNED &&
-        SECOND_BLOCK_RETURNED &&
-        THIRD_BLOCK_RETURNED
-      ) {
+      if (FIRST_BLOCK_RETURNED && SECOND_BLOCK_RETURNED && THIRD_BLOCK_RETURNED) {
         finishedTesting(index);
       }
     }

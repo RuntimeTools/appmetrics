@@ -27,28 +27,15 @@ function loopbackDJProbe() {
 util.inherits(loopbackDJProbe, Probe);
 
 function aspectJugglerMethod(target, methods, probe) {
-  aspect.before(target, methods, function(
-    target,
-    methodName,
-    methodArgs,
-    probeData
-  ) {
+  aspect.before(target, methods, function(target, methodName, methodArgs, probeData) {
     probe.metricsProbeStart(probeData, target, methodName, methodArgs);
     probe.requestProbeStart(probeData, target, methodName, methodArgs);
     if (aspect.findCallbackArg(methodArgs) != undefined) {
-      aspect.aroundCallback(methodArgs, probeData, function(
-        target,
-        args,
-        probeData
-      ) {
+      aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
         // Call the transaction link with a name and the callback for strong trace
         var callbackPosition = aspect.findCallbackArg(methodArgs);
         if (typeof callbackPosition != 'undefined') {
-          aspect.strongTraceTransactionLink(
-            'loopback-datasource-juggler: ',
-            methodName,
-            methodArgs[callbackPosition]
-          );
+          aspect.strongTraceTransactionLink('loopback-datasource-juggler: ', methodName, methodArgs[callbackPosition]);
         }
 
         probe.metricsProbeEnd(probeData, methodName, methodArgs);
@@ -65,23 +52,8 @@ loopbackDJProbe.prototype.attach = function(name, target) {
   if (target.__ddProbeAttached__) return target;
 
   // functions of DataAccessObject inherited from PersistedModel
-  var commands = [
-    'create',
-    'findOrCreate',
-    'exists',
-    'find',
-    'findById',
-    'remove',
-    'removeById',
-    'count',
-  ];
-  var instanceCommands = [
-    'save',
-    'remove',
-    'updateAttribute',
-    'updateAttributes',
-    'reload',
-  ];
+  var commands = ['create', 'findOrCreate', 'exists', 'find', 'findById', 'remove', 'removeById', 'count'];
+  var instanceCommands = ['save', 'remove', 'updateAttribute', 'updateAttributes', 'reload'];
   var dao = target.Schema.DataAccessObject;
 
   aspectJugglerMethod(dao, commands, that); // Instrument class methods
@@ -113,19 +85,13 @@ loopbackDJProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
 /*
  * Heavyweight request probes for juggler commands
  */
-loopbackDJProbe.prototype.requestStart = function(
-  probeData,
-  target,
-  method,
-  methodArgs
-) {
+loopbackDJProbe.prototype.requestStart = function(probeData, target, method, methodArgs) {
   probeData.req = request.startRequest('loopback-datasource-juggler', 'query');
   probeData.req.setContext({ loopbackDJProbe: methodArgs[0] });
 };
 
 loopbackDJProbe.prototype.requestEnd = function(probeData, method, methodArgs) {
-  if (probeData && probeData.req)
-    probeData.req.stop({ loopbackDJProbe: methodArgs[0] });
+  if (probeData && probeData.req) probeData.req.stop({ loopbackDJProbe: methodArgs[0] });
 };
 
 module.exports = loopbackDJProbe;

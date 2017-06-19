@@ -35,26 +35,11 @@ StrongOracleProbe.prototype.attach = function(name, target) {
   target.__probeAttached__ = true;
 
   // Use afterConstructor because 'target' here is the constructor
-  var newtarget = aspect.afterConstructor(target, {}, function(
-    target,
-    methodName,
-    methodArgs,
-    context,
-    ret
-  ) {
+  var newtarget = aspect.afterConstructor(target, {}, function(target, methodName, methodArgs, context, ret) {
     // 'ret' here is the strong-oracle target
     // Before 'connect'
-    aspect.before(ret, 'connect', function(
-      target,
-      methodName,
-      args,
-      probeData
-    ) {
-      aspect.aroundCallback(args, {}, function(
-        target,
-        callbackArgs,
-        probeData
-      ) {
+    aspect.before(ret, 'connect', function(target, methodName, args, probeData) {
+      aspect.aroundCallback(args, {}, function(target, callbackArgs, probeData) {
         var err = callbackArgs[0];
         if (!err) {
           var connection = callbackArgs[1];
@@ -82,20 +67,12 @@ function addMonitoring(connection, probe) {
       probe.metricsProbeStart(probeData, methodName, args);
       probe.requestProbeStart(probeData, methodName, args);
       // Advise the callback for 'execute'. Will do nothing if no callback is registered
-      aspect.aroundCallback(args, probeData, function(
-        target,
-        callbackArgs,
-        probeData
-      ) {
+      aspect.aroundCallback(args, probeData, function(target, callbackArgs, probeData) {
         // 'execute' has completed and the callback has been called, so end the monitoring
         // Call the transaction link with a name and the callback for strong trace
         var callbackPosition = aspect.findCallbackArg(args);
         if (typeof callbackPosition != 'undefined') {
-          aspect.strongTraceTransactionLink(
-            'strong-oracle: ',
-            methodName,
-            args[callbackPosition]
-          );
+          aspect.strongTraceTransactionLink('strong-oracle: ', methodName, args[callbackPosition]);
         }
 
         probe.metricsProbeEnd(probeData, methodName, args);
@@ -116,11 +93,7 @@ function addMonitoring(connection, probe) {
 /*
  * Lightweight metrics probe end for StrongOracle queries
  */
-StrongOracleProbe.prototype.metricsEnd = function(
-  probeData,
-  method,
-  methodArgs
-) {
+StrongOracleProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
     var query = methodArgs[0];
@@ -135,24 +108,11 @@ StrongOracleProbe.prototype.metricsEnd = function(
 /*
  * Heavyweight request probes for StrongOracle queries
  */
-StrongOracleProbe.prototype.requestStart = function(
-  probeData,
-  method,
-  methodArgs
-) {
-  probeData.req = request.startRequest(
-    'strong-oracle',
-    method,
-    false,
-    probeData.timer
-  );
+StrongOracleProbe.prototype.requestStart = function(probeData, method, methodArgs) {
+  probeData.req = request.startRequest('strong-oracle', method, false, probeData.timer);
 };
 
-StrongOracleProbe.prototype.requestEnd = function(
-  probeData,
-  method,
-  methodArgs
-) {
+StrongOracleProbe.prototype.requestEnd = function(probeData, method, methodArgs) {
   if (probeData && probeData.req) {
     var query = methodArgs[0];
     probeData.req.stop({ query: query });

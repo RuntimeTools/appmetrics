@@ -31,19 +31,8 @@ MySqlProbe.prototype.attach = function(name, target) {
   target.__ddProbeAttached__ = true;
 
   var data = {};
-  aspect.after(target, 'createConnection', data, function(
-    target,
-    methodName,
-    args,
-    probeData,
-    rc
-  ) {
-    aspect.before(rc, 'query', function(
-      target,
-      methodName,
-      methodArgs,
-      probeData
-    ) {
+  aspect.after(target, 'createConnection', data, function(target, methodName, args, probeData, rc) {
+    aspect.before(rc, 'query', function(target, methodName, methodArgs, probeData) {
       var method = 'query';
       that.metricsProbeStart(probeData, method, methodArgs);
       that.requestProbeStart(probeData, method, methodArgs);
@@ -52,11 +41,7 @@ MySqlProbe.prototype.attach = function(name, target) {
           // Call the transaction link with a name and the callback for strong trace
           var callbackPosition = aspect.findCallbackArg(methodArgs);
           if (typeof callbackPosition != 'undefined') {
-            aspect.strongTraceTransactionLink(
-              'mysql: ',
-              method,
-              methodArgs[callbackPosition]
-            );
+            aspect.strongTraceTransactionLink('mysql: ', method, methodArgs[callbackPosition]);
           }
 
           that.metricsProbeEnd(probeData, method, methodArgs);
@@ -93,17 +78,11 @@ MySqlProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for MySQL queries
  */
 MySqlProbe.prototype.requestStart = function(probeData, method, methodArgs) {
-  probeData.req = request.startRequest(
-    'mysql',
-    'query',
-    false,
-    probeData.timer
-  );
+  probeData.req = request.startRequest('mysql', 'query', false, probeData.timer);
 };
 
 MySqlProbe.prototype.requestEnd = function(probeData, method, methodArgs) {
-  if (probeData && probeData.req)
-    probeData.req.stop({ sql: JSON.stringify(methodArgs[0]) });
+  if (probeData && probeData.req) probeData.req.stop({ sql: JSON.stringify(methodArgs[0]) });
 };
 
 module.exports = MySqlProbe;

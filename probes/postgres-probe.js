@@ -40,19 +40,10 @@ PostgresProbe.prototype.attach = function(name, target) {
 
   // Client Pooling
   // Before we connect
-  aspect.before(target, 'connect', function(
-    target,
-    methodName,
-    methodArgs,
-    probeData
-  ) {
+  aspect.before(target, 'connect', function(target, methodName, methodArgs, probeData) {
     // Get client result from connect callback
     if (aspect.findCallbackArg(methodArgs) != undefined) {
-      aspect.aroundCallback(methodArgs, probeData, function(
-        target,
-        args,
-        probeData
-      ) {
+      aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
         // Extract client
         var client = args[1];
 
@@ -70,21 +61,9 @@ PostgresProbe.prototype.attach = function(name, target) {
 
   // Client Instance
   // After the client has been instantiated
-  aspect.after(target, 'Client', data, function(
-    clientTarget,
-    methodName,
-    methodArgs,
-    probeData,
-    rc
-  ) {
+  aspect.after(target, 'Client', data, function(clientTarget, methodName, methodArgs, probeData, rc) {
     // After a connection has been established on the client
-    aspect.after(clientTarget, 'connect', data, function(
-      connectionTarget,
-      methodName,
-      args,
-      probeData,
-      rc
-    ) {
+    aspect.after(clientTarget, 'connect', data, function(connectionTarget, methodName, args, probeData, rc) {
       // Before the query hits, start monitoring
       monitorQuery(connectionTarget, that);
       return rc;
@@ -96,32 +75,19 @@ PostgresProbe.prototype.attach = function(name, target) {
 // This function monitors the query method given a connected
 // client and the current 'PostgresProbe' reference
 function monitorQuery(client, that) {
-  aspect.before(client, 'query', function(
-    target,
-    methodName,
-    methodArgs,
-    probeData
-  ) {
+  aspect.before(client, 'query', function(target, methodName, methodArgs, probeData) {
     var method = 'query';
     that.metricsProbeStart(probeData, target, method, methodArgs);
     that.requestProbeStart(probeData, target, method, methodArgs);
     if (aspect.findCallbackArg(methodArgs) != undefined) {
-      aspect.aroundCallback(methodArgs, probeData, function(
-        target,
-        args,
-        probeData
-      ) {
+      aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
         // Here, the query has executed and returned it's callback. Then
         // stop monitoring
 
         // Call the transaction link with a name and the callback for strong trace
         var callbackPosition = aspect.findCallbackArg(methodArgs);
         if (typeof callbackPosition != 'undefined') {
-          aspect.strongTraceTransactionLink(
-            'pg: ',
-            method,
-            methodArgs[callbackPosition]
-          );
+          aspect.strongTraceTransactionLink('pg: ', method, methodArgs[callbackPosition]);
         }
 
         that.metricsProbeEnd(probeData, method, methodArgs);
@@ -153,18 +119,8 @@ PostgresProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
 /*
  * Heavyweight request probes for Postgres queries
  */
-PostgresProbe.prototype.requestStart = function(
-  probeData,
-  target,
-  method,
-  methodArgs
-) {
-  probeData.req = request.startRequest(
-    'postgres',
-    'query',
-    false,
-    probeData.timer
-  );
+PostgresProbe.prototype.requestStart = function(probeData, target, method, methodArgs) {
+  probeData.req = request.startRequest('postgres', 'query', false, probeData.timer);
   probeData.req.setContext({ sql: methodArgs[0] });
 };
 

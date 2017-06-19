@@ -38,13 +38,7 @@ SocketioProbe.prototype.attach = function(name, target) {
 	 * to broadcast to clients. This also picks up calls to io.emit() as
 	 * they map down to io.socket.emit()
 	 */
-  var newtarget = aspect.afterConstructor(target, {}, function(
-    target,
-    methodName,
-    methodArgs,
-    context,
-    server
-  ) {
+  var newtarget = aspect.afterConstructor(target, {}, function(target, methodName, methodArgs, context, server) {
     var broadcast = 'broadcast';
     aspect.around(
       server.sockets,
@@ -72,19 +66,10 @@ SocketioProbe.prototype.attach = function(name, target) {
   if (!target.__prototypeProbeAttached__) {
     target.__prototypeProbeAttached__ = true;
 
-    aspect.before(target.prototype, ['on', 'addListener'], function(
-      target,
-      methodName,
-      methodArgs,
-      context
-    ) {
+    aspect.before(target.prototype, ['on', 'addListener'], function(target, methodName, methodArgs, context) {
       if (methodArgs[0] !== 'connection') return;
       if (aspect.findCallbackArg(methodArgs) != undefined) {
-        aspect.aroundCallback(methodArgs, context, function(
-          target,
-          methodArgs,
-          context
-        ) {
+        aspect.aroundCallback(methodArgs, context, function(target, methodArgs, context) {
           var socket = methodArgs[0];
           /*
 						 * Patch Socket#emit() calls
@@ -100,11 +85,7 @@ SocketioProbe.prototype.attach = function(name, target) {
               // Call the transaction link with a name and the callback for strong trace
               var callbackPosition = aspect.findCallbackArg(methodArgs);
               if (typeof callbackPosition != 'undefined') {
-                aspect.strongTraceTransactionLink(
-                  'socket.io: ',
-                  methodName,
-                  methodArgs[callbackPosition]
-                );
+                aspect.strongTraceTransactionLink('socket.io: ', methodName, methodArgs[callbackPosition]);
               }
 
               that.metricsProbeEnd(context, methodName, methodArgs);
@@ -116,12 +97,7 @@ SocketioProbe.prototype.attach = function(name, target) {
 						 * Patch socket.on incoming events
 						 */
           var receive = 'receive';
-          aspect.before(socket, ['on', 'addListener'], function(
-            target,
-            methodName,
-            methodArgs,
-            context
-          ) {
+          aspect.before(socket, ['on', 'addListener'], function(target, methodName, methodArgs, context) {
             aspect.aroundCallback(
               methodArgs,
               context,
@@ -133,11 +109,7 @@ SocketioProbe.prototype.attach = function(name, target) {
                 // Call the transaction link with a name and the callback for strong trace
                 var callbackPosition = aspect.findCallbackArg(methodArgs);
                 if (typeof callbackPosition != 'undefined') {
-                  aspect.strongTraceTransactionLink(
-                    'socket.io: ',
-                    methodName,
-                    methodArgs[callbackPosition]
-                  );
+                  aspect.strongTraceTransactionLink('socket.io: ', methodName, methodArgs[callbackPosition]);
                 }
 
                 that.metricsProbeEnd(context, receive, methodArgs);
@@ -177,34 +149,19 @@ SocketioProbe.prototype.metricsEnd = function(context, methodName, methodArgs) {
 /*
  * Heavyweight request probes for Socket.io websocket connections
  */
-SocketioProbe.prototype.requestStart = function(
-  context,
-  methodName,
-  methodArgs
-) {
+SocketioProbe.prototype.requestStart = function(context, methodName, methodArgs) {
   /*
 	 * method names are "broadcast", "receive" and "emit"
 	 */
   if (methodName !== 'receive') {
-    context.req = request.startRequest(
-      'socketio',
-      methodName,
-      false,
-      context.timer
-    );
+    context.req = request.startRequest('socketio', methodName, false, context.timer);
   } else {
-    context.req = request.startRequest(
-      'socketio',
-      methodName,
-      true,
-      context.timer
-    );
+    context.req = request.startRequest('socketio', methodName, true, context.timer);
   }
 };
 
 SocketioProbe.prototype.requestEnd = function(context, methodName, methodArgs) {
-  if (context && context.req)
-    context.req.stop({ method: methodName, event: methodArgs[0] });
+  if (context && context.req) context.req.stop({ method: methodName, event: methodArgs[0] });
 };
 
 module.exports = SocketioProbe;

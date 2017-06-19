@@ -26,7 +26,7 @@
     "tap": "7.x"
   },
   "scripts": {
-    "fix-prettier": "prettier --single-quote --trailing-comma es5 --write {bin,lib,probes,tests}/**/*.js *.js",
+    "fix-prettier": "prettier --single-quote --trailing-comma es5 --print-width 120 --write {bin,lib,probes,tests}/**/*.js *.js",
     "fix-eslint": "eslint --fix {bin,lib,probes,tests}/**/*.js *.js",
     "pretest": "eslint .",
     "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http-outbound-probe-test.js tests/probes/http-probe-test.js tests/headless_test.js",

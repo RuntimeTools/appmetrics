@@ -48,119 +48,78 @@ Strong_MQProbe.prototype.attach = function(name, target) {
     return target;
   }
   target.__ddProbeAttached__ = true;
-  aspect.after(target, 'create', {}, function(
-    target,
-    methodName,
-    methodArgs,
-    context,
-    connection
-  ) {
-    aspect.after(
-      connection,
-      ['createPushQueue', 'createPubQueue'],
-      {},
-      function(target, methodName, methodArgs, context, queue) {
-        var socketType = methodName;
-        var methods = typeToMethods[socketType];
-        aspect.around(
-          queue,
-          methods,
-          function(target, methodName, methodArgs, context) {
-            that.metricsProbeStart(context, methodName, methodArgs);
-            that.requestProbeStart(context, methodName, methodArgs);
-            aspect.aroundCallback(methodArgs, context, function(
-              target,
-              args,
-              context
-            ) {
+  aspect.after(target, 'create', {}, function(target, methodName, methodArgs, context, connection) {
+    aspect.after(connection, ['createPushQueue', 'createPubQueue'], {}, function(
+      target,
+      methodName,
+      methodArgs,
+      context,
+      queue
+    ) {
+      var socketType = methodName;
+      var methods = typeToMethods[socketType];
+      aspect.around(
+        queue,
+        methods,
+        function(target, methodName, methodArgs, context) {
+          that.metricsProbeStart(context, methodName, methodArgs);
+          that.requestProbeStart(context, methodName, methodArgs);
+          aspect.aroundCallback(methodArgs, context, function(target, args, context) {
+            // Call the transaction link with a name and the callback for strong trace
+            var callbackPosition = aspect.findCallbackArg(methodArgs);
+            if (typeof callbackPosition != 'undefined') {
+              aspect.strongTraceTransactionLink('strong-mq: ', methodName, methodArgs[callbackPosition]);
+            }
+
+            that.metricsProbeEnd(context, methodName, methodArgs);
+            that.requestProbeEnd(context, methodName, methodArgs);
+          });
+        },
+        function(target, methodName, methodArgs, context, rc) {
+          if (aspect.findCallbackArg(methodArgs) == undefined) {
+            that.metricsProbeEnd(context, methodName, methodArgs, typeToEventType[socketType]);
+            that.requestProbeEnd(context, methodName, methodArgs, typeToEventType[socketType]);
+          }
+          return rc;
+        }
+      );
+      return queue;
+    });
+    aspect.after(connection, ['createPullQueue', 'createSubQueue'], {}, function(
+      target,
+      methodName,
+      methodArgs,
+      context,
+      queue
+    ) {
+      var socketType = methodName;
+      var methods = typeToMethods[socketType];
+      aspect.before(queue, methods, function(target, methodName, methodArgs, context) {
+        var eventName = 'message';
+        if (aspect.findCallbackArg(methodArgs) != undefined) {
+          aspect.aroundCallback(
+            methodArgs,
+            context,
+            function(target, args, context) {
+              that.metricsProbeStart(context, eventName, methodArgs);
+              that.requestProbeStart(context, eventName, methodArgs);
+            },
+            function(target, methodArgs, context, rc) {
               // Call the transaction link with a name and the callback for strong trace
               var callbackPosition = aspect.findCallbackArg(methodArgs);
               if (typeof callbackPosition != 'undefined') {
-                aspect.strongTraceTransactionLink(
-                  'strong-mq: ',
-                  methodName,
-                  methodArgs[callbackPosition]
-                );
+                aspect.strongTraceTransactionLink('strong-mq: ', methodName, methodArgs[callbackPosition]);
               }
 
-              that.metricsProbeEnd(context, methodName, methodArgs);
-              that.requestProbeEnd(context, methodName, methodArgs);
-            });
-          },
-          function(target, methodName, methodArgs, context, rc) {
-            if (aspect.findCallbackArg(methodArgs) == undefined) {
-              that.metricsProbeEnd(
-                context,
-                methodName,
-                methodArgs,
-                typeToEventType[socketType]
-              );
-              that.requestProbeEnd(
-                context,
-                methodName,
-                methodArgs,
-                typeToEventType[socketType]
-              );
+              that.metricsProbeEnd(context, eventName, methodArgs, typeToEventType[socketType]);
+              that.requestProbeEnd(context, eventName, methodArgs, typeToEventType[socketType]);
+              return rc;
             }
-            return rc;
-          }
-        );
-        return queue;
-      }
-    );
-    aspect.after(
-      connection,
-      ['createPullQueue', 'createSubQueue'],
-      {},
-      function(target, methodName, methodArgs, context, queue) {
-        var socketType = methodName;
-        var methods = typeToMethods[socketType];
-        aspect.before(queue, methods, function(
-          target,
-          methodName,
-          methodArgs,
-          context
-        ) {
-          var eventName = 'message';
-          if (aspect.findCallbackArg(methodArgs) != undefined) {
-            aspect.aroundCallback(
-              methodArgs,
-              context,
-              function(target, args, context) {
-                that.metricsProbeStart(context, eventName, methodArgs);
-                that.requestProbeStart(context, eventName, methodArgs);
-              },
-              function(target, methodArgs, context, rc) {
-                // Call the transaction link with a name and the callback for strong trace
-                var callbackPosition = aspect.findCallbackArg(methodArgs);
-                if (typeof callbackPosition != 'undefined') {
-                  aspect.strongTraceTransactionLink(
-                    'strong-mq: ',
-                    methodName,
-                    methodArgs[callbackPosition]
-                  );
-                }
-
-                that.metricsProbeEnd(
-                  context,
-                  eventName,
-                  methodArgs,
-                  typeToEventType[socketType]
-                );
-                that.requestProbeEnd(
-                  context,
-                  eventName,
-                  methodArgs,
-                  typeToEventType[socketType]
-                );
-                return rc;
-              }
-            );
-          }
-        });
-        return queue;
-      }
-    );
+          );
+        }
+      });
+      return queue;
+    });
     return connection;
   });
   return target;
@@ -176,12 +135,7 @@ Strong_MQProbe.prototype.attach = function(name, target) {
  *		event:		if this was an event (a message was received) the name of the event
  *		duration:	the time for the request to respond
  */
-Strong_MQProbe.prototype.metricsEnd = function(
-  context,
-  methodName,
-  methodArgs,
-  eventType
-) {
+Strong_MQProbe.prototype.metricsEnd = function(context, methodName, methodArgs, eventType) {
   if (context && context.timer) {
     context.timer.stop();
     // default to quality of service (qos) 0, as that's what the strong-mq module does
@@ -202,36 +156,16 @@ Strong_MQProbe.prototype.metricsEnd = function(
 /*
  * Heavyweight request probes for STRONG-MQ messages
  */
-Strong_MQProbe.prototype.requestStart = function(
-  context,
-  methodName,
-  methodArgs,
-  socketType
-) {
+Strong_MQProbe.prototype.requestStart = function(context, methodName, methodArgs, socketType) {
   if (methodName === 'publish') {
-    context.req = request.startRequest(
-      'strong-mq',
-      methodName,
-      false,
-      context.timer
-    );
+    context.req = request.startRequest('strong-mq', methodName, false, context.timer);
   } else {
     /* Received messages mark the start of requests. */
-    context.req = request.startRequest(
-      'strong-mq',
-      'message',
-      true,
-      context.timer
-    );
+    context.req = request.startRequest('strong-mq', 'message', true, context.timer);
   }
 };
 
-Strong_MQProbe.prototype.requestEnd = function(
-  context,
-  methodName,
-  methodArgs,
-  socketType
-) {
+Strong_MQProbe.prototype.requestEnd = function(context, methodName, methodArgs, socketType) {
   if (context && context.req) context.req.stop({ topic: methodArgs[0] });
 };
 

@@ -54,10 +54,7 @@ tap.test('CPU Data', function(t) {
     cpuData.system = parseFloat(cpuData.system);
 
     t.ok(isReasonableTimestamp(cpuData.time), 'time contains current year');
-    t.ok(
-      cpuData.system <= 1,
-      'CPU message contains total CPU usage less than 1'
-    );
+    t.ok(cpuData.system <= 1, 'CPU message contains total CPU usage less than 1');
 
     // TODO (acollins): Not sure what this does, should it cause a test to fail
     if (cpuData.process > cpuData.total) {
@@ -79,10 +76,7 @@ tap.test('Memory Data', function(t) {
     // Test if all the memory data values are integers.
     t.ok(isInteger(memData.time), 'Timestamp is an integer');
 
-    t.ok(
-      isInteger(memData.physical_total),
-      'Total physical memory usage is an integer'
-    );
+    t.ok(isInteger(memData.physical_total), 'Total physical memory usage is an integer');
 
     t.ok(isInteger(memData.physical), 'Physical memory usage is an integer');
 
@@ -90,55 +84,28 @@ tap.test('Memory Data', function(t) {
 
     t.ok(isInteger(memData.virtual), 'Virtual memory usage is an integer');
 
-    t.ok(
-      isInteger(memData.physical_free),
-      'Free physical memory is an integer'
-    );
+    t.ok(isInteger(memData.physical_free), 'Free physical memory is an integer');
 
-    t.ok(
-      isInteger(memData.physical_used),
-      'Used physical memory is an integer'
-    );
+    t.ok(isInteger(memData.physical_used), 'Used physical memory is an integer');
 
     for (var entry in memData) {
       memData[entry] = parseInt(memData[entry]);
     }
 
-    t.ok(
-      isReasonableTimestamp(memData.time),
-      'Contains a reasonable timestamp (timestamp year matches current year)'
-    );
+    t.ok(isReasonableTimestamp(memData.time), 'Contains a reasonable timestamp (timestamp year matches current year)');
 
     // Test if all the memory data values are valid.
-    t.ok(
-      memData.physical_total === -1 || memData.physical_total >= 0,
-      'Contains a valid total memory usage'
-    );
+    t.ok(memData.physical_total === -1 || memData.physical_total >= 0, 'Contains a valid total memory usage');
 
-    t.ok(
-      memData.physical === -1 || memData.physical >= 0,
-      'Contains a valid physical memory usage'
-    );
+    t.ok(memData.physical === -1 || memData.physical >= 0, 'Contains a valid physical memory usage');
 
-    t.ok(
-      memData.private === -1 || memData.private >= 0,
-      'Contains a valid private memory usage'
-    );
+    t.ok(memData.private === -1 || memData.private >= 0, 'Contains a valid private memory usage');
 
-    t.ok(
-      memData.virtual === -1 || memData.virtual >= 0,
-      'Contains a valid virtual memory usage'
-    );
+    t.ok(memData.virtual === -1 || memData.virtual >= 0, 'Contains a valid virtual memory usage');
 
-    t.ok(
-      memData.physical_free === -1 || memData.physical_free >= 0,
-      'Contains a valid free physical memory'
-    );
+    t.ok(memData.physical_free === -1 || memData.physical_free >= 0, 'Contains a valid free physical memory');
 
-    t.ok(
-      memData.physical_used === -1 || memData.physical_used >= 0,
-      'Contains a valid used physical memory'
-    );
+    t.ok(memData.physical_used === -1 || memData.physical_used >= 0, 'Contains a valid used physical memory');
     t.end();
   });
 });
@@ -148,10 +115,7 @@ tap.test('GC Data', function(t) {
     // Test if all the GC data values are integers and type is either M or S.
     t.ok(isInteger(gcData.time), 'Timestamp is an integer');
 
-    t.ok(
-      gcData.type === 'M' || gcData.type === 'S',
-      'Contains an expected GC type (expected "M" or "S")'
-    );
+    t.ok(gcData.type === 'M' || gcData.type === 'S', 'Contains an expected GC type (expected "M" or "S")');
 
     t.ok(isInteger(gcData.size), 'Heap size is an integer');
 
@@ -196,8 +160,7 @@ tap.test('Profiling Data', { skip: 'FIXME(@tobespec)' }, function(t) {
     // Parse values of all functions for next tests
     for (var currentFunction in functions) {
       for (var entry in currentFunction) {
-        if (entry != 'file' || entry != 'name')
-          currentFunction[entry] = parseInt(currentFunction[entry]);
+        if (entry != 'file' || entry != 'name') currentFunction[entry] = parseInt(currentFunction[entry]);
       }
     }
 
@@ -211,13 +174,7 @@ tap.test('Profiling Data', { skip: 'FIXME(@tobespec)' }, function(t) {
     function testValuesAreIntegers(keyName) {
       for (var index in functions) {
         if (!isInteger(functions[index][keyName])) {
-          t.fail(
-            'Value of ' +
-              keyName +
-              ' should be an integer (' +
-              functions[index][keyName] +
-              ')'
-          );
+          t.fail('Value of ' + keyName + ' should be an integer (' + functions[index][keyName] + ')');
           return;
         }
       }
@@ -227,25 +184,11 @@ tap.test('Profiling Data', { skip: 'FIXME(@tobespec)' }, function(t) {
     function testValuesAreGreaterThan(keyName, val) {
       for (var index in functions) {
         if (!(functions[index][keyName] > val)) {
-          t.fail(
-            "Value of '" +
-              keyName +
-              "' should be greater than " +
-              val +
-              ' (' +
-              functions[index][keyName] +
-              ')'
-          );
+          t.fail("Value of '" + keyName + "' should be greater than " + val + ' (' + functions[index][keyName] + ')');
           return;
         }
       }
-      t.pass(
-        "Value of '" +
-          keyName +
-          "' is greater than " +
-          val +
-          ' for all functions'
-      );
+      t.pass("Value of '" + keyName + "' is greater than " + val + ' for all functions');
     }
   });
 });
@@ -260,20 +203,11 @@ tap.test('Eventloop Data', function(t) {
     );
 
     for (var elem in elData.latency) {
-      t.ok(
-        isNumeric(elData.latency[elem]),
-        'Contains numeric ' + elem + ' latency value'
-      );
+      t.ok(isNumeric(elData.latency[elem]), 'Contains numeric ' + elem + ' latency value');
 
-      t.ok(
-        elData.latency[elem] > 0,
-        'Contains positive ' + elem + ' latency value'
-      );
+      t.ok(elData.latency[elem] > 0, 'Contains positive ' + elem + ' latency value');
 
-      t.ok(
-        elData.latency[elem] <= 5000,
-        'Contains ' + elem + ' latency value less that 5 seconds'
-      );
+      t.ok(elData.latency[elem] <= 5000, 'Contains ' + elem + ' latency value less that 5 seconds');
     }
     t.end();
   });
@@ -292,10 +226,7 @@ function runCommonEnvTests(commonEnvData, t) {
   var ARCHS = ['x86', 'x86_64', 'ppc32', 'ppc64', 'ppc64le', 's390', 's390x'];
   var OSES = ['AIX', 'Linux', 'Windows', 'Mac OS X'];
 
-  t.ok(
-    ARCHS.indexOf(commonEnvData['os.arch']) != -1,
-    'Contains a recognised value for os.arch'
-  );
+  t.ok(ARCHS.indexOf(commonEnvData['os.arch']) != -1, 'Contains a recognised value for os.arch');
 
   var found = false;
   for (var entry in OSES) {
@@ -312,11 +243,7 @@ function runCommonEnvTests(commonEnvData, t) {
 
   t.ok(commonEnvData['pid'] > 1, 'pid is > 1');
 
-  t.match(
-    commonEnvData['native.library.date'],
-    /\S/,
-    "native.library.date isn't empty"
-  );
+  t.match(commonEnvData['native.library.date'], /\S/, "native.library.date isn't empty");
 
   // NOTE(mjt): jar.version is required from appmetrics v1.0.0 - v1.0.3
   // and is removed in 1.0.4
@@ -328,10 +255,7 @@ function runCommonEnvTests(commonEnvData, t) {
     //            + commonEnvData['jar.version'] + "), expected 99.99.99.123456789012");
   }
 
-  t.ok(
-    isInteger(commonEnvData['number.of.processors']),
-    'number.of.processes is an integer'
-  );
+  t.ok(isInteger(commonEnvData['number.of.processors']), 'number.of.processes is an integer');
 
   t.ok(commonEnvData['number.of.processors'] > 0, 'number.of.processes is > 1');
 
@@ -359,24 +283,15 @@ function runCommonEnvTests(commonEnvData, t) {
 }
 
 function runNodeEnvTests(nodeEnvData, t) {
-  t.match(
-    nodeEnvData['runtime.version'],
-    /^v\d+.\d+.\d+/,
-    "Node version matches 'v99.99.99' format"
-  );
+  t.match(nodeEnvData['runtime.version'], /^v\d+.\d+.\d+/, "Node version matches 'v99.99.99' format");
 
   t.ok(
-    ['IBM SDK for Node.js', 'Node.js'].indexOf(nodeEnvData['runtime.name']) !=
-      -1,
+    ['IBM SDK for Node.js', 'Node.js'].indexOf(nodeEnvData['runtime.name']) != -1,
     'Node runtime name is recognised'
   );
 
   if (nodeEnvData['runtime.vendor']) {
-    t.equal(
-      nodeEnvData['runtime.vendor'],
-      'IBM',
-      'Node runtime vendor recognised as IBM'
-    );
+    t.equal(nodeEnvData['runtime.vendor'], 'IBM', 'Node runtime vendor recognised as IBM');
   }
 
   // NOTE (acollins): This was failing as the current version no. is 1.0.12-dev.201605120942 but test expected it to be 1.0.12-dev.99.201605120942. I've been informed that this is an error with the test so I've changed the regex to reflect this
@@ -403,49 +318,32 @@ function runNodeEnvTests(nodeEnvData, t) {
   if (nodeEnvData['heap.size.limit']) {
     t.ok(
       isInteger(nodeEnvData['heap.size.limit']),
-      'heap.size.limit is an integer (value was: ' +
-        nodeEnvData['heap.size.limit'] +
-        ')'
+      'heap.size.limit is an integer (value was: ' + nodeEnvData['heap.size.limit'] + ')'
     );
 
-    t.ok(
-      parseInt(nodeEnvData['heap.size.limit']) > 0,
-      'heap.size.limit is positive'
-    );
+    t.ok(parseInt(nodeEnvData['heap.size.limit']) > 0, 'heap.size.limit is positive');
     t.ok(
       isInteger(nodeEnvData['max.semi.space.size']),
-      'max.semi.space.size is an integer (value was: ' +
-        nodeEnvData['max.semi.space.size'] +
-        ')'
+      'max.semi.space.size is an integer (value was: ' + nodeEnvData['max.semi.space.size'] + ')'
     );
-    t.ok(
-      parseInt(nodeEnvData['max.semi.space.size']) > 0,
-      'max.semi.size is positive'
-    );
+    t.ok(parseInt(nodeEnvData['max.semi.space.size']) > 0, 'max.semi.size is positive');
 
     t.ok(
       isInteger(nodeEnvData['max.old.space.size']),
-      'max.old.space.size is an integer (value was: ' +
-        nodeEnvData['max.old.space.size'] +
-        ')'
+      'max.old.space.size is an integer (value was: ' + nodeEnvData['max.old.space.size'] + ')'
     );
-    t.ok(
-      parseInt(nodeEnvData['max.old.space.size']) > 0,
-      'max.old.space.size is positive'
-    );
+    t.ok(parseInt(nodeEnvData['max.old.space.size']) > 0, 'max.old.space.size is positive');
 
     if (semver.gt(process.version, '6.5.0')) {
       // issue 283
       t.ok(
-        2 * parseInt(nodeEnvData['max.semi.space.size']) +
-          parseInt(nodeEnvData['max.old.space.size']) ===
+        2 * parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']) ===
           parseInt(nodeEnvData['heap.size.limit']),
         'Values for max.old.space.size and max.semi.space.size match heap.size.limit'
       );
     } else {
       t.ok(
-        4 * parseInt(nodeEnvData['max.semi.space.size']) +
-          parseInt(nodeEnvData['max.old.space.size']) ===
+        4 * parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']) ===
           parseInt(nodeEnvData['heap.size.limit']),
         'Values for max.old.space.size and max.semi.space.size match heap.size.limit'
       );
@@ -453,27 +351,15 @@ function runNodeEnvTests(nodeEnvData, t) {
 
     t.ok(
       isInteger(nodeEnvData['max.heap.size']),
-      'max.heap.size is an integer (value was: ' +
-        nodeEnvData['max.heap.size'] +
-        ')'
+      'max.heap.size is an integer (value was: ' + nodeEnvData['max.heap.size'] + ')'
     );
 
-    t.ok(
-      parseInt(nodeEnvData['max.heap.size']) > 0,
-      'max.heap.size is positive'
-    );
+    t.ok(parseInt(nodeEnvData['max.heap.size']) > 0, 'max.heap.size is positive');
   }
 
-  var requiredKeys = [
-    'runtime.version',
-    'runtime.name',
-    'command.line.arguments',
-  ];
+  var requiredKeys = ['runtime.version', 'runtime.name', 'command.line.arguments'];
   requiredKeys.forEach(function(key) {
-    t.ok(
-      nodeEnvData.hasOwnProperty(key),
-      'Node environment data contains ' + key
-    );
+    t.ok(nodeEnvData.hasOwnProperty(key), 'Node environment data contains ' + key);
   });
 }
 

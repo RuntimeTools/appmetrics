@@ -221,11 +221,7 @@ RedisProbe.prototype.attach = function(name, target) {
       aspect.aroundCallback(methodArgs, probeData, function(target, args) {
         // Call the transaction link with a name and the callback for strong trace
         var callbackPosition = aspect.findCallbackArg(methodArgs);
-        aspect.strongTraceTransactionLink(
-          'redis: ',
-          eventName,
-          methodArgs[callbackPosition]
-        );
+        aspect.strongTraceTransactionLink('redis: ', eventName, methodArgs[callbackPosition]);
 
         that.metricsProbeEnd(probeData, eventName, methodArgs);
         that.requestProbeEnd(probeData, eventName, methodArgs);
@@ -244,38 +240,39 @@ RedisProbe.prototype.attach = function(name, target) {
 	 * Instrument the exec method on the object returned from client.batch()
 	 * or client.multi()
 	 */
-  aspect.after(
-    target.RedisClient.prototype,
-    ['multi', 'batch', 'MULTI', 'BATCH'],
-    {},
-    function(target, mode, args, probeData, client) {
-      // Log the event name as batch.exec or multi.exec
-      var eventName = mode.toLowerCase() + '.exec';
-      aspect.around(
-        client,
-        ['exec', 'EXEC'],
-        function(target, method, methodArgs, probeData) {
-          that.metricsProbeStart(probeData, eventName, methodArgs);
-          that.requestProbeStart(probeData, eventName, methodArgs);
-          /* REDIS commands don't have to have a callback.
+  aspect.after(target.RedisClient.prototype, ['multi', 'batch', 'MULTI', 'BATCH'], {}, function(
+    target,
+    mode,
+    args,
+    probeData,
+    client
+  ) {
+    // Log the event name as batch.exec or multi.exec
+    var eventName = mode.toLowerCase() + '.exec';
+    aspect.around(
+      client,
+      ['exec', 'EXEC'],
+      function(target, method, methodArgs, probeData) {
+        that.metricsProbeStart(probeData, eventName, methodArgs);
+        that.requestProbeStart(probeData, eventName, methodArgs);
+        /* REDIS commands don't have to have a callback.
 			 * All redis calls are asynchronous so we need to instrument or add a
 			 * callback to stop the timer.
 			 */
-          aspect.aroundCallback(methodArgs, probeData, function() {
-            that.metricsProbeEnd(probeData, eventName, methodArgs);
-            that.requestProbeEnd(probeData, eventName, methodArgs);
-          });
-        },
-        function(target, method, methodArgs, probeData, rc) {
-          if (aspect.findCallbackArg(methodArgs) == undefined) {
-            that.metricsProbeEnd(probeData, eventName, methodArgs);
-            that.requestProbeEnd(probeData, eventName, methodArgs);
-          }
+        aspect.aroundCallback(methodArgs, probeData, function() {
+          that.metricsProbeEnd(probeData, eventName, methodArgs);
+          that.requestProbeEnd(probeData, eventName, methodArgs);
+        });
+      },
+      function(target, method, methodArgs, probeData, rc) {
+        if (aspect.findCallbackArg(methodArgs) == undefined) {
+          that.metricsProbeEnd(probeData, eventName, methodArgs);
+          that.requestProbeEnd(probeData, eventName, methodArgs);
         }
-      );
-      return client;
-    }
-  );
+      }
+    );
+    return client;
+  });
   return target;
 };
 

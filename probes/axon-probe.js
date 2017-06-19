@@ -49,13 +49,7 @@ AxonProbe.prototype.attach = function(name, target) {
   if (name != 'axon') return target;
   target.__ddProbeAttached__ = true;
 
-  aspect.after(target, ['socket'], {}, function(
-    target,
-    methodName,
-    methodArgs,
-    context,
-    client
-  ) {
+  aspect.after(target, ['socket'], {}, function(target, methodName, methodArgs, context, client) {
     var socketType = methodArgs[0];
     if (isSendMethod(socketType)) {
       var methods = sendTypeToMethod[socketType];
@@ -65,19 +59,11 @@ AxonProbe.prototype.attach = function(name, target) {
         function(target, methodName, methodArgs, context) {
           that.metricsProbeStart(context, methodName, methodArgs);
           that.requestProbeStart(context, methodName, methodArgs);
-          aspect.aroundCallback(methodArgs, context, function(
-            target,
-            args,
-            context
-          ) {
+          aspect.aroundCallback(methodArgs, context, function(target, args, context) {
             // Call the transaction link with a name and the callback for strong trace
             var callbackPosition = aspect.findCallbackArg(methodArgs);
             if (typeof callbackPosition != 'undefined') {
-              aspect.strongTraceTransactionLink(
-                'axon',
-                methodName,
-                methodArgs[callbackPosition]
-              );
+              aspect.strongTraceTransactionLink('axon', methodName, methodArgs[callbackPosition]);
             }
 
             that.metricsProbeEnd(context, methodName, methodArgs, socketType);
@@ -93,12 +79,7 @@ AxonProbe.prototype.attach = function(name, target) {
         }
       );
     } else {
-      aspect.before(client, ['on', 'addListener'], function(
-        target,
-        methodName,
-        methodArgs,
-        context
-      ) {
+      aspect.before(client, ['on', 'addListener'], function(target, methodName, methodArgs, context) {
         var eventName = methodArgs[0];
         if (aspect.findCallbackArg(methodArgs) != undefined) {
           aspect.aroundCallback(
@@ -108,25 +89,11 @@ AxonProbe.prototype.attach = function(name, target) {
               // Call the transaction link with a name and the callback for strong trace
               var callbackPosition = aspect.findCallbackArg(methodArgs);
               if (typeof callbackPosition != 'undefined') {
-                aspect.strongTraceTransactionLink(
-                  'axon: ',
-                  eventName,
-                  args[callbackPosition]
-                );
+                aspect.strongTraceTransactionLink('axon: ', eventName, args[callbackPosition]);
               }
 
-              that.metricsProbeStart(
-                context,
-                eventName,
-                methodArgs,
-                socketType
-              );
-              that.requestProbeStart(
-                context,
-                eventName,
-                methodArgs,
-                socketType
-              );
+              that.metricsProbeStart(context, eventName, methodArgs, socketType);
+              that.requestProbeStart(context, eventName, methodArgs, socketType);
             },
             function(target, methodArgs, context, rc) {
               that.metricsProbeEnd(context, eventName, methodArgs, socketType);
@@ -152,12 +119,7 @@ AxonProbe.prototype.attach = function(name, target) {
  *		topic:		the topic the message was received on
  *		duration:	the time for the request to respond
  */
-AxonProbe.prototype.metricsEnd = function(
-  context,
-  methodName,
-  methodArgs,
-  socketType
-) {
+AxonProbe.prototype.metricsEnd = function(context, methodName, methodArgs, socketType) {
   if (context && context.timer) {
     context.timer.stop();
     // default to quality of service (qos) 0, as that's what the axon module does
@@ -186,12 +148,7 @@ AxonProbe.prototype.requestStart = function(context, methodName, methodArgs) {
   if (methodName === 'message') {
     context.req = request.startRequest('axon', methodName, true, context.timer);
   } else {
-    context.req = request.startRequest(
-      'axon',
-      methodName,
-      false,
-      context.timer
-    );
+    context.req = request.startRequest('axon', methodName, false, context.timer);
   }
 };
 

@@ -36,19 +36,11 @@ MongoProbe.prototype.aspectCollectionMethod = function(coll, method) {
       that.metricsProbeStart(probeData, target, method, methodArgs);
       that.requestProbeStart(probeData, target, method, methodArgs);
       if (aspect.findCallbackArg(methodArgs) != undefined) {
-        aspect.aroundCallback(methodArgs, probeData, function(
-          target,
-          args,
-          probeData
-        ) {
+        aspect.aroundCallback(methodArgs, probeData, function(target, args, probeData) {
           // Call the transaction link with a name and the callback for strong trace
           var callbackPosition = aspect.findCallbackArg(methodArgs);
           if (typeof callbackPosition != 'undefined') {
-            aspect.strongTraceTransactionLink(
-              'mongodb: ',
-              methodName,
-              methodArgs[callbackPosition]
-            );
+            aspect.strongTraceTransactionLink('mongodb: ', methodName, methodArgs[callbackPosition]);
           }
           var count;
 
@@ -71,22 +63,12 @@ MongoProbe.prototype.aspectCollectionMethod = function(coll, method) {
                 count = res;
               }
               if (methodName === 'bulkWrite') {
-                count =
-                  res.modifiedCount +
-                  res.insertedCount +
-                  res.deletedCount +
-                  res.upsertedCount;
+                count = res.modifiedCount + res.insertedCount + res.deletedCount + res.upsertedCount;
               }
             }
           }
 
-          that.metricsProbeEnd(
-            probeData,
-            collectionName,
-            method,
-            methodArgs,
-            count
-          );
+          that.metricsProbeEnd(probeData, collectionName, method, methodArgs, count);
           that.requestProbeEnd(probeData, method, methodArgs);
         });
       }
@@ -125,17 +107,8 @@ MongoProbe.prototype.attach = function(name, target) {
         that.metricsProbeEnd(probeData, collectionName, method, findArgs);
         that.requestProbeEnd(probeData, method, findArgs);
       } else {
-        aspect.before(rc, 'toArray', function(
-          target,
-          methodName,
-          args,
-          context
-        ) {
-          aspect.aroundCallback(args, probeData, function(
-            target,
-            args,
-            probeData
-          ) {
+        aspect.before(rc, 'toArray', function(target, methodName, args, context) {
+          aspect.aroundCallback(args, probeData, function(target, args, probeData) {
             var count;
 
             if (args && args.length > 1) {
@@ -144,13 +117,7 @@ MongoProbe.prototype.attach = function(name, target) {
                 count = res.length;
               }
             }
-            that.metricsProbeEnd(
-              probeData,
-              collectionName,
-              method,
-              findArgs,
-              count
-            );
+            that.metricsProbeEnd(probeData, collectionName, method, findArgs, count);
             that.requestProbeEnd(probeData, method, findArgs);
           });
         });
@@ -202,13 +169,7 @@ MongoProbe.prototype.attach = function(name, target) {
  *         method:      the executed method for the query, such as find, update
  *         collection:  the mongo collection
  */
-MongoProbe.prototype.metricsEnd = function(
-  probeData,
-  collectionName,
-  method,
-  methodArgs,
-  count
-) {
+MongoProbe.prototype.metricsEnd = function(probeData, collectionName, method, methodArgs, count) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
     am.emit('mongo', {
@@ -225,23 +186,12 @@ MongoProbe.prototype.metricsEnd = function(
 /*
  * Heavyweight request probes for MongoDB queries
  */
-MongoProbe.prototype.requestStart = function(
-  probeData,
-  target,
-  method,
-  methodArgs
-) {
-  probeData.req = request.startRequest(
-    'mongo',
-    method + '(' + target.collectionName + ')',
-    false,
-    probeData.timer
-  );
+MongoProbe.prototype.requestStart = function(probeData, target, method, methodArgs) {
+  probeData.req = request.startRequest('mongo', method + '(' + target.collectionName + ')', false, probeData.timer);
 };
 
 MongoProbe.prototype.requestEnd = function(probeData, method, methodArgs) {
-  if (probeData && probeData.req)
-    probeData.req.stop({ query: JSON.stringify(methodArgs[0]) });
+  if (probeData && probeData.req) probeData.req.stop({ query: JSON.stringify(methodArgs[0]) });
 };
 
 module.exports = MongoProbe;

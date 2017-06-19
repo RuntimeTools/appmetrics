@@ -64,19 +64,11 @@ MemcachedProbe.prototype.attach = function(name, target) {
     function(target, methodName, methodArgs, context) {
       that.metricsProbeStart(context, methodName, methodArgs);
       that.requestProbeStart(context, methodName, methodArgs);
-      aspect.aroundCallback(methodArgs, context, function(
-        target,
-        callbackArgs,
-        context
-      ) {
+      aspect.aroundCallback(methodArgs, context, function(target, callbackArgs, context) {
         // Call the transaction link with a name and the callback for strong trace
         var callbackPosition = aspect.findCallbackArg(methodArgs);
         if (typeof callbackPosition != 'undefined') {
-          aspect.strongTraceTransactionLink(
-            'memcached: ',
-            methodName,
-            methodArgs[callbackPosition]
-          );
+          aspect.strongTraceTransactionLink('memcached: ', methodName, methodArgs[callbackPosition]);
         }
 
         that.metricsProbeEnd(context, methodName, methodArgs);
@@ -118,24 +110,11 @@ MemcachedProbe.prototype.metricsEnd = function(context, method, methodArgs) {
 /*
  * Heavyweight request probes for Memcached data store
  */
-MemcachedProbe.prototype.requestStart = function(
-  context,
-  methodName,
-  methodArgs
-) {
-  context.req = request.startRequest(
-    'memcached',
-    methodName,
-    false,
-    context.timer
-  );
+MemcachedProbe.prototype.requestStart = function(context, methodName, methodArgs) {
+  context.req = request.startRequest('memcached', methodName, false, context.timer);
 };
 
-MemcachedProbe.prototype.requestEnd = function(
-  context,
-  methodName,
-  methodArgs
-) {
+MemcachedProbe.prototype.requestEnd = function(context, methodName, methodArgs) {
   if (context && context.req) context.req.stop({ key: methodArgs[0] });
 };
 

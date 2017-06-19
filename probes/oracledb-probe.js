@@ -35,12 +35,7 @@ OracleDBProbe.prototype.attach = function(name, target) {
   target.__probeAttached__ = true;
 
   // After 'getConnection' (single-user connection model)
-  aspect.before(target, 'getConnection', function(
-    target,
-    methodName,
-    args,
-    probeData
-  ) {
+  aspect.before(target, 'getConnection', function(target, methodName, args, probeData) {
     aspect.aroundCallback(args, {}, function(target, callbackArgs, probeData) {
       var err = callbackArgs[0];
       if (!err) {
@@ -52,27 +47,13 @@ OracleDBProbe.prototype.attach = function(name, target) {
   });
 
   // Connection pooling
-  aspect.before(target, 'createPool', function(
-    target,
-    methodName,
-    args,
-    context
-  ) {
+  aspect.before(target, 'createPool', function(target, methodName, args, context) {
     aspect.aroundCallback(args, {}, function(target, callbackArgs, probeData) {
       var err = callbackArgs[0];
       if (!err) {
         var pool = callbackArgs[1];
-        aspect.before(pool, 'getConnection', function(
-          target,
-          methodName,
-          args,
-          probeData
-        ) {
-          aspect.aroundCallback(args, {}, function(
-            target,
-            callbackArgs,
-            probeData
-          ) {
+        aspect.before(pool, 'getConnection', function(target, methodName, args, probeData) {
+          aspect.aroundCallback(args, {}, function(target, callbackArgs, probeData) {
             var err = callbackArgs[0];
             if (!err) {
               var connection = callbackArgs[1];
@@ -101,21 +82,13 @@ function addMonitoring(connection, probe) {
       probe.metricsProbeStart(probeData, methodName, args);
       probe.requestProbeStart(probeData, methodName, args);
       // Advise the callback for 'execute'. Will do nothing if no callback is registered
-      aspect.aroundCallback(args, probeData, function(
-        target,
-        callbackArgs,
-        probeData
-      ) {
+      aspect.aroundCallback(args, probeData, function(target, callbackArgs, probeData) {
         // 'execute' has completed and the callback has been called, so end the monitoring
 
         // Call the transaction link with a name and the callback for strong trace
         var callbackPosition = aspect.findCallbackArg(args);
         if (typeof callbackPosition != 'undefined') {
-          aspect.strongTraceTransactionLink(
-            'oracledb: ',
-            methodName,
-            args[callbackPosition]
-          );
+          aspect.strongTraceTransactionLink('oracledb: ', methodName, args[callbackPosition]);
         }
 
         probe.metricsProbeEnd(probeData, methodName, args);
@@ -152,12 +125,7 @@ OracleDBProbe.prototype.metricsEnd = function(probeData, method, methodArgs) {
  * Heavyweight request probes for OracleDB queries
  */
 OracleDBProbe.prototype.requestStart = function(probeData, method, methodArgs) {
-  probeData.req = request.startRequest(
-    'oracledb',
-    method,
-    false,
-    probeData.timer
-  );
+  probeData.req = request.startRequest('oracledb', method, false, probeData.timer);
 };
 
 OracleDBProbe.prototype.requestEnd = function(probeData, method, methodArgs) {

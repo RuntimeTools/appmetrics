@@ -35,13 +35,7 @@ MQLightProbe.prototype.attach = function(name, target) {
   target.__probeAttached__ = true;
 
   // After 'createClient'
-  aspect.after(target, 'createClient', {}, function(
-    target,
-    methodName,
-    createClientArgs,
-    context,
-    rc
-  ) {
+  aspect.after(target, 'createClient', {}, function(target, methodName, createClientArgs, context, rc) {
     var thisClient = rc; // the MQLight client that was created
     // Just monitor 'send' for now as not sure what else will be useful
     var methods = 'send';
@@ -54,21 +48,13 @@ MQLightProbe.prototype.attach = function(name, target) {
         that.metricsProbeStart(probeData, methodName, args);
         that.requestProbeStart(probeData, methodName, args);
         // Advise the callback for the method.  Will do nothing if no callback is registered
-        aspect.aroundCallback(args, probeData, function(
-          target,
-          callbackArgs,
-          probeData
-        ) {
+        aspect.aroundCallback(args, probeData, function(target, callbackArgs, probeData) {
           // method has completed and the callback has been called, so end the monitoring
 
           // Call the transaction link with a name and the callback for strong trace
           var callbackPosition = aspect.findCallbackArg(args);
           if (typeof callbackPosition != 'undefined') {
-            aspect.strongTraceTransactionLink(
-              'mqlight: ',
-              methodName,
-              args[callbackPosition]
-            );
+            aspect.strongTraceTransactionLink('mqlight: ', methodName, args[callbackPosition]);
           }
 
           that.metricsProbeEnd(probeData, methodName, args, thisClient);
@@ -86,12 +72,7 @@ MQLightProbe.prototype.attach = function(name, target) {
     );
 
     // Advise the callback code that is called when a message is received
-    aspect.before(thisClient, 'on', function(
-      target,
-      methodName,
-      args,
-      probeData
-    ) {
+    aspect.before(thisClient, 'on', function(target, methodName, args, probeData) {
       // only care about 'message' events
       if (args[0] == 'message') {
         // Must be a callback so no need to check for it
@@ -108,25 +89,11 @@ MQLightProbe.prototype.attach = function(name, target) {
             // Call the transaction link with a name and the callback for strong trace
             var callbackPosition = aspect.findCallbackArg(callbackArgs);
             if (typeof callbackPosition != 'undefined') {
-              aspect.strongTraceTransactionLink(
-                'mqlight: ',
-                methodName,
-                callbackArgs[callbackPosition]
-              );
+              aspect.strongTraceTransactionLink('mqlight: ', methodName, callbackArgs[callbackPosition]);
             }
 
-            that.metricsProbeEnd(
-              probeData,
-              'message',
-              callbackArgs,
-              thisClient
-            );
-            that.requestProbeEnd(
-              probeData,
-              'message',
-              callbackArgs,
-              thisClient
-            );
+            that.metricsProbeEnd(probeData, 'message', callbackArgs, thisClient);
+            that.requestProbeEnd(probeData, 'message', callbackArgs, thisClient);
             return ret;
           }
         );
@@ -140,12 +107,7 @@ MQLightProbe.prototype.attach = function(name, target) {
 /*
  * Lightweight metrics probe end for MQLight messages
  */
-MQLightProbe.prototype.metricsEnd = function(
-  probeData,
-  method,
-  methodArgs,
-  client
-) {
+MQLightProbe.prototype.metricsEnd = function(probeData, method, methodArgs, client) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
     /* eslint no-redeclare:0 */
@@ -192,28 +154,13 @@ MQLightProbe.prototype.metricsEnd = function(
  */
 MQLightProbe.prototype.requestStart = function(probeData, method, methodArgs) {
   if (method == 'message') {
-    probeData.req = request.startRequest(
-      'mqlight',
-      method,
-      true,
-      probeData.timer
-    );
+    probeData.req = request.startRequest('mqlight', method, true, probeData.timer);
   } else {
-    probeData.req = request.startRequest(
-      'mqlight',
-      method,
-      false,
-      probeData.timer
-    );
+    probeData.req = request.startRequest('mqlight', method, false, probeData.timer);
   }
 };
 
-MQLightProbe.prototype.requestEnd = function(
-  probeData,
-  method,
-  methodArgs,
-  client
-) {
+MQLightProbe.prototype.requestEnd = function(probeData, method, methodArgs, client) {
   if (probeData && probeData.req) {
     if (method == 'message') {
       var data = methodArgs[0];
