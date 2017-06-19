@@ -62,12 +62,12 @@ MQLightProbe.prototype.attach = function(name, target) {
           // method has completed and the callback has been called, so end the monitoring
 
           // Call the transaction link with a name and the callback for strong trace
-          var callbackPosition = aspect.findCallbackArg(methodArgs); // FIXME(sam) methodArgs does not exist!
+          var callbackPosition = aspect.findCallbackArg(args);
           if (typeof callbackPosition != 'undefined') {
             aspect.strongTraceTransactionLink(
               'mqlight: ',
               methodName,
-              methodArgs[callbackPosition]
+              args[callbackPosition]
             );
           }
 
