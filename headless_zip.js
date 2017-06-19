@@ -103,13 +103,7 @@ module.exports.headlessZip = function headlessZip(dirToZip) {
 };
 
 module.exports.tryZipOnExit = function tryZipOnExit() {
-  var outputDir = dirToWriteTo;
-  if (!outputDir) {
-    // FIXME(sam) not sure what to do here, this code probably never did
-    // anything but I don't want to enable it in error (btw,  cwd() always
-    // returns a string).
-    ouputDir = process.cwd().toString();
-  }
+  var outputDir = dirToWriteTo || process.cwd();
   if (fs.existsSync(outputDir)) {
     var files = fs.readdirSync(outputDir);
     // Search for temporary output directory using pattern matching
