@@ -129,13 +129,19 @@ LeveldownProbe.prototype.requestStart = function(
 ) {
   // FIXME(sam) req is used as a global to communicate with requestEnd, almost
   // certainly a bug, what happens if two requests are started before the first
-  // ends?
+  // ends? This is a bug, but it is being marked to be skipped by eslint
+  // temporarily until it is fixed. See:
+  //   https://github.com/RuntimeTools/appmetrics/pull/274#discussion_r122651577
+  /* eslint-disable */
   req = request.startRequest('leveldown', 'query');
   req.setContext({ leveldown: methodArgs[0] });
+  /* eslint-enable */
 };
 
 LeveldownProbe.prototype.requestEnd = function(probeData, method, methodArgs) {
+  /* eslint-disable */
   if (probeData && probeData.req) req.stop({ leveldown: methodArgs[0] });
+  /* eslint-enable */
 };
 
 module.exports = LeveldownProbe;
