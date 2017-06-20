@@ -45,8 +45,7 @@
          "libraries": [ "-undefined dynamic_lookup" ],
       }],
       ['OS=="os390"', {
-        "defines": [ "_ZOS" ],
-        'libraries': [ '-Wl,lp64,dll,xplink,-Wc,lp64,warn64,expo -Wc,"LANG(EXTENDED),COMPACT,COMPRESS,NOCONVLIT"' ],
+        "defines": [ "_ZOS", "_UNIX03_THREADS" ],
       }],
       ['OS=="linux"', {
         "defines": [ "_LINUX", "LINUX" ],
