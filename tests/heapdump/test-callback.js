@@ -11,8 +11,7 @@
 // WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-var path = require('path');
+'use strict';
 var http = require('http');
 var shelljs = require('shelljs');
 var test = require('tap').test;
@@ -20,12 +19,12 @@ var heapdump = require('../../heapdump.js');
 
 process.chdir(__dirname);
 
-function testFuncCall(test){
+function testFuncCall(test) {
   var server = http.createServer(function(req, res) {
     res.writeHeader(200);
     res.end();
   });
-  server.on('listening', function(){
+  server.on('listening', function() {
     console.log('Listening on http://127.0.0.1:8000/');
     console.log('PID %d', process.pid);
 

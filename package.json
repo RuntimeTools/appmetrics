@@ -1,7 +1,9 @@
 {
   "name": "appmetrics",
   "version": "3.0.2",
-  "engines": { "node": ">=4" },
+  "engines": {
+    "node": ">=4"
+  },
   "description": "Node Application Metrics",
   "bin": {
     "node-hc": "bin/appmetrics-cli.js"
@@ -17,10 +19,16 @@
   ],
   "devDependencies": {
     "codecov": "2.x",
+    "eslint": "^4.0.0",
+    "eslint-config-strongloop": "^2.1.0",
     "node-gyp": "3.x",
+    "prettier": "^1.4.4",
     "tap": "7.x"
   },
   "scripts": {
+    "fix-prettier": "prettier --single-quote --trailing-comma es5 --print-width 120 --write {bin,lib,probes,tests}/**/*.js *.js",
+    "fix-eslint": "eslint --fix {bin,lib,probes,tests}/**/*.js *.js",
+    "pretest": "eslint .",
     "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http*test.js tests/headless_test.js",
     "travis": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http*test.js tests/headless_test.js --coverage",
     "posttravis": "./get_code_cov.sh && tap --coverage-report=lcov && codecov --disable=gcov",
