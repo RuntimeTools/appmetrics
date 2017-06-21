@@ -11,23 +11,23 @@
 // WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
-
-var path = require('path');
+'use strict';
 var http = require('http');
 var shelljs = require('shelljs');
 var test = require('tap').test;
-var heapdump = require('../../heapdump.js');
 
 process.chdir(__dirname);
 
-function testSigUsr2(test){
+function testSigUsr2(test) {
   var server = http.createServer(function(req, res) {
-    res.writeHeader(200, {'Content-Type':'text/plain;charset=utf-8',
-                          'Content-Length':'2'});
+    res.writeHeader(200, {
+      'Content-Type': 'text/plain;charset=utf-8',
+      'Content-Length': '2',
+    });
     res.end('OK');
   });
 
-  server.on('listening', function(){
+  server.on('listening', function() {
     console.log('Listening on http://127.0.0.1:8000/');
     console.log('now sending SIGUSR2 to %d', process.pid);
 
@@ -36,12 +36,12 @@ function testSigUsr2(test){
 
     var killCmd = shelljs.which('kill');
     var cmd = [killCmd, '-usr2', process.pid].join(' ');
-    console.log("executing kill");
+    console.log('executing kill');
     shelljs.exec(cmd);
 
-    function waitForHeapdump(){
+    function waitForHeapdump() {
       var files = shelljs.ls(heapSnapshotFile);
-      test.ok(files.length>0, 'Heap file should be present');
+      test.ok(files.length > 0, 'Heap file should be present');
       server.close();
       test.end();
     }

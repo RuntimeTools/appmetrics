@@ -1,0 +1,13 @@
+{
+  "extends": "strongloop",
+  "env": {
+    "node": true
+  },
+  "parserOptions": { "ecmaVersion": 6 },
+  "rules": {
+    "eqeqeq": "off",
+    "max-len": ["error", 120, 8, {"ignoreComments": true}],
+    "comma-dangle": "off",
+    "spaced-comment": ["error", "always", { "exceptions": ["*"] }]
+  }
+}
