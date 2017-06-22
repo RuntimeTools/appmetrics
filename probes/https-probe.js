@@ -31,7 +31,7 @@ util.inherits(HttpsProbe, Probe);
 
 HttpsProbe.prototype.attach = function(name, target) {
   var that = this;
-  if (name == 'https') {
+  if (name === 'https') {
     if (target.__probeAttached__) return target;
     target.__probeAttached__ = true;
     var methods = ['on', 'addListener'];
@@ -62,7 +62,7 @@ HttpsProbe.prototype.attach = function(name, target) {
 /*
  * Custom req.url parser that strips out any trailing query
  */
-var parse = function(url) {
+function parse(url) {
   ['?', '#'].forEach(function(separator) {
     var index = url.indexOf(separator);
     if (index !== -1) url = url.substring(0, index);
@@ -76,7 +76,7 @@ var parse = function(url) {
 HttpsProbe.prototype.filterUrl = function(req) {
   var resultUrl = parse(req.url);
   var filters = this.config.filters;
-  if (filters.length == 0) return resultUrl;
+  if (filters.length === 0) return resultUrl;
 
   var identifier = req.method + ' ' + resultUrl;
   for (var i = 0; i < filters.length; ++i) {
@@ -125,7 +125,7 @@ HttpsProbe.prototype.requestStart = function(probeData, method, url) {
 };
 
 HttpsProbe.prototype.requestEnd = function(probeData, method, url, res, httpsReq) {
-  if (probeData && probeData.req)
+  if (probeData && probeData.req) {
     probeData.req.stop({
       url: url,
       method: method,
@@ -134,6 +134,7 @@ HttpsProbe.prototype.requestEnd = function(probeData, method, url, res, httpsReq
       header: res._header,
       contentType: res.getHeader('content-type'),
     });
+  }
 };
 
 /*

@@ -39,7 +39,7 @@ util.inherits(HttpsOutboundProbe, Probe);
 
 HttpsOutboundProbe.prototype.attach = function(name, target) {
   var that = this;
-  if (name == 'https') {
+  if (name === 'https') {
     if (target.__outboundProbeAttached__) return target;
     target.__outboundProbeAttached__ = true;
 
@@ -53,7 +53,7 @@ HttpsOutboundProbe.prototype.attach = function(name, target) {
         var requestMethod = 'GET';
         var urlRequested = '';
         var headers = '';
-        if (typeof options === 'object') {
+        if (options !== null && typeof options === 'object') {
           urlRequested = formatURL(options);
           if (options.method) {
             requestMethod = options.method;
@@ -73,8 +73,8 @@ HttpsOutboundProbe.prototype.attach = function(name, target) {
         }
 
         // Start metrics
-        that.metricsProbeStart(probeData, requestMethod, urlRequested);
-        that.requestProbeStart(probeData, requestMethod, urlRequested);
+        that.metricsProbeStart(probeData);
+        that.requestProbeStart(probeData, '', '');
 
         // End metrics
         aspect.aroundCallback(
@@ -94,13 +94,13 @@ HttpsOutboundProbe.prototype.attach = function(name, target) {
       // After 'https.request' function returns
       function(target, methodName, methodArgs, probeData, rc) {
         // If no callback has been used then end the metrics after returning from the method instead
-        if (aspect.findCallbackArg(methodArgs) == undefined) {
+        if (aspect.findCallbackArg(methodArgs) === undefined) {
           // Need to get request method and URL again
           var options = methodArgs[0];
           var requestMethod = 'GET';
           var urlRequested = '';
           var headers = '';
-          if (typeof options === 'object') {
+          if (options !== null && typeof options === 'object') {
             urlRequested = formatURL(options);
             if (options.method) {
               requestMethod = options.method;

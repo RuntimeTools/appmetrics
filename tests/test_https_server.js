@@ -19,8 +19,6 @@ var https = require('https');
 var fs = require('fs');
 var path = require('path');
 
-console.log('dirname = ' + __dirname);
-
 const httpsOptions = {
   key: fs.readFileSync(path.resolve(__dirname, 'testkey.pem')),
   cert: fs.readFileSync(path.resolve(__dirname, 'testcert.crt')),
@@ -28,7 +26,6 @@ const httpsOptions = {
 
 module.exports.server = https.createServer(httpsOptions, (req, res) => {
   // Send "Hello World" to every request
-  console.log('request received');
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Hello World');
 });

@@ -38,7 +38,7 @@ util.inherits(HttpOutboundProbe, Probe);
 
 HttpOutboundProbe.prototype.attach = function(name, target) {
   var that = this;
-  if (name == 'http') {
+  if (name === 'http') {
     if (target.__outboundProbeAttached__) return target;
     target.__outboundProbeAttached__ = true;
 
@@ -52,7 +52,7 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
         var requestMethod = 'GET';
         var urlRequested = '';
         var headers = '';
-        if (typeof options === 'object') {
+        if (options !== null && typeof options === 'object') {
           urlRequested = formatURL(options);
           if (options.method) {
             requestMethod = options.method;
@@ -93,13 +93,13 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
       // After 'http.request' function returns
       function(target, methodName, methodArgs, probeData, rc) {
         // If no callback has been used then end the metrics after returning from the method instead
-        if (aspect.findCallbackArg(methodArgs) == undefined) {
+        if (aspect.findCallbackArg(methodArgs) === undefined) {
           // Need to get request method and URL again
           var options = methodArgs[0];
           var requestMethod = 'GET';
           var urlRequested = '';
           var headers = '';
-          if (typeof options === 'object') {
+          if (options !== null && typeof options === 'object') {
             urlRequested = formatURL(options);
             if (options.method) {
               requestMethod = options.method;
