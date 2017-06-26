@@ -16,23 +16,24 @@
 'use strict';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-var appmetrics = (appmetrics = require('../../'));
+var appmetrics = require('../../');
 var monitor = appmetrics.monitor();
 var server = require('../test_https_server').server;
 var https = require('https');
 
 var tap = require('tap');
 
-tap.plan(8);
+tap.plan(5);
 
 tap.tearDown(function() {
   server.close();
 });
 
 var completedTests = 0;
-var completedOutboundTests = 0;
 
 monitor.on('https', function(data) {
+  // First 3 calls should have an 'https' event emitted, then 2 'request' events,
+  // so don't allow more than 3 tests to run here.
   if (completedTests < 3) {
     tap.test('HTTPS Event', function(t) {
       checkHttpsData(data, t);
@@ -42,24 +43,11 @@ monitor.on('https', function(data) {
   }
 });
 
-monitor.on('https-outbound', function(data) {
-  if (completedOutboundTests < 3) {
-    tap.test('HTTPS Outbound Event', function(t) {
-      checkHttpOutboundData(data, t);
-      t.end();
-      completedOutboundTests++;
-    });
-  }
-});
-
 monitor.on('request', function(data) {
-  if (completedTests < 5) {
-    tap.test('HTTPS Request Event', function(t) {
-      checkHttpsRequestData(data.request.context, t);
-      t.end();
-      completedTests++;
-    });
-  }
+  tap.test('HTTPS Request Event', function(t) {
+    checkHttpsRequestData(data.request.context, t);
+    t.end();
+  });
 });
 
 function checkHttpsData(data, t) {
@@ -83,15 +71,6 @@ function checkHttpsRequestData(data, t) {
   t.equals(data.hasOwnProperty('requestHeader'), true, 'Should have HTTPS property requestHeader;');
   t.equals(data.hasOwnProperty('header'), true, 'Should have HTTPS property header;');
   t.equals(data.hasOwnProperty('contentType'), true, 'Should have HTTPS property contentType;');
-}
-
-function checkHttpOutboundData(data, t) {
-  t.ok(isInteger(data.time), 'Timestamp is an integer');
-  t.equals(data.method, 'GET', 'Should report GET as HTTP request method');
-  t.equals(data.url, 'https://localhost:8000/', 'Should report https://localhost:8000/ as URL');
-  if (data.requestHeaders) {
-    t.equals(data.requestHeaders.hello, 'world', 'Should report world as value of hello header');
-  }
 }
 
 function isInteger(n) {

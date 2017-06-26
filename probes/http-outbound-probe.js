@@ -23,6 +23,7 @@ var am = require('../');
 var semver = require('semver');
 
 var methods;
+// In Node.js < v8.0.0 'get' calls 'request' so we only instrument 'request'
 if (semver.lt(process.version, '8.0.0')) {
   methods = ['request'];
 } else {
@@ -181,7 +182,7 @@ HttpOutboundProbe.prototype.metricsEnd = function(probeData, method, url, res, h
       url: url,
       duration: probeData.timer.timeDelta,
       statusCode: res.statusCode,
-      contentType: res.headers ? res.headers['content-type'] : 'undefined',
+      contentType: res.headers ? res.headers['content-type'] : undefined,
       requestHeaders: headers,
     });
   }
@@ -201,7 +202,7 @@ HttpOutboundProbe.prototype.requestEnd = function(probeData, method, url, res, h
     probeData.req.stop({
       url: url,
       statusCode: res.statusCode,
-      contentType: res.headers ? res.headers['content-type'] : 'undefined',
+      contentType: res.headers ? res.headers['content-type'] : undefined,
       requestHeaders: headers,
     });
 };

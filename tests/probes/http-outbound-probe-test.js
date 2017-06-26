@@ -15,7 +15,7 @@
  *******************************************************************************/
 'use strict';
 
-var appmetrics = (appmetrics = require('../../'));
+var appmetrics = require('../../');
 var monitor = appmetrics.monitor();
 var server = require('../test_http_server').server;
 var http = require('http');
@@ -28,16 +28,12 @@ tap.tearDown(function() {
   server.close();
 });
 
-var completedTests = 0;
 
 monitor.on('http-outbound', function(data) {
-  if (completedTests < 3) {
-    tap.test('HTTP Outbound Event', function(t) {
-      checkHttpOutboundData(data, t);
-      t.end();
-      completedTests++;
-    });
-  }
+  tap.test('HTTP Outbound Event', function(t) {
+    checkHttpOutboundData(data, t);
+    t.end();
+  });
 });
 
 function checkHttpOutboundData(data, t) {

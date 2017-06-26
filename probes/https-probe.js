@@ -15,11 +15,12 @@
  *******************************************************************************/
 'use strict';
 
-var Probe = require('../lib/probe.js');
-var aspect = require('../lib/aspect.js');
-var request = require('../lib/request.js');
-var util = require('util');
 var am = require('../');
+var aspect = require('../lib/aspect.js');
+var Probe = require('../lib/probe.js');
+var request = require('../lib/request.js');
+
+var util = require('util');
 
 function HttpsProbe() {
   Probe.call(this, 'https');

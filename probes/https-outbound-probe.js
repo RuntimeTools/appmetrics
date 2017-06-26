@@ -15,15 +15,17 @@
  *******************************************************************************/
 'use strict';
 
-var Probe = require('../lib/probe.js');
-var aspect = require('../lib/aspect.js');
-var request = require('../lib/request.js');
-var util = require('util');
-var url = require('url');
 var am = require('../');
+var aspect = require('../lib/aspect.js');
+var Probe = require('../lib/probe.js');
+var request = require('../lib/request.js');
+
 var semver = require('semver');
+var url = require('url');
+var util = require('util');
 
 var methods;
+// In Node.js < v8.0.0 'get' calls 'request' so we only instrument 'request'
 if (semver.lt(process.version, '8.0.0')) {
   methods = ['request'];
 } else {
@@ -182,7 +184,7 @@ HttpsOutboundProbe.prototype.metricsEnd = function(probeData, method, url, res, 
       url: url,
       duration: probeData.timer.timeDelta,
       statusCode: res.statusCode,
-      contentType: res.headers ? res.headers['content-type'] : 'undefined',
+      contentType: res.headers ? res.headers['content-type'] : undefined,
       requestHeaders: headers,
     });
   }
@@ -202,7 +204,7 @@ HttpsOutboundProbe.prototype.requestEnd = function(probeData, method, url, res, 
     probeData.req.stop({
       url: url,
       statusCode: res.statusCode,
-      contentType: res.headers ? res.headers['content-type'] : 'undefined',
+      contentType: res.headers ? res.headers['content-type'] : undefined,
       requestHeaders: headers,
     });
 };

@@ -16,7 +16,7 @@
 'use strict';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
-var appmetrics = (appmetrics = require('../../'));
+var appmetrics = require('../../');
 var monitor = appmetrics.monitor();
 var server = require('../test_https_server').server;
 var https = require('https');
@@ -31,16 +31,11 @@ tap.tearDown(function() {
   }, 1000);
 });
 
-var completedTests = 0;
-
 monitor.on('https-outbound', function(data) {
-  if (completedTests < 3) {
-    tap.test('HTTPS Outbound Event', function(t) {
-      checkHttpOutboundData(data, t);
-      t.end();
-      completedTests++;
-    });
-  }
+  tap.test('HTTPS Outbound Event', function(t) {
+    checkHttpOutboundData(data, t);
+    t.end();
+  });
 });
 
 function checkHttpOutboundData(data, t) {
