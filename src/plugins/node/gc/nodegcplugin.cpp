@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+#if defined(_ZOS)
+#define _XOPEN_SOURCE_EXTENDED 1
+#undef _ALL_SOURCE
+#endif
 
 #include "ibmras/monitoring/AgentExtensions.h"
 #include "Typesdef.h"
@@ -45,7 +49,7 @@ namespace plugin {
 	LARGE_INTEGER gcSteadyStart, gcSteadyEnd;
 #elif defined(_LINUX) || defined(_AIX)
 	struct timespec gcSteadyStart, gcSteadyEnd;
-#elif defined(__MACH__) || defined(__APPLE__)
+#elif defined(__MACH__) || defined(__APPLE__) || defined(_ZOS)
 	struct timeval gcSteadyStart, gcSteadyEnd;
 #endif
 }
@@ -61,7 +65,7 @@ static char* NewCString(const std::string& s) {
 /*
  * OSX
  */
-#if defined(__MACH__) || defined(__APPLE__)
+#if defined(__MACH__) || defined(__APPLE__) || defined(_ZOS)
 static bool GetSteadyTime(struct timeval* tv) {
 	//int rc = clock_gettime(CLOCK_MONOTONIC, tv);
 	int rc = gettimeofday(tv, 0);
