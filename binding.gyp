@@ -163,32 +163,51 @@
         "nodeprofplugin",
         "nodeloopplugin",
      ],
-      "copies": [
-        {
-          "destination": "./",
-          "files": [
-            "<(PRODUCT_DIR)/appmetrics.node",
-            "<(PRODUCT_DIR)/heapdump.node",
-            "<(agentcoredir)/<(SHARED_LIB_PREFIX)agentcore<(SHARED_LIB_SUFFIX)",
-          ],
-        },
-        {
-          "destination": "./plugins",
-          "files": [
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeenvplugin<(SHARED_LIB_SUFFIX)",
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeheapplugin<(SHARED_LIB_SUFFIX)",
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeprofplugin<(SHARED_LIB_SUFFIX)",
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeloopplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)cpuplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)envplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcapiplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
-          ],
-        },
-      ],
+     "conditions": [
+       ['OS=="os390"', {
+         # the following don't work on zOS yet
+         "dependencies!": [
+           "nodegcplugin",
+         ],
+       }],
+     ],
+     "copies": [
+       {
+         "destination": "./",
+         "files": [
+           "<(PRODUCT_DIR)/appmetrics.node",
+           "<(PRODUCT_DIR)/heapdump.node",
+           "<(agentcoredir)/<(SHARED_LIB_PREFIX)agentcore<(SHARED_LIB_SUFFIX)",
+         ],
+       },
+       {
+         "destination": "./plugins",
+         "files": [
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeenvplugin<(SHARED_LIB_SUFFIX)",
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeheapplugin<(SHARED_LIB_SUFFIX)",
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeprofplugin<(SHARED_LIB_SUFFIX)",
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeloopplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)cpuplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)envplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcapiplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
+         ],
+         "conditions": [
+           ['OS=="os390"', {
+             # no hcmqtt or headless plugin
+             "files!": [
+               "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
+               "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
+               # the following don't work on zOS yet
+               "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
+             ],
+           }],
+         ],
+       },
+     ],
     },
   ],
 }
