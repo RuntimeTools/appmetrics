@@ -159,9 +159,9 @@
         "heapdump",
         "appmetrics",
         "nodeenvplugin",
-        "nodegcplugin",
         "nodeprofplugin",
         "nodeloopplugin",
+        "nodegcplugin",
      ],
      "conditions": [
        ['OS=="os390"', {
