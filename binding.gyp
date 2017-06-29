@@ -163,14 +163,6 @@
         "nodeloopplugin",
         "nodegcplugin",
      ],
-     "conditions": [
-       ['OS=="os390"', {
-         # the following don't work on zOS yet
-         "dependencies!": [
-           "nodegcplugin",
-         ],
-       }],
-     ],
      "copies": [
        {
          "destination": "./",
@@ -202,7 +194,6 @@
                "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
                # the following don't work on zOS yet
                "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
-               "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
              ],
            }],
          ],
