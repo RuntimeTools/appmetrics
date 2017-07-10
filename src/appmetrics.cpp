@@ -686,12 +686,8 @@ void init(Local<Object> exports, Local<Object> module) {
      */
     std::cout << "appmetrics:appmetrics.cpp - init" << std::endl;
     Nan::HandleScope scope;
-    //changing on z/OS as there is a break
-#if defined(_ZOS)
+    //removing isGlobalAgentAlreadyLoaded on z/OS as there is a break
     if (!isGlobalAgent(module)) {
-#else
-    if (!isGlobalAgent(module) && isGlobalAgentAlreadyLoaded(module)) {
-#endif
         Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
         return;
     }
