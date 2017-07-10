@@ -668,12 +668,13 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Throw an error if appmetrics has already been loaded globally
      */
+    std::cout << "appmetrics:appmetrics.cpp - init" << std::endl;
     Nan::HandleScope scope;
     if (!isGlobalAgent(module) && isGlobalAgentAlreadyLoaded(module)) {
         Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
         return;
     }
-
+    std::cout << "appmetrics:appmetrics.cpp - setup" << std::endl;
     // Setup global data mutex
     uv_mutex_init(messageListMutex);
 
@@ -684,6 +685,7 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Set exported functions
      */
+    std::cout << "appmetrics:appmetrics.cpp - set exported functions" << std::endl;
     exports->Set(Nan::New<String>("getOption").ToLocalChecked(), Nan::New<FunctionTemplate>(getOption)->GetFunction());
     exports->Set(Nan::New<String>("setOption").ToLocalChecked(), Nan::New<FunctionTemplate>(setOption)->GetFunction());
     exports->Set(Nan::New<String>("start").ToLocalChecked(), Nan::New<FunctionTemplate>(start)->GetFunction());
@@ -704,27 +706,32 @@ void init(Local<Object> exports, Local<Object> module) {
      */
     applicationDir = findApplicationDir();
     appmetricsDir = getModuleDir(module);
-
+    std::cout << "appmetrics:appmetrics.cpp - initialise healthcenter" << std::endl;
     if (!initLoaderApi()) {
         Nan::ThrowError("Failed to initialize Agent Core library");
         return;
     }
+    std::cout << "appmetrics:appmetrics.cpp - load properties file" << std::endl;
     if (!loadProperties()) {
         loaderApi->logMessage(warning, "Failed to load appmetrics.properties file");
     }
+    std::cout << "appmetrics:appmetrics.cpp - register zip functions" << std::endl;
     loaderApi->registerZipFunction(&zip);
+        std::cout << "appmetrics:appmetrics.cpp - set log levels" << std::endl;
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
     loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());
     loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
     /* Initialize watchdog directly so that bindings can be created */
+    std::cout << "appmetrics:appmetrics.cpp - initialise watchdog" << std::endl;
     Isolate* isolate = v8::Isolate::GetCurrent();
     watchdog::Initialize(isolate, exports);
 
     /*
      * Log startup message with version information
      */
+    std::cout << "appmetrics:appmetrics.cpp - log startup message" << std::endl;
     std::stringstream msg;
     msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << loaderApi->getAgentVersion() << ")";
     loaderApi->logMessage(info, msg.str().c_str());
