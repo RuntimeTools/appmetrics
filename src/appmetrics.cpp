@@ -20,7 +20,7 @@
 
 #include "node.h"
 #include "nan.h"
-#include "uv.h"
+//#include "uv.h"
 #include "ibmras/monitoring/AgentExtensions.h"
 #include "plugins/node/prof/watchdog.h"
 #include "headlessutils.h"
