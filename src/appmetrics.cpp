@@ -592,6 +592,9 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 static Local<Object> getRequireCache(Local<Object> module) {
     std::cout << "appmetrics:appmetrics.cpp - getRequireCache()" << std::endl;
     Nan::EscapableHandleScope scope;
+#if defined(_ZOS)
+#pragma convert("ISO8859-1")
+#endif
     Local<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
     Local<String> require_string = Nan::New<String>("require").ToLocalChecked();
     Local<Value> require_v = Nan::Get(module, require_string).ToLocalChecked();
@@ -603,6 +606,9 @@ static Local<Object> getRequireCache(Local<Object> module) {
     Local<Value> cache_v = Nan::Get(module_obj, cache_string).ToLocalChecked();
     Local<Object> cache_obj = Nan::To<Object>(cache_v).ToLocalChecked();
     return scope.Escape(cache_obj);
+#if defined(_ZOS)
+#pragma convert(pop)
+#endif
 }
 
 // Check whether the filepath given looks like it's a file in the
