@@ -393,7 +393,7 @@ static void emitMessage(uv_async_t *handle, int status) {
     uv_mutex_unlock(messageListMutex);
 
     while(currentMessage != NULL ) {
-        TryCatch try_catch;
+        Nan::TryCatch try_catch;
         const unsigned argc = 2;
         Local<Value> argv[argc];
         const char * source = (*currentMessage->source).c_str();
@@ -404,11 +404,7 @@ static void emitMessage(uv_async_t *handle, int status) {
 
         listener->callback->Call(argc, argv);
         if (try_catch.HasCaught()) {
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-            node::FatalException(v8::Isolate::GetCurrent(), try_catch);
-#else
-            node::FatalException(try_catch);
-#endif
+            Nan::FatalException(try_catch);
         }
         MessageData* nextMessage = currentMessage->next;
         freePayload(currentMessage);
