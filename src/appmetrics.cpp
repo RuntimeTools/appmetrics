@@ -609,6 +609,7 @@ static Local<Object> getRequireCache(Local<Object> module) {
 // with appmetrics/somefile, but perhaps node_modules/appmetrics/somefile
 // would be more accurate?
 static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
+    std::cout << "appmetrics:appmetrics.cpp - isAppMetricsFile() expected: " << expected << ", potential match: " << potentialMatch << std::endl;
     std::string endsWithPosix = "appmetrics/" + expected;
     std::string endsWithWindows = "appmetrics\\" + expected;
 
@@ -626,18 +627,24 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 }
 
 static bool isGlobalAgent(Local<Object> module) {
+    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent()" << std::endl;
     Nan::HandleScope scope;
     Local<Value> parent = module->Get(Nan::New<String>("parent").ToLocalChecked());
+    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() got parent" << std::endl;
     if (parent->IsObject()) {
+        std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() parent is object" << std::endl;
         Local<Value> filename = parent->ToObject()->Get(Nan::New<String>("filename").ToLocalChecked());
         if (filename->IsString() && isAppMetricsFile("index.js", toStdString(filename->ToString()))) {
             Local<Value> grandparent = parent->ToObject()->Get(Nan::New<String>("parent").ToLocalChecked());
+            std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() got grandparent" << std::endl;
             Local<Value> gpfilename = grandparent->ToObject()->Get(Nan::New<String>("filename").ToLocalChecked());
             if (gpfilename->IsString() && isAppMetricsFile("launcher.js", toStdString(gpfilename->ToString()))) {
+                std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() returning true" << std::endl;
                 return true;
             }
         }
     }
+    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() returning false" << std::endl;
     return false;
 }
 
@@ -646,17 +653,19 @@ static bool isGlobalAgent(Local<Object> module) {
 // ending .../appmetrics/launcher.js
 static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     //Nan::HandleScope scope;
+    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded()" << std::endl;
     Local<Object> cache = getRequireCache(module);
     Local<Array> props = cache->GetOwnPropertyNames();
     if (props->Length() > 0) {
         for (uint32_t i=0; i<props->Length(); i++) {
             Local<Value> entry = props->Get(i);
             if (entry->IsString() && isAppMetricsFile("launcher.js", toStdString(entry->ToString()))) {
+                std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded() returning true " << std::endl;
                 return true;
             }
         }
     }
-
+    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded() returning false" << std::endl;
     return false;
 }
 
