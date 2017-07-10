@@ -656,7 +656,9 @@ static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded()" << std::endl;
     Local<Object> cache = getRequireCache(module);
     Local<Array> props = cache->GetOwnPropertyNames();
+    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded() props: " << props << std::endl;
     if (props->Length() > 0) {
+        std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded() props length is " <<  props->Length() << std::endl;
         for (uint32_t i=0; i<props->Length(); i++) {
             Local<Value> entry = props->Get(i);
             if (entry->IsString() && isAppMetricsFile("launcher.js", toStdString(entry->ToString()))) {
