@@ -593,7 +593,7 @@ static Local<Object> getRequireCache(Local<Object> module) {
     std::cout << "appmetrics:appmetrics.cpp - getRequireCache()" << std::endl;
     Nan::EscapableHandleScope scope;
 #if defined(_ZOS)
-#pragma convert("ISO8859-1")
+#pragma convert("IBM-1047")
 #endif
     Local<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
     Local<String> require_string = Nan::New<String>("require").ToLocalChecked();
