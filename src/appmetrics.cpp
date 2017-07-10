@@ -590,6 +590,7 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 // So we need to get it from Module._cache instead (by
 // executing require('module')._cache)
 static Local<Object> getRequireCache(Local<Object> module) {
+    std::cout << "appmetrics:appmetrics.cpp - getRequireCache()" << std::endl;
     Nan::EscapableHandleScope scope;
     Local<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
     Local<String> require_string = Nan::New<String>("require").ToLocalChecked();
