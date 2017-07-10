@@ -592,9 +592,6 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 static Local<Object> getRequireCache(Local<Object> module) {
     std::cout << "appmetrics:appmetrics.cpp - getRequireCache()" << std::endl;
     Nan::EscapableHandleScope scope;
-#if defined(_ZOS)
-#pragma convert("IBM-1047")
-#endif
     Local<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
     Local<String> require_string = Nan::New<String>("require").ToLocalChecked();
     Local<Value> require_v = Nan::Get(module, require_string).ToLocalChecked();
@@ -659,8 +656,9 @@ static bool isGlobalAgent(Local<Object> module) {
 // This is actually searching the module cache for a module with filepath
 // ending .../appmetrics/launcher.js
 static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
-    //Nan::HandleScope scope;
+    Nan::HandleScope scope;
     std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded()" << std::endl;
+// The following line contains a method that breaks on z/OS.
     Local<Object> cache = getRequireCache(module);
     Local<Array> props = cache->GetOwnPropertyNames();
     std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded() props: " << toStdString(props->ToString()) << std::endl;
@@ -688,7 +686,12 @@ void init(Local<Object> exports, Local<Object> module) {
      */
     std::cout << "appmetrics:appmetrics.cpp - init" << std::endl;
     Nan::HandleScope scope;
+    //changing on z/OS as there is a break
+#if defined(_ZOS)
+    if (!isGlobalAgent(module)) {
+#else
     if (!isGlobalAgent(module) && isGlobalAgentAlreadyLoaded(module)) {
+#endif
         Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
         return;
     }
