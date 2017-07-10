@@ -605,10 +605,10 @@ static Local<Object> getRequireCache(Local<Object> module) {
     Local<String> cache_string = Nan::New<String>("_cache").ToLocalChecked();
     Local<Value> cache_v = Nan::Get(module_obj, cache_string).ToLocalChecked();
     Local<Object> cache_obj = Nan::To<Object>(cache_v).ToLocalChecked();
-    return scope.Escape(cache_obj);
 #if defined(_ZOS)
 #pragma convert(pop)
 #endif
+    return scope.Escape(cache_obj);
 }
 
 // Check whether the filepath given looks like it's a file in the
