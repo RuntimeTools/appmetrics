@@ -590,9 +590,16 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 static Local<Object> getRequireCache(Local<Object> module) {
     Nan::EscapableHandleScope scope;
     Local<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
-    Local<Value> m = module->Get(Nan::New<String>("require").ToLocalChecked())->ToObject()->CallAsFunction(Nan::GetCurrentContext()->Global(), 1, args);
-    Local<Object> cache = m->ToObject()->Get(Nan::New<String>("_cache").ToLocalChecked())->ToObject();
-    return scope.Escape(cache);
+    Local<String> require_string = Nan::New<String>("require").ToLocalChecked();
+    Local<Value> require_v = Nan::Get(module, require_string).ToLocalChecked();
+    Local<Object> require_obj = Nan::To<Object>(require_v).ToLocalChecked();
+    Local<Object> global_obj = Nan::GetCurrentContext()->Global();
+    Local<Value> module_v = Nan::CallAsFunction(require_obj, global_obj, 1, args).ToLocalChecked();
+    Local<Object> module_obj = Nan::To<Object>(module_v).ToLocalChecked();
+    Local<String> cache_string = Nan::New<String>("_cache").ToLocalChecked();
+    Local<Value> cache_v = Nan::Get(module_obj, cache_string).ToLocalChecked();
+    Local<Object> cache_obj = Nan::To<Object>(cache_v).ToLocalChecked();
+    return scope.Escape(cache_obj);
 }
 
 // Check whether the filepath given looks like it's a file in the
