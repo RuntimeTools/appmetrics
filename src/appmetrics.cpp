@@ -733,7 +733,7 @@ void init(Local<Object> exports, Local<Object> module) {
         loaderApi->logMessage(warning, "Failed to load appmetrics.properties file");
     }
     std::cout << "appmetrics:appmetrics.cpp - register zip functions" << std::endl;
-    loaderApi->registerZipFunction(&zip);
+//    loaderApi->registerZipFunction(&zip);
         std::cout << "appmetrics:appmetrics.cpp - set log levels" << std::endl;
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
