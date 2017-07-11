@@ -21,7 +21,7 @@ var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
 var fs = require('fs');
 var agent = require('./appmetrics');
-var headlessZip = require('./headless_zip.js');
+//var headlessZip = require('./headless_zip.js');
 var heapdump = require('./heapdump.js');
 var VERSION = require('./package.json').version;
 var assert = require('assert');
@@ -41,6 +41,7 @@ var propertyMappings = {
   mqtt: 'com.ibm.diagnostics.healthcenter.mqtt',
   profiling: 'com.ibm.diagnostics.healthcenter.data.profiling',
 };
+/*
 var headlessPropertyMappings = {
   'appmetrics.file.collection': 'com.ibm.diagnostics.healthcenter.headless',
   'appmetrics.file.max.size': 'com.ibm.diagnostics.healthcenter.headless.files.max.size',
@@ -51,7 +52,7 @@ var headlessPropertyMappings = {
   'appmetrics.file.files.to.keep': 'com.ibm.diagnostics.healthcenter.headless.files.to.keep',
   'appmetrics.file.output.directory': 'com.ibm.diagnostics.healthcenter.headless.output.directory',
 };
-
+*/
 /*
  * Load module probes into probes array by searching the probes directory.
  * We handle the 'trace' probe as a special case because we don't want to put
@@ -260,7 +261,7 @@ for (var prop in agent) {
   if (typeof agent[prop] == 'function') {
     module.exports[prop] = agent[prop];
   }
-  agent.setHeadlessZipFunction(headlessZip.headlessZip);
+//  agent.setHeadlessZipFunction(headlessZip.headlessZip);
 }
 
 // Export emit() API for JS data providers
@@ -321,7 +322,7 @@ module.exports.writeSnapshot = function(args) {
 
 module.exports.start = function start() {
   agent.setOption(propertyMappings['applicationID'], main_filename);
-  for (var property in headlessPropertyMappings) {
+/*  for (var property in headlessPropertyMappings) {
     var prop = agent.getOption(property);
     if (prop) {
       agent.setOption(headlessPropertyMappings[property], prop);
@@ -334,7 +335,7 @@ module.exports.start = function start() {
   var headlessFilesToKeep = agent.getOption('com.ibm.diagnostics.healthcenter.headless.files.to.keep');
   if (headlessFilesToKeep && !isNaN(headlessFilesToKeep) && headlessFilesToKeep > 0) {
     headlessZip.setFilesToKeep(headlessFilesToKeep);
-  }
+  } */
   var am = this;
   agent.start();
   process.on('exit', function() {
@@ -343,11 +344,12 @@ module.exports.start = function start() {
       clearInterval(latencyCheckLoop);
       clearInterval(latencyReportLoop);
     }
-    var headlessMode = agent.getOption('com.ibm.diagnostics.healthcenter.headless');
+//    var headlessMode = agent.getOption('com.ibm.diagnostics.healthcenter.headless');
     am.stop();
+/*
     if (headlessMode == 'on') {
       headlessZip.tryZipOnExit();
-    }
+    } */
   });
 
   // Start the probes
