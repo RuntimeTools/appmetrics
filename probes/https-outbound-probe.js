@@ -20,17 +20,11 @@ var aspect = require('../lib/aspect.js');
 var Probe = require('../lib/probe.js');
 var request = require('../lib/request.js');
 
-var semver = require('semver');
 var url = require('url');
 var util = require('util');
 
-var methods;
-// In Node.js < v8.0.0 'get' calls 'request' so we only instrument 'request'
-if (semver.lt(process.version, '8.0.0')) {
-  methods = ['request'];
-} else {
-  methods = ['request', 'get'];
-}
+// In https 'get' calls 'request' so we only instrument 'request'
+var methods = ['request'];
 
 // Probe to instrument outbound https requests
 
@@ -50,40 +44,41 @@ HttpsOutboundProbe.prototype.attach = function(name, target) {
       methods,
       // Before 'https.request' function
       function(obj, methodName, methodArgs, probeData) {
-        // Get HTTPS request method from options
-        var options = methodArgs[0];
-        var requestMethod = 'GET';
-        var urlRequested = '';
-        var headers = '';
-        if (options !== null && typeof options === 'object') {
-          urlRequested = formatURL(options);
-          if (options.method) {
-            requestMethod = options.method;
-          }
-          if (options.headers) {
-            headers = options.headers;
-          }
-        } else if (typeof options === 'string') {
-          urlRequested = options;
-          var parsedOptions = url.parse(options);
-          if (parsedOptions.method) {
-            requestMethod = parsedOptions.method;
-          }
-          if (parsedOptions.headers) {
-            headers = parsedOptions.headers;
-          }
-        }
 
         // Start metrics
         that.metricsProbeStart(probeData);
-        that.requestProbeStart(probeData, '', '');
+        that.requestProbeStart(probeData);
 
         // End metrics
         aspect.aroundCallback(
           methodArgs,
           probeData,
           function(target, args, probeData) {
-            methodArgs.statusCode = args[0].statusCode;
+
+            // Get HTTPS request method from options
+            var options = methodArgs[0];
+            var requestMethod = 'GET';
+            var urlRequested = '';
+            var headers = '';
+            if (options !== null && typeof options === 'object') {
+              urlRequested = formatURL(options);
+              if (options.method) {
+                requestMethod = options.method;
+              }
+              if (options.headers) {
+                headers = options.headers;
+              }
+            } else if (typeof options === 'string') {
+              urlRequested = options;
+              var parsedOptions = url.parse(options);
+              if (parsedOptions.method) {
+                requestMethod = parsedOptions.method;
+              }
+              if (parsedOptions.headers) {
+                headers = parsedOptions.headers;
+              }
+            }
+
             that.metricsProbeEnd(probeData, requestMethod, urlRequested, args[0], headers);
             that.requestProbeEnd(probeData, requestMethod, urlRequested, args[0], headers);
           },

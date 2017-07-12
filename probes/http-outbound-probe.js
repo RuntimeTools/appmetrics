@@ -48,40 +48,41 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
       methods,
       // Before 'http.request' function
       function(obj, methodName, methodArgs, probeData) {
-        // Get HTTP request method from options
-        var options = methodArgs[0];
-        var requestMethod = 'GET';
-        var urlRequested = '';
-        var headers = '';
-        if (options !== null && typeof options === 'object') {
-          urlRequested = formatURL(options);
-          if (options.method) {
-            requestMethod = options.method;
-          }
-          if (options.headers) {
-            headers = options.headers;
-          }
-        } else if (typeof options === 'string') {
-          urlRequested = options;
-          var parsedOptions = url.parse(options);
-          if (parsedOptions.method) {
-            requestMethod = parsedOptions.method;
-          }
-          if (parsedOptions.headers) {
-            headers = parsedOptions.headers;
-          }
-        }
 
         // Start metrics
-        that.metricsProbeStart(probeData, requestMethod, urlRequested);
-        that.requestProbeStart(probeData, requestMethod, urlRequested);
+        that.metricsProbeStart(probeData);
+        that.requestProbeStart(probeData);
 
         // End metrics
         aspect.aroundCallback(
           methodArgs,
           probeData,
           function(target, args, probeData) {
-            methodArgs.statusCode = args[0].statusCode;
+
+            // Get HTTP request method from options
+            var options = methodArgs[0];
+            var requestMethod = 'GET';
+            var urlRequested = '';
+            var headers = '';
+            if (options !== null && typeof options === 'object') {
+              urlRequested = formatURL(options);
+              if (options.method) {
+                requestMethod = options.method;
+              }
+              if (options.headers) {
+                headers = options.headers;
+              }
+            } else if (typeof options === 'string') {
+              urlRequested = options;
+              var parsedOptions = url.parse(options);
+              if (parsedOptions.method) {
+                requestMethod = parsedOptions.method;
+              }
+              if (parsedOptions.headers) {
+                headers = parsedOptions.headers;
+              }
+            }
+
             that.metricsProbeEnd(probeData, requestMethod, urlRequested, args[0], headers);
             that.requestProbeEnd(probeData, requestMethod, urlRequested, args[0], headers);
           },
