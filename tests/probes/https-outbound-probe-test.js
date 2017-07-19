@@ -15,22 +15,24 @@
  *******************************************************************************/
 'use strict';
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 var appmetrics = require('../../');
 var monitor = appmetrics.monitor();
-var server = require('../test_http_server').server;
-var http = require('http');
+var server = require('../test_https_server').server;
+var https = require('https');
 
 var tap = require('tap');
 
 tap.plan(3);
 
 tap.tearDown(function() {
-  server.close();
+  setTimeout(function() {
+    server.close();
+  }, 1000);
 });
 
-
-monitor.on('http-outbound', function(data) {
-  tap.test('HTTP Outbound Event', function(t) {
+monitor.on('https-outbound', function(data) {
+  tap.test('HTTPS Outbound Event', function(t) {
     checkHttpOutboundData(data, t);
     t.end();
   });
@@ -39,7 +41,7 @@ monitor.on('http-outbound', function(data) {
 function checkHttpOutboundData(data, t) {
   t.ok(isInteger(data.time), 'Timestamp is an integer');
   t.equals(data.method, 'GET', 'Should report GET as HTTP request method');
-  t.equals(data.url, 'http://localhost:8000/', 'Should report http://localhost:8000/ as URL');
+  t.equals(data.url, 'https://localhost:8000/', 'Should report https://localhost:8000/ as URL');
   if (data.requestHeaders) {
     t.equals(data.requestHeaders.hello, 'world', 'Should report world as value of hello header');
   }
@@ -62,10 +64,10 @@ var options = {
 };
 
 // Request with a callback
-http.get('http://localhost:8000/', function(res) {});
+https.get('https://localhost:8000/', function(res) {});
 
 // Request without a callback
-http.get('http://localhost:8000/');
+https.get('https://localhost:8000/');
 
 // Request with headers
-http.request(options).end();
+https.request(options).end();

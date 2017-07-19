@@ -13,58 +13,56 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+'use strict';
 
-//Default behaviour for npm test - app will be closed with endRun() so timeout not needed
+// Default behaviour for npm test - app will be closed with endRun() so timeout not needed
 var timeout = false;
 var agent = true;
 
 process.argv.forEach(function(elem) {
-	
-	//Running globally with node-hc - testing agent runs and doesn't crash process
-	if (elem == '-g'){
-		timeout = true;
-		agent = false;
-	}
-	
-	//Running with node-hc and including agent - this should fail
-	if (elem == '-f'){
-		agent = true;
-		timeout = true;
-	}
+  // Running globally with node-hc - testing agent runs and doesn't crash process
+  if (elem == '-g') {
+    timeout = true;
+    agent = false;
+  }
+
+  // Running with node-hc and including agent - this should fail
+  if (elem == '-f') {
+    agent = true;
+    timeout = true;
+  }
 });
 
 var appmetrics;
 
-//If running global test, run long enough to ensure the agent has loaded and process doesn't crash
+// If running global test, run long enough to ensure the agent has loaded and process doesn't crash
 if (timeout) {
-	var duration_secs = process.argv[2] || 10; //Default 10 seconds for global tests
-	setTimeout(function(){
-		clearInterval(ih);
-	}, duration_secs*1000);
+  var duration_secs = process.argv[2] || 10; // Default 10 seconds for global tests
+  setTimeout(function() {
+    clearInterval(ih);
+  }, duration_secs * 1000);
 }
 
-//If being run from other test, start the agent and make available
+// If being run from other test, start the agent and make available
 if (agent) {
-	appmetrics = require('../');
+  appmetrics = require('../');
 
-	// Make agent visible for other script files.
-	module.exports.appmetrics = appmetrics;
+  // Make agent visible for other script files.
+  module.exports.appmetrics = appmetrics;
 }
 
 module.exports.start = function start() {
-	return appmetrics.start();
-}
+  return appmetrics.start();
+};
 
-//Write a string to memory on timer
-var test = null;
+// Write a string to memory on timer
 var ih = setInterval(function() {
-  var dummy = new Buffer(1024*1024);
-  dummy.write("hello");
-  test = dummy.toString()[0];
+  var dummy = new Buffer(1024 * 1024);
+  dummy.write('hello');
+  dummy.toString()[0];
 }, 100);
 
-
-module.exports.endRun = function(){
-	appmetrics.stop();
-	clearInterval(ih);
-}
+module.exports.endRun = function() {
+  appmetrics.stop();
+  clearInterval(ih);
+};

@@ -17,6 +17,9 @@
   "target_defaults": {
     "cflags_cc!": [ '-fno-exceptions' ],
     "include_dirs": [ '<(srcdir)', '<(nandir)', '<(agentcoredir)/src'],
+    "variables": {
+      'travis%': "false"
+    },
     "target_conditions": [
       ['_type=="shared_library"', {
         'product_prefix': '<(SHARED_LIB_PREFIX)',
@@ -26,6 +29,10 @@
           },{
           }],
         ],
+      }],
+      ['travis=="true"', {
+        "cflags_cc": [ '--coverage' ],
+        "libraries": [ '--coverage' ],
       }],
     ],
     "conditions": [
@@ -39,6 +46,9 @@
       }],
       ['OS=="linux"', {
         "defines": [ "_LINUX", "LINUX" ],
+        "variables": {
+          'travis': "<!(echo $TRAVIS)",
+        },
       }],
       ['OS=="win"', {
         "defines": [ "_WINDOWS", "WINDOWS"  ],
@@ -54,6 +64,8 @@
       }]
     ],
   },
+
+
 
   "targets": [
     {

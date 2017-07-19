@@ -14,39 +14,35 @@
  * limitations under the License.
  *******************************************************************************/
 'use strict';
-var Probe = require('../lib/probe.js');
-var aspect = require('../lib/aspect.js');
-var request = require('../lib/request.js');
-var util = require('util');
-var url = require('url');
+
 var am = require('../');
-var semver = require('semver');
+var aspect = require('../lib/aspect.js');
+var Probe = require('../lib/probe.js');
+var request = require('../lib/request.js');
 
-var methods;
-// In Node.js < v8.0.0 'get' calls 'request' so we only instrument 'request'
-if (semver.lt(process.version, '8.0.0')) {
-  methods = ['request'];
-} else {
-  methods = ['request', 'get'];
+var url = require('url');
+var util = require('util');
+
+// In https 'get' calls 'request' so we only instrument 'request'
+var methods = ['request'];
+
+// Probe to instrument outbound https requests
+
+function HttpsOutboundProbe() {
+  Probe.call(this, 'https'); // match the name of the module we're instrumenting
 }
+util.inherits(HttpsOutboundProbe, Probe);
 
-// Probe to instrument outbound http requests
-
-function HttpOutboundProbe() {
-  Probe.call(this, 'http'); // match the name of the module we're instrumenting
-}
-util.inherits(HttpOutboundProbe, Probe);
-
-HttpOutboundProbe.prototype.attach = function(name, target) {
+HttpsOutboundProbe.prototype.attach = function(name, target) {
   var that = this;
-  if (name === 'http') {
+  if (name === 'https') {
     if (target.__outboundProbeAttached__) return target;
     target.__outboundProbeAttached__ = true;
 
     aspect.around(
       target,
       methods,
-      // Before 'http.request' function
+      // Before 'https.request' function
       function(obj, methodName, methodArgs, probeData) {
 
         // Start metrics
@@ -59,7 +55,7 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
           probeData,
           function(target, args, probeData) {
 
-            // Get HTTP request method from options
+            // Get HTTPS request method from options
             var options = methodArgs[0];
             var requestMethod = 'GET';
             var urlRequested = '';
@@ -92,7 +88,7 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
           }
         );
       },
-      // After 'http.request' function returns
+      // After 'https.request' function returns
       function(target, methodName, methodArgs, probeData, rc) {
         // If no callback has been used then end the metrics after returning from the method instead
         if (aspect.findCallbackArg(methodArgs) === undefined) {
@@ -131,31 +127,31 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
   return target;
 };
 
-// Get a URL as a string from the options object passed to http.get or http.request
+// Get a URL as a string from the options object passed to https.get or https.request
 // See https://nodejs.org/api/http.html#http_http_request_options_callback
-function formatURL(httpOptions) {
+function formatURL(httpsOptions) {
   var url;
-  if (httpOptions.protocol) {
-    url = httpOptions.protocol;
+  if (httpsOptions.protocol) {
+    url = httpsOptions.protocol;
   } else {
-    url = 'http:';
+    url = 'https:';
   }
   url += '//';
-  if (httpOptions.auth) {
-    url += httpOptions.auth + '@';
+  if (httpsOptions.auth) {
+    url += httpsOptions.auth + '@';
   }
-  if (httpOptions.host) {
-    url += httpOptions.host;
-  } else if (httpOptions.hostname) {
-    url += httpOptions.host;
+  if (httpsOptions.host) {
+    url += httpsOptions.host;
+  } else if (httpsOptions.hostname) {
+    url += httpsOptions.host;
   } else {
     url += 'localhost';
   }
-  if (httpOptions.port) {
-    url += ':' + httpOptions.port;
+  if (httpsOptions.port) {
+    url += ':' + httpsOptions.port;
   }
-  if (httpOptions.path) {
-    url += httpOptions.path;
+  if (httpsOptions.path) {
+    url += httpsOptions.path;
   } else {
     url += '/';
   }
@@ -163,21 +159,21 @@ function formatURL(httpOptions) {
 }
 
 /*
- * Lightweight metrics probe for HTTP requests
+ * Lightweight metrics probe for HTTPS requests
  *
  * These provide:
  *   time:            time event started
- *   method:          HTTP method, eg. GET, POST, etc
+ *   method:          HTTPS method, eg. GET, POST, etc
  *   url:             The url requested
- *   requestHeaders:  The HTTP headers for the request
+ *   requestHeaders:  The HTTPS headers for the request
  *   duration:        The time for the request to respond
- *   contentType:     HTTP content-type
- *   statusCode:      HTTP status code
+ *   contentType:     HTTPS content-type
+ *   statusCode:      HTTPS status code
  */
-HttpOutboundProbe.prototype.metricsEnd = function(probeData, method, url, res, headers) {
+HttpsOutboundProbe.prototype.metricsEnd = function(probeData, method, url, res, headers) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
-    am.emit('http-outbound', {
+    am.emit('https-outbound', {
       time: probeData.timer.startTimeMillis,
       method: method,
       url: url,
@@ -190,15 +186,15 @@ HttpOutboundProbe.prototype.metricsEnd = function(probeData, method, url, res, h
 };
 
 /*
- * Heavyweight request probes for HTTP outbound requests
+ * Heavyweight request probes for HTTPS outbound requests
  */
-HttpOutboundProbe.prototype.requestStart = function(probeData, method, url) {
-  var reqType = 'http-outbound';
+HttpsOutboundProbe.prototype.requestStart = function(probeData, method, url) {
+  var reqType = 'https-outbound';
   // Do not mark as a root request
   probeData.req = request.startRequest(reqType, url, false, probeData.timer);
 };
 
-HttpOutboundProbe.prototype.requestEnd = function(probeData, method, url, res, headers) {
+HttpsOutboundProbe.prototype.requestEnd = function(probeData, method, url, res, headers) {
   if (probeData && probeData.req)
     probeData.req.stop({
       url: url,
@@ -208,4 +204,4 @@ HttpOutboundProbe.prototype.requestEnd = function(probeData, method, url, res, h
     });
 };
 
-module.exports = HttpOutboundProbe;
+module.exports = HttpsOutboundProbe;

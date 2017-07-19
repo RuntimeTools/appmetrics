@@ -41,29 +41,13 @@ Node Application Metrics provides the following built-in data collection sources
  Riak               | Riak methods called by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
+## Performance overhead
+
+Our testing has shown that the performance overhead in terms of processing is minimal, adding less than 0.5 % to the CPU usage of your application. The additional memory required is around 20 MB to gather information about your system and application. 
+
+We gathered this information by monitoring the sample application [Acme Air][3]. We used MongoDB as our datastore and used JMeter to drive load though the program.  We have performed this testing with Node.js version 6.10.3
 
 ## Getting Started
-### Prerequisites
-
-The Node Application Metrics agent supports the following runtime environments:
-
-* **Node.js v7** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
-  * 64-bit runtime on Mac OS X (x64)
-* **Node.js v6** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
-  * 64-bit runtime on Mac OS X (x64)
-* **Node.js v4** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC64LE)
-  * 64-bit runtime on Mac OS X (x64)
-* **IBM SDK for Node.js 4** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
-  * 64-bit or 32-bit runtime on AIX (PPC32, PPC64)
-  * 64-bit runtime on Mac OS X (x64)
 
 ### Installation
 
@@ -448,6 +432,16 @@ Requests are a special type of event emitted by appmetrics.  All the probes name
         * `duration` (Number) the time taken for the request to complete in ms.
     * `duration` (Number) the time taken for the overall request to complete in ms.
 
+### Supported platforms
+
+The Node Application Metrics agent supports the following runtime environments where a Node.js runtime is available:
+
+* **Node.js v4, v6 ,v7 and v8** on:
+  * 64-bit or 32-bit runtime on Windows (x64 or x86)
+  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
+  * 64-bit or 32-bit runtime on AIX (PPC64)
+  * 64-bit runtime on Mac OS X (x64)
+
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
 
@@ -500,9 +494,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-3.0.2-development
+3.0.2
 
 ## Release History
+`3.0.2` - Probe defect for Node 8 support.  
 `3.0.1` - Packaging bug fix to allow build from source if binary not present.  
 `3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.  
 `2.0.1` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.  
