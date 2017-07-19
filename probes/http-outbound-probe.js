@@ -37,54 +37,59 @@ function HttpOutboundProbe() {
 }
 util.inherits(HttpOutboundProbe, Probe);
 
+function getRequestItems(options) {
+  //set defaults in case of duff options
+  var requestMethod = 'GET';
+  var urlRequested = '';
+  var headers = '';
+  if (options !== null) {
+    switch(typeof options) {
+      case 'object':
+        urlRequested = formatURL(options);
+        if (options.method) {
+          requestMethod = options.method;
+        }
+        if (options.headers) {
+          headers = options.headers;
+        }
+        break;
+      case 'string': 
+        urlRequested = options;
+        var parsedOptions = url.parse(options);
+        if (parsedOptions.method) {
+          requestMethod = parsedOptions.method;
+        }
+        if (parsedOptions.headers) {
+          headers = parsedOptions.headers;
+        }
+        break;
+    }
+  }
+  return { requestMethod: requestMethod, urlRequested: urlRequested, headers: headers };
+}
+
 HttpOutboundProbe.prototype.attach = function(name, target) {
   var that = this;
   if (name === 'http') {
     if (target.__outboundProbeAttached__) return target;
     target.__outboundProbeAttached__ = true;
-
     aspect.around(
       target,
       methods,
       // Before 'http.request' function
       function(obj, methodName, methodArgs, probeData) {
-
         // Start metrics
         that.metricsProbeStart(probeData);
         that.requestProbeStart(probeData);
-
         // End metrics
         aspect.aroundCallback(
           methodArgs,
           probeData,
           function(target, args, probeData) {
-
             // Get HTTP request method from options
-            var options = methodArgs[0];
-            var requestMethod = 'GET';
-            var urlRequested = '';
-            var headers = '';
-            if (options !== null && typeof options === 'object') {
-              urlRequested = formatURL(options);
-              if (options.method) {
-                requestMethod = options.method;
-              }
-              if (options.headers) {
-                headers = options.headers;
-              }
-            } else if (typeof options === 'string') {
-              urlRequested = options;
-              var parsedOptions = url.parse(options);
-              if (parsedOptions.method) {
-                requestMethod = parsedOptions.method;
-              }
-              if (parsedOptions.headers) {
-                headers = parsedOptions.headers;
-              }
-            }
-
-            that.metricsProbeEnd(probeData, requestMethod, urlRequested, args[0], headers);
-            that.requestProbeEnd(probeData, requestMethod, urlRequested, args[0], headers);
+            var ri = getRequestItems(methodArgs[0]);
+            that.metricsProbeEnd(probeData, ri.requestMethod, ri.urlRequested, args[0], ri.headers);
+            that.requestProbeEnd(probeData, ri.requestMethod, ri.urlRequested, args[0], ri.headers);
           },
           function(target, args, probeData, ret) {
             // Don't need to do anything after the callback
@@ -97,32 +102,10 @@ HttpOutboundProbe.prototype.attach = function(name, target) {
         // If no callback has been used then end the metrics after returning from the method instead
         if (aspect.findCallbackArg(methodArgs) === undefined) {
           // Need to get request method and URL again
-          var options = methodArgs[0];
-          var requestMethod = 'GET';
-          var urlRequested = '';
-          var headers = '';
-          if (options !== null && typeof options === 'object') {
-            urlRequested = formatURL(options);
-            if (options.method) {
-              requestMethod = options.method;
-            }
-            if (options.headers) {
-              headers = options.headers;
-            }
-          } else if (typeof options === 'string') {
-            urlRequested = options;
-            var parsedOptions = url.parse(options);
-            if (parsedOptions.method) {
-              requestMethod = parsedOptions.method;
-            }
-            if (parsedOptions.headers) {
-              headers = parsedOptions.headers;
-            }
-          }
-
+          var ri = getRequestItems(methodArgs[0]);
           // End metrics (no response available so pass empty object)
-          that.metricsProbeEnd(probeData, requestMethod, urlRequested, {}, headers);
-          that.requestProbeEnd(probeData, requestMethod, urlRequested, {}, headers);
+          that.metricsProbeEnd(probeData, ri.requestMethod, ri.urlRequested, {}, ri.headers);
+          that.requestProbeEnd(probeData, ri.requestMethod, ri.urlRequested, {}, ri.headers);
         }
         return rc;
       }
