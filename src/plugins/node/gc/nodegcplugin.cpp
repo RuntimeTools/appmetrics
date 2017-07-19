@@ -128,11 +128,11 @@ static unsigned long long GetRealTime() {
 }
 #endif
 
-void beforeGC(GCType type, GCCallbackFlags flags) {
+void beforeGC(v8::Isolate *isolate, GCType type, GCCallbackFlags flags) {
 	plugin::timingOK = GetSteadyTime(&plugin::gcSteadyStart);
 }
 
-void afterGC(GCType type, GCCallbackFlags flags) {
+void afterGC(v8::Isolate *isolate, GCType type, GCCallbackFlags flags) {
 	unsigned long long gcRealEnd;
 	
 	// GC pause time
@@ -201,12 +201,12 @@ extern "C" {
 	
 	NODEGCPLUGIN_DECL int ibmras_monitoring_plugin_start() {
 		plugin::api.logMessage(fine, "[gc_node] Starting");
-	
-		V8::AddGCPrologueCallback(beforeGC);
-		V8::AddGCEpilogueCallback(afterGC);
+
+		v8::Isolate::GetCurrent()->AddGCPrologueCallback(beforeGC);
+		v8::Isolate::GetCurrent()->AddGCEpilogueCallback(afterGC);
 		return 0;
 	}
-	
+
 	NODEGCPLUGIN_DECL int ibmras_monitoring_plugin_stop() {
 		plugin::api.logMessage(fine, "[gc_node] Stopping");
 		// TODO Unhook GC hooks...

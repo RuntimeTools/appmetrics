@@ -393,7 +393,9 @@ static void emitMessage(uv_async_t *handle, int status) {
     uv_mutex_unlock(messageListMutex);
 
     while(currentMessage != NULL ) {
+      
         Nan::TryCatch try_catch;
+
         const unsigned argc = 2;
         Local<Value> argv[argc];
         const char * source = (*currentMessage->source).c_str();
