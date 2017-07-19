@@ -38,26 +38,23 @@ function HttpOutboundProbe() {
 util.inherits(HttpOutboundProbe, Probe);
 
 function getRequestItems(options) {
-  //set defaults in case of duff options
-  var requestMethod = 'GET';
-  var urlRequested = '';
-  var headers = '';
+  var returnObject = { requestMethod: 'GET', urlRequested: '', headers: '' };
   if (options !== null) {
     var parsedOptions;
     switch(typeof options) {
       case 'object':
-        urlRequested = formatURL(options);
+        returnObject.urlRequested = formatURL(options);
         parsedOptions = options;
         break;
       case 'string': 
-        urlRequested = options;
+        returnObject.urlRequested = options;
         parsedOptions = url.parse(options);
         break;
     }
-    if (parsedOptions.method) { requestMethod = parsedOptions.method; }
-    if (parsedOptions.headers) { headers = parsedOptions.headers; }
+    if (parsedOptions.method) { returnObject.requestMethod = parsedOptions.method; }
+    if (parsedOptions.headers) { returnObject.headers = parsedOptions.headers; }
   }
-  return { requestMethod: requestMethod, urlRequested: urlRequested, headers: headers };
+  return returnObject;
 }
 
 HttpOutboundProbe.prototype.attach = function(name, target) {
