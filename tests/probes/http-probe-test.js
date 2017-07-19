@@ -15,7 +15,7 @@
  ******************************************************************************/
 'use strict';
 
-var appmetrics = (appmetrics = require('../../'));
+var appmetrics = require('../../');
 var monitor = appmetrics.monitor();
 var server = require('../test_http_server').server;
 var http = require('http');

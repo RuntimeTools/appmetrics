@@ -14,42 +14,44 @@
  * limitations under the License.
  *******************************************************************************/
 'use strict';
-var Probe = require('../lib/probe.js');
-var aspect = require('../lib/aspect.js');
-var request = require('../lib/request.js');
-var util = require('util');
-var am = require('../');
 
-function HttpProbe() {
-  Probe.call(this, 'http');
+var am = require('../');
+var aspect = require('../lib/aspect.js');
+var Probe = require('../lib/probe.js');
+var request = require('../lib/request.js');
+
+var util = require('util');
+
+function HttpsProbe() {
+  Probe.call(this, 'https');
   this.config = {
     filters: [],
   };
 }
-util.inherits(HttpProbe, Probe);
+util.inherits(HttpsProbe, Probe);
 
-HttpProbe.prototype.attach = function(name, target) {
+HttpsProbe.prototype.attach = function(name, target) {
   var that = this;
-  if (name === 'http') {
+  if (name === 'https') {
     if (target.__probeAttached__) return target;
     target.__probeAttached__ = true;
     var methods = ['on', 'addListener'];
 
     aspect.before(target.Server.prototype, methods, function(obj, methodName, args, probeData) {
       if (args[0] !== 'request') return;
-      if (obj.__httpProbe__) return;
-      obj.__httpProbe__ = true;
+      if (obj.__httpsProbe__) return;
+      obj.__httpsProbe__ = true;
       aspect.aroundCallback(args, probeData, function(obj, args, probeData) {
-        var httpReq = args[0];
+        var httpsReq = args[0];
         var res = args[1];
         // Filter out urls where filter.to is ''
-        var traceUrl = that.filterUrl(httpReq);
+        var traceUrl = that.filterUrl(httpsReq);
         if (traceUrl !== '') {
-          that.metricsProbeStart(probeData, httpReq.method, traceUrl);
-          that.requestProbeStart(probeData, httpReq.method, traceUrl);
+          that.metricsProbeStart(probeData, httpsReq.method, traceUrl);
+          that.requestProbeStart(probeData, httpsReq.method, traceUrl);
           aspect.after(res, 'end', probeData, function(obj, methodName, args, probeData, ret) {
-            that.metricsProbeEnd(probeData, httpReq.method, traceUrl, res, httpReq);
-            that.requestProbeEnd(probeData, httpReq.method, traceUrl, res, httpReq);
+            that.metricsProbeEnd(probeData, httpsReq.method, traceUrl, res, httpsReq);
+            that.requestProbeEnd(probeData, httpsReq.method, traceUrl, res, httpsReq);
           });
         }
       });
@@ -72,7 +74,7 @@ function parse(url) {
 /*
  * Ignore requests for URLs which we've been configured via regex to ignore
  */
-HttpProbe.prototype.filterUrl = function(req) {
+HttpsProbe.prototype.filterUrl = function(req) {
   var resultUrl = parse(req.url);
   var filters = this.config.filters;
   if (filters.length === 0) return resultUrl;
@@ -88,19 +90,19 @@ HttpProbe.prototype.filterUrl = function(req) {
 };
 
 /*
- * Lightweight metrics probe for HTTP requests
+ * Lightweight metrics probe for HTTPS requests
  *
  * These provide:
  * 		time:		time event started
- * 		method:		HTTP method, eg. GET, POST, etc
+ * 		method:		HTTPS method, eg. GET, POST, etc
  * 		url:		The url requested
  * 		duration:	the time for the request to respond
  */
 
-HttpProbe.prototype.metricsEnd = function(probeData, method, url, res, httpReq) {
+HttpsProbe.prototype.metricsEnd = function(probeData, method, url, res, httpsReq) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
-    am.emit('http', {
+    am.emit('https', {
       time: probeData.timer.startTimeMillis,
       method: method,
       url: url,
@@ -108,27 +110,27 @@ HttpProbe.prototype.metricsEnd = function(probeData, method, url, res, httpReq) 
       header: res._header,
       statusCode: res.statusCode,
       contentType: res.getHeader('content-type'),
-      requestHeader: httpReq.headers,
+      requestHeader: httpsReq.headers,
     });
   }
 };
 
 /*
- * Heavyweight request probes for HTTP requests
+ * Heavyweight request probes for HTTPS requests
  */
 
-HttpProbe.prototype.requestStart = function(probeData, method, url) {
-  var reqType = 'http';
+HttpsProbe.prototype.requestStart = function(probeData, method, url) {
+  var reqType = 'https';
   // Mark as a root request as this happens due to an external event
   probeData.req = request.startRequest(reqType, url, true, probeData.timer);
 };
 
-HttpProbe.prototype.requestEnd = function(probeData, method, url, res, httpReq) {
+HttpsProbe.prototype.requestEnd = function(probeData, method, url, res, httpsReq) {
   if (probeData && probeData.req) {
     probeData.req.stop({
       url: url,
       method: method,
-      requestHeader: httpReq.headers,
+      requestHeader: httpsReq.headers,
       statusCode: res.statusCode,
       header: res._header,
       contentType: res.getHeader('content-type'),
@@ -139,7 +141,7 @@ HttpProbe.prototype.requestEnd = function(probeData, method, url, res, httpReq) 
 /*
  * Set configuration by merging passed in config with current one
  */
-HttpProbe.prototype.setConfig = function(newConfig) {
+HttpsProbe.prototype.setConfig = function(newConfig) {
   if (typeof newConfig.filters !== 'undefined') {
     newConfig.filters.forEach(function(filter) {
       if (typeof filter.regex === 'undefined') {
@@ -154,4 +156,4 @@ HttpProbe.prototype.setConfig = function(newConfig) {
   }
 };
 
-module.exports = HttpProbe;
+module.exports = HttpsProbe;
