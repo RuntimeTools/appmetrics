@@ -43,27 +43,19 @@ function getRequestItems(options) {
   var urlRequested = '';
   var headers = '';
   if (options !== null) {
+    var parsedOptions;
     switch(typeof options) {
       case 'object':
         urlRequested = formatURL(options);
-        if (options.method) {
-          requestMethod = options.method;
-        }
-        if (options.headers) {
-          headers = options.headers;
-        }
+        parsedOptions = options;
         break;
       case 'string': 
         urlRequested = options;
-        var parsedOptions = url.parse(options);
-        if (parsedOptions.method) {
-          requestMethod = parsedOptions.method;
-        }
-        if (parsedOptions.headers) {
-          headers = parsedOptions.headers;
-        }
+        parsedOptions = url.parse(options);
         break;
     }
+    if (parsedOptions.method) { requestMethod = parsedOptions.method; }
+    if (parsedOptions.headers) { headers = parsedOptions.headers; }
   }
   return { requestMethod: requestMethod, urlRequested: urlRequested, headers: headers };
 }
