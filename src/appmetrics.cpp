@@ -694,6 +694,7 @@ void init(Local<Object> exports, Local<Object> module) {
         Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
 #pragma convert(pop)
 #endif
+        std::cout << "appmetrics:appmetrics.cpp - returning" << std::endl;
         return;
     }
     std::cout << "appmetrics:appmetrics.cpp - setup" << std::endl;
