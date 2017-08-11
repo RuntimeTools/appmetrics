@@ -326,7 +326,7 @@ NAN_METHOD(start) {
         loaderApi->init();
 
         loaderApi->start();
-	
+
 	//headless::start();
     }
     if (!initMonitorApi()) {
@@ -393,7 +393,7 @@ static void emitMessage(uv_async_t *handle, int status) {
     uv_mutex_unlock(messageListMutex);
 
     while(currentMessage != NULL ) {
-      
+
         Nan::TryCatch try_catch;
 
         const unsigned argc = 2;
@@ -456,7 +456,7 @@ static void sendData(const char* sourceId, unsigned int size, void *data) {
 }
 
 NAN_METHOD(nativeEmit) {
-    
+
     if (!isMonitorApiValid()) {
         Nan::ThrowError("Monitoring API is not initialized");
         //NanReturnUndefined();
@@ -477,7 +477,7 @@ NAN_METHOD(nativeEmit) {
         String::Utf8Value str(info[1]->ToString());
         char *c_arg = *str;
         contentss << c_arg;
-        
+
     } else {
         /*
          *  Error handling as we don't have a valid parameter
@@ -567,7 +567,7 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
     timespec ts = {0, 0};
     clock_gettime(clock_id, &ts);
-      
+
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
     v8::Isolate* isolate = info.GetIsolate();
     v8::Local<v8::Array> result = v8::Array::New(isolate, 2);
@@ -578,7 +578,7 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     result->Set(0, v8::Number::New(ts.tv_sec));
     result->Set(1, v8::Integer::NewFromUnsigned(ts.tv_nsec));
 #endif
-    
+
     info.GetReturnValue().Set(result);
 }
 #endif
@@ -688,7 +688,11 @@ void init(Local<Object> exports, Local<Object> module) {
     Nan::HandleScope scope;
     //removing isGlobalAgentAlreadyLoaded on z/OS as there is a break
     if (!isGlobalAgent(module)) {
+#if defined(_ZOS)
+#pragma convert("ISO8859-1")
         Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
+#pragma convert(pop)
+#endif
         return;
     }
     std::cout << "appmetrics:appmetrics.cpp - setup" << std::endl;
