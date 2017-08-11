@@ -688,8 +688,9 @@ void init(Local<Object> exports, Local<Object> module) {
     Nan::HandleScope scope;
     //removing isGlobalAgentAlreadyLoaded on z/OS as there is a break
     if (!isGlobalAgent(module)) {
+      std::cout << "appmetrics:appmetrics.cpp - throwing Conflict error" << std::endl;
 #if defined(_ZOS)
-#pragma convert("ISO8859-1")
+#pragma convert("IBM-1047")
         Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
 #pragma convert(pop)
 #endif
