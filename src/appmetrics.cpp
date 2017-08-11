@@ -632,6 +632,8 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 
 static bool isGlobalAgent(Local<Object> module) {
     std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent()" << std::endl;
+#if defined(_ZOS)
+#pragma convert("ISO8859-1")
     Nan::HandleScope scope;
     Local<Value> parent = module->Get(Nan::New<String>("parent").ToLocalChecked());
     std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() got parent" << std::endl;
@@ -643,6 +645,8 @@ static bool isGlobalAgent(Local<Object> module) {
             std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() got grandparent" << std::endl;
             Local<Value> gpfilename = grandparent->ToObject()->Get(Nan::New<String>("filename").ToLocalChecked());
             if (gpfilename->IsString() && isAppMetricsFile("launcher.js", toStdString(gpfilename->ToString()))) {
+#pragma convert(pop)
+#endif
                 std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() returning true" << std::endl;
                 return true;
             }
@@ -689,11 +693,7 @@ void init(Local<Object> exports, Local<Object> module) {
     //removing isGlobalAgentAlreadyLoaded on z/OS as there is a break
     if (!isGlobalAgent(module)) {
       std::cout << "appmetrics:appmetrics.cpp - throwing Conflict error" << std::endl;
-#if defined(_ZOS)
-#pragma convert("IBM-1047")
         Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
-#pragma convert(pop)
-#endif
         std::cout << "appmetrics:appmetrics.cpp - returning" << std::endl;
         return;
     }
