@@ -652,7 +652,7 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 static bool isGlobalAgent(Local<Object> module) {
     std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent()" << std::endl;
     Nan::HandleScope scope;
-    Local<Value> parent = module->Get(Nan::New<String>("parent").ToLocalChecked());
+    Local<Value> parent = module->Get(Nan::New<String>(asciiString("parent")).ToLocalChecked());
     std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() got parent" << std::endl;
     if (parent->IsObject()) {
         std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() parent is object" << std::endl;
