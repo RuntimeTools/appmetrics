@@ -42,6 +42,10 @@
 #include <dlfcn.h>
 #endif
 
+#if defined(_ZOS)
+#include <unistd.h>
+#endif
+
 using namespace v8;
 
 static std::string* applicationDir;
@@ -85,6 +89,22 @@ static std::string toStdString(Local<String> s) {
     std::string result(buf);
     delete[] buf;
     return result;
+}
+
+static std::string asciiString(std::string s) {
+#if defined(_zOS)
+    size_t s_size = s.length() + 1;
+    char* cp = new (std::nothrow) unsigned char[s_size];
+    memset(cp, 0, s_size);
+    strcpy(cp, s.c_str());
+    __etoa(cp);
+    std::string returnString = new std::string(cp);
+    delete[] cp;
+    cp = NULL;
+    return returnString;
+#else
+    return s;
+#endif
 }
 
 #if defined(_WINDOWS)
@@ -686,7 +706,7 @@ void init(Local<Object> exports, Local<Object> module) {
     //removing isGlobalAgentAlreadyLoaded on z/OS as there is a break
     if (!isGlobalAgent(module)) {
       std::cout << "appmetrics:appmetrics.cpp - throwing Conflict error" << std::endl;
-        Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
+        Nan::ThrowError(asciiString("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead."));
         std::cout << "appmetrics:appmetrics.cpp - returning" << std::endl;
         return;
     }
