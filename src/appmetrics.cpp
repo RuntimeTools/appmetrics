@@ -98,7 +98,7 @@ static std::string asciiString(std::string s) {
     char* cp = (char *) new (std::nothrow) unsigned char[s_size];
     memset(cp, 0, s_size);
     strcpy(cp, s.c_str());
-    __atoe(cp);
+    __etoa(cp);
     std::string returnString (cp);
     delete[] cp;
     cp = NULL;
