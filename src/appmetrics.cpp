@@ -602,9 +602,6 @@ static Local<Object> getRequireCache(Local<Object> module) {
     Local<String> cache_string = Nan::New<String>("_cache").ToLocalChecked();
     Local<Value> cache_v = Nan::Get(module_obj, cache_string).ToLocalChecked();
     Local<Object> cache_obj = Nan::To<Object>(cache_v).ToLocalChecked();
-#if defined(_ZOS)
-#pragma convert(pop)
-#endif
     return scope.Escape(cache_obj);
 }
 
@@ -632,8 +629,6 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 
 static bool isGlobalAgent(Local<Object> module) {
     std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent()" << std::endl;
-#if defined(_ZOS)
-#pragma convert("ISO8859-1")
     Nan::HandleScope scope;
     Local<Value> parent = module->Get(Nan::New<String>("parent").ToLocalChecked());
     std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() got parent" << std::endl;
@@ -645,8 +640,6 @@ static bool isGlobalAgent(Local<Object> module) {
             std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() got grandparent" << std::endl;
             Local<Value> gpfilename = grandparent->ToObject()->Get(Nan::New<String>("filename").ToLocalChecked());
             if (gpfilename->IsString() && isAppMetricsFile("launcher.js", toStdString(gpfilename->ToString()))) {
-#pragma convert(pop)
-#endif
                 std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() returning true" << std::endl;
                 return true;
             }
