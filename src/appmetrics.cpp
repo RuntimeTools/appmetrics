@@ -92,7 +92,7 @@ static std::string toStdString(Local<String> s) {
 }
 
 static std::string asciiString(std::string s) {
-#if defined(_zOS)
+#if defined(_ZOS)
     std::cout << "asciiString:appmetrics.cpp - input = " << s << std::endl;
     size_t s_size = s.length() + 1;
     char* cp = new (std::nothrow) unsigned char[s_size];
