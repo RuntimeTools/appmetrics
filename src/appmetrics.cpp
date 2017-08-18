@@ -93,7 +93,7 @@ static std::string toStdString(Local<String> s) {
 
 static std::string asciiString(std::string s) {
 #if defined(_ZOS)
-    std::cout << "asciiString:appmetrics.cpp - input = " << s << std::endl;
+    std::cout << "appmetrics.cpp:asciiString() - input = " << s << std::endl;
     size_t s_size = s.length() + 1;
     char* cp = (char *) new (std::nothrow) unsigned char[s_size];
     memset(cp, 0, s_size);
@@ -102,7 +102,7 @@ static std::string asciiString(std::string s) {
     std::string returnString (cp);
     delete[] cp;
     cp = NULL;
-    std::cout << "asciiString:appmetrics.cpp - output = " << returnString << std::endl;
+    std::cout << "appmetrics.cpp:asciiString() - output = " << returnString << std::endl;
     return returnString;
 #else
     return s;
@@ -171,16 +171,16 @@ static std::string fileJoin(const std::string& path, const std::string& filename
 }
 
 static std::string* getModuleDir(Local<Object> module) {
-    std::string moduleFilename(toStdString(module->Get(Nan::New<String>("filename").ToLocalChecked())->ToString()));
+    std::string moduleFilename(toStdString(module->Get(Nan::New<String>(asciiString("filename")).ToLocalChecked())->ToString()));
     return new std::string(portDirname(moduleFilename));
 }
 
 static Local<Object> getProcessObject() {
-    return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("process").ToLocalChecked())->ToObject();
+    return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject();
 }
 
 static std::string* findApplicationDir() {
-    Local<Value> mainModule = getProcessObject()->Get(Nan::New<String>("mainModule").ToLocalChecked());
+    Local<Value> mainModule = getProcessObject()->Get(Nan::New<String>(asciiString("mainModule")).ToLocalChecked());
     if (!mainModule->IsUndefined()) {
         return getModuleDir(mainModule->ToObject());
     }
@@ -480,7 +480,7 @@ static void sendData(const char* sourceId, unsigned int size, void *data) {
 NAN_METHOD(nativeEmit) {
 
     if (!isMonitorApiValid()) {
-        Nan::ThrowError("Monitoring API is not initialized");
+        Nan::ThrowError(asciiString("Monitoring API is not initialized").c_str());
         //NanReturnUndefined();
     }
 
@@ -493,7 +493,7 @@ NAN_METHOD(nativeEmit) {
         /*
          *  Error handling as we don't have a valid parameter
          */
-        return Nan::ThrowError("First argument must a event name string");
+        return Nan::ThrowError(asciiString("First argument must a event name string").c_str());
     }
     if (info[1]->IsString()) {
         String::Utf8Value str(info[1]->ToString());
@@ -504,7 +504,7 @@ NAN_METHOD(nativeEmit) {
         /*
          *  Error handling as we don't have a valid parameter
          */
-        Nan::ThrowError("Second argument must be a JSON string or a comma separated list of key value pairs");
+        Nan::ThrowError(asciiString("Second argument must be a JSON string or a comma separated list of key value pairs").c_str());
         return;
     }
     contentss << '\n';
@@ -517,7 +517,7 @@ NAN_METHOD(nativeEmit) {
 NAN_METHOD(sendControlCommand) {
 
     if (!isMonitorApiValid()) {
-        Nan::ThrowError("Monitoring API is not initialized");
+        Nan::ThrowError(asciiString("Monitoring API is not initialized").c_str());
         return;
     }
 
@@ -529,7 +529,7 @@ NAN_METHOD(sendControlCommand) {
         unsigned int length = command.length();
         monitorApi::sendControl(topic.c_str(), length, (void*)command.c_str());
     } else {
-        return Nan::ThrowError("Arguments must be strings containing the plugin name and control command");
+        return Nan::ThrowError(asciiString("Arguments must be strings containing the plugin name and control command").c_str());
     }
 
     return;
@@ -546,12 +546,12 @@ NAN_METHOD(setHeadlessZipFunction) {
 */
 NAN_METHOD(localConnect) {
     if (!isMonitorApiValid()) {
-        Nan::ThrowError("Monitoring API is not initialized");
+        Nan::ThrowError(asciiString("Monitoring API is not initialized").c_str());
         return;
     }
 
     if (!info[0]->IsFunction()) {
-        return Nan::ThrowError("First argument must be a callback function");
+        return Nan::ThrowError(asciiString("First argument must be a callback function").c_str());
     }
     Nan::Callback *callback = new Nan::Callback(info[0].As<Function>());
 
@@ -612,16 +612,16 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 // So we need to get it from Module._cache instead (by
 // executing require('module')._cache)
 static Local<Object> getRequireCache(Local<Object> module) {
-    std::cout << "appmetrics:appmetrics.cpp - getRequireCache()" << std::endl;
+    std::cout << "appmetrics.cpp:getRequireCache() - start" << std::endl;
     Nan::EscapableHandleScope scope;
-    Local<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
-    Local<String> require_string = Nan::New<String>("require").ToLocalChecked();
+    Local<Value> args[] = { Nan::New<String>(asciiString("module")).ToLocalChecked() };
+    Local<String> require_string = Nan::New<String>(asciiString("require")).ToLocalChecked();
     Local<Value> require_v = Nan::Get(module, require_string).ToLocalChecked();
     Local<Object> require_obj = Nan::To<Object>(require_v).ToLocalChecked();
     Local<Object> global_obj = Nan::GetCurrentContext()->Global();
     Local<Value> module_v = Nan::CallAsFunction(require_obj, global_obj, 1, args).ToLocalChecked();
     Local<Object> module_obj = Nan::To<Object>(module_v).ToLocalChecked();
-    Local<String> cache_string = Nan::New<String>("_cache").ToLocalChecked();
+    Local<String> cache_string = Nan::New<String>(asciiString("_cache")).ToLocalChecked();
     Local<Value> cache_v = Nan::Get(module_obj, cache_string).ToLocalChecked();
     Local<Object> cache_obj = Nan::To<Object>(cache_v).ToLocalChecked();
     return scope.Escape(cache_obj);
@@ -632,7 +632,7 @@ static Local<Object> getRequireCache(Local<Object> module) {
 // with appmetrics/somefile, but perhaps node_modules/appmetrics/somefile
 // would be more accurate?
 static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
-    std::cout << "appmetrics:appmetrics.cpp - isAppMetricsFile() expected: " << expected << ", potential match: " << potentialMatch << std::endl;
+    std::cout << "appmetrics.cpp:isAppMetricsFile() expected: " << expected << ", potential match: " << potentialMatch << std::endl;
     std::string endsWithPosix = "appmetrics/" + expected;
     std::string endsWithWindows = "appmetrics\\" + expected;
 
@@ -650,24 +650,24 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 }
 
 static bool isGlobalAgent(Local<Object> module) {
-    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent()" << std::endl;
+    std::cout << "appmetrics.cpp:isGlobalAgent() - start" << std::endl;
     Nan::HandleScope scope;
     Local<Value> parent = module->Get(Nan::New<String>(asciiString("parent")).ToLocalChecked());
-    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() got parent" << std::endl;
+    std::cout << "appmetrics.cpp:isGlobalAgent() - got parent" << std::endl;
     if (parent->IsObject()) {
-        std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() parent is object" << std::endl;
-        Local<Value> filename = parent->ToObject()->Get(Nan::New<String>("filename").ToLocalChecked());
+        std::cout << "appmetrics.cpp:isGlobalAgent() - parent is object" << std::endl;
+        Local<Value> filename = parent->ToObject()->Get(Nan::New<String>(asciiString("filename")).ToLocalChecked());
         if (filename->IsString() && isAppMetricsFile("index.js", toStdString(filename->ToString()))) {
-            Local<Value> grandparent = parent->ToObject()->Get(Nan::New<String>("parent").ToLocalChecked());
-            std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() got grandparent" << std::endl;
-            Local<Value> gpfilename = grandparent->ToObject()->Get(Nan::New<String>("filename").ToLocalChecked());
+            Local<Value> grandparent = parent->ToObject()->Get(Nan::New<String>(asciiString("parent")).ToLocalChecked());
+            std::cout << "appmetrics.cpp:isGlobalAgent() - got grandparent" << std::endl;
+            Local<Value> gpfilename = grandparent->ToObject()->Get(Nan::New<String>(asciiString("filename")).ToLocalChecked());
             if (gpfilename->IsString() && isAppMetricsFile("launcher.js", toStdString(gpfilename->ToString()))) {
-                std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() returning true" << std::endl;
+                std::cout << "appmetrics.cpp:isGlobalAgent() - returning true" << std::endl;
                 return true;
             }
         }
     }
-    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgent() returning false" << std::endl;
+    std::cout << "appmetrics.cpp:isGlobalAgent() - returning false" << std::endl;
     return false;
 }
 
@@ -676,22 +676,22 @@ static bool isGlobalAgent(Local<Object> module) {
 // ending .../appmetrics/launcher.js
 static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     Nan::HandleScope scope;
-    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded()" << std::endl;
+    std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - start" << std::endl;
 // The following line contains a method that breaks on z/OS.
     Local<Object> cache = getRequireCache(module);
     Local<Array> props = cache->GetOwnPropertyNames();
-    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded() props: " << toStdString(props->ToString()) << std::endl;
+    std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - props: " << toStdString(props->ToString()) << std::endl;
     if (props->Length() > 0) {
-        std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded() props length is " <<  props->Length() << std::endl;
+        std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - props length is " <<  props->Length() << std::endl;
         for (uint32_t i=0; i<props->Length(); i++) {
             Local<Value> entry = props->Get(i);
             if (entry->IsString() && isAppMetricsFile("launcher.js", toStdString(entry->ToString()))) {
-                std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded() returning true " << std::endl;
+                std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - returning true " << std::endl;
                 return true;
             }
         }
     }
-    std::cout << "appmetrics:appmetrics.cpp - isGlobalAgentAlreadyLoaded() returning false" << std::endl;
+    std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - returning false" << std::endl;
     return false;
 }
 /*
@@ -703,16 +703,16 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Throw an error if appmetrics has already been loaded globally
      */
-    std::cout << "appmetrics:appmetrics.cpp - init" << std::endl;
+    std::cout << "appmetrics.cpp:init() - start" << std::endl;
     Nan::HandleScope scope;
     //removing isGlobalAgentAlreadyLoaded on z/OS as there is a break
     if (!isGlobalAgent(module)) {
-      std::cout << "appmetrics:appmetrics.cpp - throwing Conflict error" << std::endl;
+      std::cout << "appmetrics.cpp:init() - throwing Conflict error" << std::endl;
         Nan::ThrowError(asciiString("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.").c_str());
-        std::cout << "appmetrics:appmetrics.cpp - returning" << std::endl;
+        std::cout << "appmetrics.cpp:init() - returning" << std::endl;
         return;
     }
-    std::cout << "appmetrics:appmetrics.cpp - setup" << std::endl;
+    std::cout << "appmetrics.cpp:init() - setup" << std::endl;
     // Setup global data mutex
     uv_mutex_init(messageListMutex);
 
@@ -723,53 +723,53 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Set exported functions
      */
-    std::cout << "appmetrics:appmetrics.cpp - set exported functions" << std::endl;
-    exports->Set(Nan::New<String>("getOption").ToLocalChecked(), Nan::New<FunctionTemplate>(getOption)->GetFunction());
-    exports->Set(Nan::New<String>("setOption").ToLocalChecked(), Nan::New<FunctionTemplate>(setOption)->GetFunction());
-    exports->Set(Nan::New<String>("start").ToLocalChecked(), Nan::New<FunctionTemplate>(start)->GetFunction());
-    exports->Set(Nan::New<String>("spath").ToLocalChecked(), Nan::New<FunctionTemplate>(spath)->GetFunction());
-    exports->Set(Nan::New<String>("stop").ToLocalChecked(), Nan::New<FunctionTemplate>(stop)->GetFunction());
-    exports->Set(Nan::New<String>("localConnect").ToLocalChecked(), Nan::New<FunctionTemplate>(localConnect)->GetFunction());
-    exports->Set(Nan::New<String>("nativeEmit").ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmit)->GetFunction());
-    exports->Set(Nan::New<String>("sendControlCommand").ToLocalChecked(), Nan::New<FunctionTemplate>(sendControlCommand)->GetFunction());
-//    exports->Set(Nan::New<String>("setHeadlessZipFunction").ToLocalChecked(), Nan::New<FunctionTemplate>(setHeadlessZipFunction)->GetFunction());
+    std::cout << "appmetrics.cpp:init() - set exported functions" << std::endl;
+    exports->Set(Nan::New<String>(asciiString("getOption")).ToLocalChecked(), Nan::New<FunctionTemplate>(getOption)->GetFunction());
+    exports->Set(Nan::New<String>(asciiString("setOption")).ToLocalChecked(), Nan::New<FunctionTemplate>(setOption)->GetFunction());
+    exports->Set(Nan::New<String>(asciiString("start")).ToLocalChecked(), Nan::New<FunctionTemplate>(start)->GetFunction());
+    exports->Set(Nan::New<String>(asciiString("spath")).ToLocalChecked(), Nan::New<FunctionTemplate>(spath)->GetFunction());
+    exports->Set(Nan::New<String>(asciiString("stop")).ToLocalChecked(), Nan::New<FunctionTemplate>(stop)->GetFunction());
+    exports->Set(Nan::New<String>(asciiString("localConnect")).ToLocalChecked(), Nan::New<FunctionTemplate>(localConnect)->GetFunction());
+    exports->Set(Nan::New<String>(asciiString("nativeEmit")).ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmit)->GetFunction());
+    exports->Set(Nan::New<String>(asciiString("sendControlCommand")).ToLocalChecked(), Nan::New<FunctionTemplate>(sendControlCommand)->GetFunction());
+//    exports->Set(Nan::New<String>(asciiString("setHeadlessZipFunction")).ToLocalChecked(), Nan::New<FunctionTemplate>(setHeadlessZipFunction)->GetFunction());
 #if defined(_LINUX)
     exports->Set(Nan::New<String>("lrtime").ToLocalChecked(), Nan::New<FunctionTemplate>(lrtime)->GetFunction());
 #endif
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-    exports->Set(Nan::New<String>("getObjectHistogram").ToLocalChecked(), Nan::New<FunctionTemplate>(getObjectHistogram)->GetFunction());
+    exports->Set(Nan::New<String>(asciiString("getObjectHistogram")).ToLocalChecked(), Nan::New<FunctionTemplate>(getObjectHistogram)->GetFunction());
 #endif
     /*
      * Initialize healthcenter core library
      */
     applicationDir = findApplicationDir();
     appmetricsDir = getModuleDir(module);
-    std::cout << "appmetrics:appmetrics.cpp - initialise healthcenter" << std::endl;
+    std::cout << "appmetrics.cpp:init() - initialise healthcenter" << std::endl;
     if (!initLoaderApi()) {
-        Nan::ThrowError("Failed to initialize Agent Core library");
+        Nan::ThrowError(asciiString("Failed to initialize Agent Core library").c_str());
         return;
     }
-    std::cout << "appmetrics:appmetrics.cpp - load properties file" << std::endl;
+    std::cout << "appmetrics.cpp:init() - load properties file" << std::endl;
     if (!loadProperties()) {
         loaderApi->logMessage(warning, "Failed to load appmetrics.properties file");
     }
-    std::cout << "appmetrics:appmetrics.cpp - register zip functions" << std::endl;
+    std::cout << "appmetrics.cpp:init() - register zip functions" << std::endl;
 //    loaderApi->registerZipFunction(&zip);
-        std::cout << "appmetrics:appmetrics.cpp - set log levels" << std::endl;
+        std::cout << "appmetrics.cpp:init() - set log levels" << std::endl;
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
     loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());
     loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
     /* Initialize watchdog directly so that bindings can be created */
-    std::cout << "appmetrics:appmetrics.cpp - initialise watchdog" << std::endl;
+    std::cout << "appmetrics.cpp:init() - initialise watchdog" << std::endl;
     Isolate* isolate = v8::Isolate::GetCurrent();
     watchdog::Initialize(isolate, exports);
 
     /*
      * Log startup message with version information
      */
-    std::cout << "appmetrics:appmetrics.cpp - log startup message" << std::endl;
+    std::cout << "appmetrics.cpp:init() - log startup message" << std::endl;
     std::stringstream msg;
     msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << loaderApi->getAgentVersion() << ")";
     loaderApi->logMessage(info, msg.str().c_str());
