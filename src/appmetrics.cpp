@@ -99,7 +99,7 @@ static std::string asciiString(std::string s) {
     memset(cp, 0, s_size);
     strcpy(cp, s.c_str());
     __atoe(cp);
-    std::string returnString = new std::string(cp);
+    std::string returnString (cp);
     delete[] cp;
     cp = NULL;
     std::cout << "asciiString:appmetrics.cpp - output = " << returnString << std::endl;
