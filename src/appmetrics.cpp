@@ -95,7 +95,7 @@ static std::string asciiString(std::string s) {
 #if defined(_ZOS)
     std::cout << "asciiString:appmetrics.cpp - input = " << s << std::endl;
     size_t s_size = s.length() + 1;
-    char* cp = new (std::nothrow) unsigned char[s_size];
+    char* cp = (char *) new (std::nothrow) unsigned char[s_size];
     memset(cp, 0, s_size);
     strcpy(cp, s.c_str());
     __atoe(cp);
