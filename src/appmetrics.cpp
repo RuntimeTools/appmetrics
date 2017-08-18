@@ -93,14 +93,16 @@ static std::string toStdString(Local<String> s) {
 
 static std::string asciiString(std::string s) {
 #if defined(_zOS)
+    std::cout << "asciiString:appmetrics.cpp - input = " << s << std::endl;
     size_t s_size = s.length() + 1;
     char* cp = new (std::nothrow) unsigned char[s_size];
     memset(cp, 0, s_size);
     strcpy(cp, s.c_str());
-    __etoa(cp);
+    __atoe(cp);
     std::string returnString = new std::string(cp);
     delete[] cp;
     cp = NULL;
+    std::cout << "asciiString:appmetrics.cpp - output = " << returnString << std::endl;
     return returnString;
 #else
     return s;
