@@ -706,7 +706,7 @@ void init(Local<Object> exports, Local<Object> module) {
     //removing isGlobalAgentAlreadyLoaded on z/OS as there is a break
     if (!isGlobalAgent(module)) {
       std::cout << "appmetrics:appmetrics.cpp - throwing Conflict error" << std::endl;
-        Nan::ThrowError(asciiString("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead."));
+        Nan::ThrowError(asciiString("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.").c_str());
         std::cout << "appmetrics:appmetrics.cpp - returning" << std::endl;
         return;
     }
