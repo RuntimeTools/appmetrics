@@ -91,20 +91,18 @@ static std::string toStdString(Local<String> s) {
 #endif
     std::string result(buf);
     delete[] buf;
+    std::cout << "appmetrics.cpp:toStdString() - result = " << result << std::endl;
     return result;
 }
 
 static std::string asciiString(std::string s) {
 #if defined(_ZOS)
     std::cout << "appmetrics.cpp:asciiString() - input = " << s << std::endl;
-    size_t s_size = s.length() + 1;
-    char* cp = (char *) new (std::nothrow) unsigned char[s_size];
-    memset(cp, 0, s_size);
-    strcpy(cp, s.c_str());
+    char* cp = new char[s.length() + 1];
+    std::strcpy(cp, s.c_str());
     __etoa(cp);
     std::string returnString (cp);
     delete[] cp;
-    cp = NULL;
     std::cout << "appmetrics.cpp:asciiString() - output = " << returnString << std::endl;
     return returnString;
 #else
@@ -123,6 +121,7 @@ static std::string asciiString(std::string s) {
 //  std::cout << "Test ./: " << portDirname("./") << std::endl;
 //  std::cout << "Test a/b/: " << portDirname("a/b/") << std::endl;
 static std::string portDirname(const std::string& filename) {
+  std::cout << "appmetrics.cpp:portDirname() - input = " << filename << std::endl;
     if (filename.length() == 0) return std::string(".");
 
     // Check for and ignore trailing slashes
@@ -135,6 +134,7 @@ static std::string portDirname(const std::string& filename) {
     std::size_t bslashpos = filename.rfind("\\", lastpos);
     if (slashpos == std::string::npos && bslashpos == std::string::npos) {
         // No slashes
+        std::cout << "appmetrics.cpp:portDirname() - result = ." << std::endl;
         return std::string(".");
     } else {
         std::size_t pos;
@@ -156,20 +156,24 @@ static std::string portDirname(const std::string& filename) {
 #else
 #include <libgen.h>
 static std::string portDirname(const std::string& filename) {
+  std::cout << "appmetrics.cpp:portDirName() - input = " << filename << std::endl;
     char *fname = new char[filename.length() + 1];
     std::strcpy(fname, filename.c_str());
     std::string result(dirname(fname));
     delete[] fname;
+    std::cout << "appmetrics.cpp:portDirname() - result = " << result << std::endl;
     return result;
 }
 #endif
 
 static std::string fileJoin(const std::string& path, const std::string& filename) {
+std::cout << "appmetrics.cpp:fileJoin() - path = " << path << ", filename = " << filename << std::endl;
 #if defined(_WINDOWS)
     static const std::string fileSeparator("\\");
 #else
     static const std::string fileSeparator("/");
 #endif
+std::cout << "appmetrics.cpp:fileJoin() - returning " << path + fileSeparator + filename << std::endl;
     return path + fileSeparator + filename;
 }
 
@@ -191,6 +195,7 @@ static std::string* findApplicationDir() {
 }
 
 static bool loadProperties() {
+  std::cout << "appmetrics.cpp:loadProperties() - entry " << std::endl;
     bool loaded = false;
 
     // Load from application directory, if possible
@@ -243,6 +248,7 @@ static void* getFunctionFromLibrary(std::string libraryPath, std::string functio
 }
 #else
 static void* getFunctionFromLibrary(std::string libraryPath, std::string functionName) {
+  std::cout << "appmetrics.cpp:getFunctionFromLibrary() - path = " << libraryPath >> ", functionName = " << functionName << std::endl;
     void* handle = dlopen(libraryPath.c_str(), RTLD_LAZY);
     if (!handle) {
         std::stringstream msg;
@@ -271,6 +277,7 @@ static void* getFunctionFromLibrary(std::string libraryPath, std::string functio
 #endif
 
 static void* getMonitorApiFunction(std::string pluginPath, std::string functionName) {
+std::cout << "appmetrics.cpp:getMonitorApiFunction() - path = " << pluginPath << ", functionName = " << functionName << std::endl;
 #if defined(_WINDOWS)
     std::string libname = "hcapiplugin.dll";
 #elif defined(__MACH__) || defined(__APPLE__)
@@ -288,6 +295,7 @@ static bool isMonitorApiValid() {
 }
 
 static bool initMonitorApi() {
+    std::cout << "appmetrics.cpp:asciiString() - entry = " << std::endl;
     std::string pluginPath = loaderApi->getProperty("com.ibm.diagnostics.healthcenter.plugin.path");
 
     monitorApi::pushData = (void (*)(const char*)) getMonitorApiFunction(pluginPath, std::string("pushData"));
@@ -300,6 +308,7 @@ static bool initMonitorApi() {
 typedef loaderCoreFunctions* (*LOADER_CORE)();
 
 static bool initLoaderApi() {
+std::cout << "appmetrics.cpp:intiLoaderApi() - entry" << std::endl;
 #if defined(_WINDOWS)
     std::string libname = "agentcore.dll";
 #elif defined(__MACH__) || defined(__APPLE__)
@@ -311,6 +320,7 @@ static bool initLoaderApi() {
 #endif
     LOADER_CORE getLoaderCoreFunctions = (LOADER_CORE)getFunctionFromLibrary(fileJoin(*appmetricsDir, libname), "loader_entrypoint");
     if (getLoaderCoreFunctions) {
+        std::cout << "appmetrics.cpp:initLoaderApi() - got loader core functions" << std::endl;
         loaderApi = getLoaderCoreFunctions();
     }
 
@@ -319,9 +329,12 @@ static bool initLoaderApi() {
 
 // set the property to given value (called from index.js)
 NAN_METHOD(setOption) {
+  std::cout << "appmetrics.cpp:setOption() - entry" << s << std::endl;
 	if (info.Length() > 1) {
 		Local<String> value = info[0]->ToString();
+    std::cout << "appmetrics.cpp:setOption() - value = " << toStdString(value) << std::endl;
 		Local<String> value1 = info[1]->ToString();
+    std::cout << "appmetrics.cpp:setOption() - value1 = " << toStdString(value1) << std::endl;
 		loaderApi->setProperty(toStdString(value).c_str(),toStdString(value1).c_str());
     } else {
         loaderApi->logMessage(warning, "Incorrect number of parameters passed to setOption");
@@ -332,7 +345,9 @@ NAN_METHOD(setOption) {
 NAN_METHOD(getOption) {
 	if (info.Length() > 0) {
 		Local<String> value = info[0]->ToString();
+    std::cout << "appmetrics.cpp:getOption() - value = " << toStdString(value) << std::endl;
 		std::string property = loaderApi->getProperty(toStdString(value).c_str());
+    std::cout << "appmetrics.cpp:getOption() - property = " << property << std::endl;
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 		v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str());
 #else
@@ -375,7 +390,7 @@ NAN_METHOD(stop) {
 NAN_METHOD(spath) {
 
     Local<String> value = info[0]->ToString();
-
+std::cout << "appmetrics.cpp:sPath() - setting plugin path to = " << toStdString(value) << std::endl;
     loaderApi->setProperty("com.ibm.diagnostics.healthcenter.plugin.path", toStdString(value).c_str());
 
 
