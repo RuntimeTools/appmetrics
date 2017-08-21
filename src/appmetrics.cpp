@@ -110,6 +110,21 @@ static std::string asciiString(std::string s) {
 #endif
 }
 
+static std::string nativeString(std::string s) {
+#if defined(_ZOS)
+    std::cout << "appmetrics.cpp:asciiString() - input = " << s << std::endl;
+    char* cp = new char[s.length() + 1];
+    std::strcpy(cp, s.c_str());
+    __atoe(cp);
+    std::string returnString (cp);
+    delete[] cp;
+    std::cout << "appmetrics.cpp:asciiString() - output = " << returnString << std::endl;
+    return returnString;
+#else
+    return s;
+#endif
+}
+
 #if defined(_WINDOWS)
 //  std::cout << "Test empty: " << portDirname("") << std::endl;
 //  std::cout << "Test /: " << portDirname("/") << std::endl;
@@ -788,7 +803,7 @@ void init(Local<Object> exports, Local<Object> module) {
      */
     std::cout << "appmetrics.cpp:init() - log startup message" << std::endl;
     std::stringstream msg;
-    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << loaderApi->getAgentVersion() << ")";
+    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << nativeString(loaderApi->getAgentVersion()) << ")";
     loaderApi->logMessage(info, msg.str().c_str());
 }
 

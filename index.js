@@ -20,13 +20,12 @@ var module_dir = path.dirname(module.filename);
 var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
 var fs = require('fs');
-debugger;
 var agent = require('./appmetrics');
+// commenting out on z/OS at the moment
 // var headlessZip = require('./headless_zip.js');
-var heapdump = require('./heapdump.js');
+// var heapdump = require('./heapdump.js');
 var VERSION = require('./package.json').version;
 var assert = require('assert');
-console.log('appmetrics:index.js - starting')
 // Set the plugin search path
 agent.spath(path.join(module_dir, 'plugins'));
 
@@ -316,11 +315,11 @@ module.exports.setJSONProfilingMode = function(val) {
 module.exports.getJSONProfilingMode = function() {
   return jsonProfilingMode;
 };
-
+/* commenting out on z/OS for now
 module.exports.writeSnapshot = function(args) {
   return heapdump.writeSnapshot(args);
 };
-
+*/
 module.exports.start = function start() {
   agent.setOption(propertyMappings['applicationID'], main_filename);
 /*  for (var property in headlessPropertyMappings) {
