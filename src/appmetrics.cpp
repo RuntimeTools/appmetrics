@@ -248,7 +248,7 @@ static void* getFunctionFromLibrary(std::string libraryPath, std::string functio
 }
 #else
 static void* getFunctionFromLibrary(std::string libraryPath, std::string functionName) {
-  std::cout << "appmetrics.cpp:getFunctionFromLibrary() - path = " << libraryPath >> ", functionName = " << functionName << std::endl;
+  std::cout << "appmetrics.cpp:getFunctionFromLibrary() - path = " << libraryPath << ", functionName = " << functionName << std::endl;
     void* handle = dlopen(libraryPath.c_str(), RTLD_LAZY);
     if (!handle) {
         std::stringstream msg;
@@ -329,7 +329,7 @@ std::cout << "appmetrics.cpp:intiLoaderApi() - entry" << std::endl;
 
 // set the property to given value (called from index.js)
 NAN_METHOD(setOption) {
-  std::cout << "appmetrics.cpp:setOption() - entry" << s << std::endl;
+  std::cout << "appmetrics.cpp:setOption() - entry" << std::endl;
 	if (info.Length() > 1) {
 		Local<String> value = info[0]->ToString();
     std::cout << "appmetrics.cpp:setOption() - value = " << toStdString(value) << std::endl;
