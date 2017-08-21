@@ -313,8 +313,8 @@ static bool isMonitorApiValid() {
 }
 
 static bool initMonitorApi() {
-    std::cout << "appmetrics.cpp:asciiString() - entry = " << std::endl;
-    std::string pluginPath = loaderApi->getProperty("com.ibm.diagnostics.healthcenter.plugin.path");
+    std::cout << "appmetrics.cpp:initMonitorApi() - entry" << std::endl;
+    std::string pluginPath = nativeString(loaderApi->getProperty("com.ibm.diagnostics.healthcenter.plugin.path"));
 
     monitorApi::pushData = (void (*)(const char*)) getMonitorApiFunction(pluginPath, std::string("pushData"));
     monitorApi::sendControl = (void (*)(const char*, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
@@ -795,7 +795,7 @@ void init(Local<Object> exports, Local<Object> module) {
         std::cout << "appmetrics.cpp:init() - set log levels" << std::endl;
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
-    loaderApi->setProperty("agentcore.version", nativeString(loaderApi->getAgentVersion()).c_str());
+    loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());
     loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
     /* Initialize watchdog directly so that bindings can be created */
@@ -808,7 +808,7 @@ void init(Local<Object> exports, Local<Object> module) {
      */
     std::cout << "appmetrics.cpp:init() - log startup message" << std::endl;
     std::stringstream msg;
-    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << loaderApi->getAgentVersion() << ")";
+    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << nativeString(loaderApi->getAgentVersion()) << ")";
     loaderApi->logMessage(info, msg.str().c_str());
 }
 
