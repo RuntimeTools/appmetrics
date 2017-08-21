@@ -91,19 +91,19 @@ static std::string toStdString(Local<String> s) {
 #endif
     std::string result(buf);
     delete[] buf;
-    std::cout << "appmetrics.cpp:toStdString() - result = " << result << std::endl;
+    //std::cout << "appmetrics.cpp:toStdString() - result = " << result << std::endl;
     return result;
 }
 
 static std::string asciiString(std::string s) {
 #if defined(_ZOS)
-    std::cout << "appmetrics.cpp:asciiString() - input = " << s << std::endl;
+    //std::cout << "appmetrics.cpp:asciiString() - input = " << s << std::endl;
     char* cp = new char[s.length() + 1];
     std::strcpy(cp, s.c_str());
     __etoa(cp);
     std::string returnString (cp);
     delete[] cp;
-    std::cout << "appmetrics.cpp:asciiString() - output = " << returnString << std::endl;
+    //std::cout << "appmetrics.cpp:asciiString() - output = " << returnString << std::endl;
     return returnString;
 #else
     return s;
@@ -112,13 +112,13 @@ static std::string asciiString(std::string s) {
 
 static std::string nativeString(std::string s) {
 #if defined(_ZOS)
-    std::cout << "appmetrics.cpp:asciiString() - input = " << s << std::endl;
+    //std::cout << "appmetrics.cpp:asciiString() - input = " << s << std::endl;
     char* cp = new char[s.length() + 1];
     std::strcpy(cp, s.c_str());
     __atoe(cp);
     std::string returnString (cp);
     delete[] cp;
-    std::cout << "appmetrics.cpp:asciiString() - output = " << returnString << std::endl;
+    //std::cout << "appmetrics.cpp:asciiString() - output = " << returnString << std::endl;
     return returnString;
 #else
     return s;
@@ -215,6 +215,7 @@ static bool loadProperties() {
 
     // Load from application directory, if possible
     if (applicationDir != NULL) {
+      std::cout << "appmetrics.cpp:loadProperties() - loading from applicationDir " << std::endl;
         std::string propFilename(fileJoin(*applicationDir, std::string(PROPERTIES_FILE)));
         loaded = loaderApi->loadPropertiesFile(propFilename.c_str());
     } else {
@@ -223,12 +224,14 @@ static bool loadProperties() {
 
     // Load from current working directory, if possible
     if (!loaded) {
+      std::cout << "appmetrics.cpp:loadProperties() - loading from current dir " << std::endl;
         std::string propFilename(PROPERTIES_FILE);
         loaded = loaderApi->loadPropertiesFile(propFilename.c_str());
     }
 
     // Load from module directory
     if (!loaded && appmetricsDir != NULL) {
+      std::cout << "appmetrics.cpp:loadProperties() - loading from appmetricsDir " << std::endl;
         std::string propFilename(fileJoin(*appmetricsDir, std::string(PROPERTIES_FILE)));
         loaded = loaderApi->loadPropertiesFile(propFilename.c_str());
     }
@@ -775,7 +778,9 @@ void init(Local<Object> exports, Local<Object> module) {
      * Initialize healthcenter core library
      */
     applicationDir = findApplicationDir();
+    std::cout << "appmetrics.cpp:init() - applicationDir = " << applicationDir << std::endl;
     appmetricsDir = getModuleDir(module);
+    std::cout << "appmetrics.cpp:init() - appmetricsDir = " << appmetricsDir << std::endl;
     std::cout << "appmetrics.cpp:init() - initialise healthcenter" << std::endl;
     if (!initLoaderApi()) {
         Nan::ThrowError(asciiString("Failed to initialize Agent Core library").c_str());
@@ -790,7 +795,7 @@ void init(Local<Object> exports, Local<Object> module) {
         std::cout << "appmetrics.cpp:init() - set log levels" << std::endl;
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
-    loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());
+    loaderApi->setProperty("agentcore.version", nativeString(loaderApi->getAgentVersion()));
     loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
     /* Initialize watchdog directly so that bindings can be created */
@@ -803,7 +808,7 @@ void init(Local<Object> exports, Local<Object> module) {
      */
     std::cout << "appmetrics.cpp:init() - log startup message" << std::endl;
     std::stringstream msg;
-    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << nativeString(loaderApi->getAgentVersion()) << ")";
+    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << loaderApi->getAgentVersion() << ")";
     loaderApi->logMessage(info, msg.str().c_str());
 }
 
