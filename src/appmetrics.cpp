@@ -795,7 +795,7 @@ void init(Local<Object> exports, Local<Object> module) {
         std::cout << "appmetrics.cpp:init() - set log levels" << std::endl;
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
-    loaderApi->setProperty("agentcore.version", nativeString(loaderApi->getAgentVersion()));
+    loaderApi->setProperty("agentcore.version", nativeString(loaderApi->getAgentVersion()).c_str());
     loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
     /* Initialize watchdog directly so that bindings can be created */
