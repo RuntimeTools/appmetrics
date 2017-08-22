@@ -388,9 +388,7 @@ NAN_METHOD(stop) {
 NAN_METHOD(spath) {
 
     Local<String> value = info[0]->ToString();
-std::cout << "appmetrics.cpp:sPath() - setting plugin path to = " << toStdString(value) << std::endl;
     loaderApi->setProperty("com.ibm.diagnostics.healthcenter.plugin.path", toStdString(value).c_str());
-
 
 }
 
@@ -438,7 +436,7 @@ static void emitMessage(uv_async_t *handle, int status) {
         Local<Value> argv[argc];
         const char * source = (*currentMessage->source).c_str();
 
-        Local<Object> buffer = Nan::CopyBuffer((char*)currentMessage->data, currentMessage->size).ToLocalChecked();
+        Local<Object> buffer = Nan::CopyBuffer(asciiString(std::string((char*)currentMessage->data)).c_str(), currentMessage->size).ToLocalChecked();
         argv[0] = Nan::New<String>(source).ToLocalChecked();
         argv[1] = buffer;
 
@@ -455,6 +453,7 @@ static void emitMessage(uv_async_t *handle, int status) {
 
 //static void sendData(const std::string &sourceId, unsigned int size, void *data) {
 static void sendData(const char* sourceId, unsigned int size, void *data) {
+    std::cout << "appmetrics.cpp:sendData() - entry for " << sourceId << std::endl;
     if( size == 0 ) {
         return;
     }
