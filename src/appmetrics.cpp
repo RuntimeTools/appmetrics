@@ -91,19 +91,16 @@ static std::string toStdString(Local<String> s) {
 #endif
     std::string result(buf);
     delete[] buf;
-    //std::cout << "appmetrics.cpp:toStdString() - result = " << result << std::endl;
     return result;
 }
 
 static std::string asciiString(std::string s) {
 #if defined(_ZOS)
-    //std::cout << "appmetrics.cpp:asciiString() - input = " << s << std::endl;
     char* cp = new char[s.length() + 1];
     std::strcpy(cp, s.c_str());
     __etoa(cp);
     std::string returnString (cp);
     delete[] cp;
-    //std::cout << "appmetrics.cpp:asciiString() - output = " << returnString << std::endl;
     return returnString;
 #else
     return s;
@@ -112,13 +109,11 @@ static std::string asciiString(std::string s) {
 
 static std::string nativeString(std::string s) {
 #if defined(_ZOS)
-    //std::cout << "appmetrics.cpp:asciiString() - input = " << s << std::endl;
     char* cp = new char[s.length() + 1];
     std::strcpy(cp, s.c_str());
     __atoe(cp);
     std::string returnString (cp);
     delete[] cp;
-    //std::cout << "appmetrics.cpp:asciiString() - output = " << returnString << std::endl;
     return returnString;
 #else
     return s;
@@ -136,7 +131,6 @@ static std::string nativeString(std::string s) {
 //  std::cout << "Test ./: " << portDirname("./") << std::endl;
 //  std::cout << "Test a/b/: " << portDirname("a/b/") << std::endl;
 static std::string portDirname(const std::string& filename) {
-  std::cout << "appmetrics.cpp:portDirname() - input = " << filename << std::endl;
     if (filename.length() == 0) return std::string(".");
 
     // Check for and ignore trailing slashes
@@ -149,7 +143,6 @@ static std::string portDirname(const std::string& filename) {
     std::size_t bslashpos = filename.rfind("\\", lastpos);
     if (slashpos == std::string::npos && bslashpos == std::string::npos) {
         // No slashes
-        std::cout << "appmetrics.cpp:portDirname() - result = ." << std::endl;
         return std::string(".");
     } else {
         std::size_t pos;
@@ -171,24 +164,20 @@ static std::string portDirname(const std::string& filename) {
 #else
 #include <libgen.h>
 static std::string portDirname(const std::string& filename) {
-  std::cout << "appmetrics.cpp:portDirName() - input = " << filename << std::endl;
     char *fname = new char[filename.length() + 1];
     std::strcpy(fname, filename.c_str());
     std::string result(dirname(fname));
     delete[] fname;
-    std::cout << "appmetrics.cpp:portDirname() - result = " << result << std::endl;
     return result;
 }
 #endif
 
 static std::string fileJoin(const std::string& path, const std::string& filename) {
-std::cout << "appmetrics.cpp:fileJoin() - path = " << path << ", filename = " << filename << std::endl;
 #if defined(_WINDOWS)
     static const std::string fileSeparator("\\");
 #else
     static const std::string fileSeparator("/");
 #endif
-std::cout << "appmetrics.cpp:fileJoin() - returning " << path + fileSeparator + filename << std::endl;
     return path + fileSeparator + filename;
 }
 
@@ -210,12 +199,10 @@ static std::string* findApplicationDir() {
 }
 
 static bool loadProperties() {
-  std::cout << "appmetrics.cpp:loadProperties() - entry " << std::endl;
     bool loaded = false;
 
     // Load from application directory, if possible
     if (applicationDir != NULL) {
-      std::cout << "appmetrics.cpp:loadProperties() - loading from applicationDir " << std::endl;
         std::string propFilename(fileJoin(*applicationDir, std::string(PROPERTIES_FILE)));
         loaded = loaderApi->loadPropertiesFile(propFilename.c_str());
     } else {
@@ -224,14 +211,12 @@ static bool loadProperties() {
 
     // Load from current working directory, if possible
     if (!loaded) {
-      std::cout << "appmetrics.cpp:loadProperties() - loading from current dir " << std::endl;
         std::string propFilename(PROPERTIES_FILE);
         loaded = loaderApi->loadPropertiesFile(propFilename.c_str());
     }
 
     // Load from module directory
     if (!loaded && appmetricsDir != NULL) {
-      std::cout << "appmetrics.cpp:loadProperties() - loading from appmetricsDir " << std::endl;
         std::string propFilename(fileJoin(*appmetricsDir, std::string(PROPERTIES_FILE)));
         loaded = loaderApi->loadPropertiesFile(propFilename.c_str());
     }
@@ -266,7 +251,6 @@ static void* getFunctionFromLibrary(std::string libraryPath, std::string functio
 }
 #else
 static void* getFunctionFromLibrary(std::string libraryPath, std::string functionName) {
-  std::cout << "appmetrics.cpp:getFunctionFromLibrary() - path = " << libraryPath << ", functionName = " << functionName << std::endl;
     void* handle = dlopen(libraryPath.c_str(), RTLD_LAZY);
     if (!handle) {
         std::stringstream msg;
@@ -295,7 +279,6 @@ static void* getFunctionFromLibrary(std::string libraryPath, std::string functio
 #endif
 
 static void* getMonitorApiFunction(std::string pluginPath, std::string functionName) {
-std::cout << "appmetrics.cpp:getMonitorApiFunction() - path = " << pluginPath << ", functionName = " << functionName << std::endl;
 #if defined(_WINDOWS)
     std::string libname = "hcapiplugin.dll";
 #elif defined(__MACH__) || defined(__APPLE__)
@@ -313,7 +296,6 @@ static bool isMonitorApiValid() {
 }
 
 static bool initMonitorApi() {
-    std::cout << "appmetrics.cpp:initMonitorApi() - entry" << std::endl;
     std::string pluginPath = nativeString(loaderApi->getProperty("com.ibm.diagnostics.healthcenter.plugin.path"));
 
     monitorApi::pushData = (void (*)(const char*)) getMonitorApiFunction(pluginPath, std::string("apiPushData"));
@@ -326,7 +308,6 @@ static bool initMonitorApi() {
 typedef loaderCoreFunctions* (*LOADER_CORE)();
 
 static bool initLoaderApi() {
-std::cout << "appmetrics.cpp:intiLoaderApi() - entry" << std::endl;
 #if defined(_WINDOWS)
     std::string libname = "agentcore.dll";
 #elif defined(__MACH__) || defined(__APPLE__)
@@ -338,7 +319,6 @@ std::cout << "appmetrics.cpp:intiLoaderApi() - entry" << std::endl;
 #endif
     LOADER_CORE getLoaderCoreFunctions = (LOADER_CORE)getFunctionFromLibrary(fileJoin(*appmetricsDir, libname), "loader_entrypoint");
     if (getLoaderCoreFunctions) {
-        std::cout << "appmetrics.cpp:initLoaderApi() - got loader core functions" << std::endl;
         loaderApi = getLoaderCoreFunctions();
     }
 
@@ -648,7 +628,6 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 // So we need to get it from Module._cache instead (by
 // executing require('module')._cache)
 static Local<Object> getRequireCache(Local<Object> module) {
-    std::cout << "appmetrics.cpp:getRequireCache() - start" << std::endl;
     Nan::EscapableHandleScope scope;
     Local<Value> args[] = { Nan::New<String>(asciiString("module")).ToLocalChecked() };
     Local<String> require_string = Nan::New<String>(asciiString("require")).ToLocalChecked();
@@ -668,7 +647,6 @@ static Local<Object> getRequireCache(Local<Object> module) {
 // with appmetrics/somefile, but perhaps node_modules/appmetrics/somefile
 // would be more accurate?
 static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
-    std::cout << "appmetrics.cpp:isAppMetricsFile() expected: " << expected << ", potential match: " << potentialMatch << std::endl;
     std::string endsWithPosix = "appmetrics/" + expected;
     std::string endsWithWindows = "appmetrics\\" + expected;
 
@@ -686,24 +664,18 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 }
 
 static bool isGlobalAgent(Local<Object> module) {
-    std::cout << "appmetrics.cpp:isGlobalAgent() - start" << std::endl;
     Nan::HandleScope scope;
     Local<Value> parent = module->Get(Nan::New<String>(asciiString("parent")).ToLocalChecked());
-    std::cout << "appmetrics.cpp:isGlobalAgent() - got parent" << std::endl;
     if (parent->IsObject()) {
-        std::cout << "appmetrics.cpp:isGlobalAgent() - parent is object" << std::endl;
         Local<Value> filename = parent->ToObject()->Get(Nan::New<String>(asciiString("filename")).ToLocalChecked());
         if (filename->IsString() && isAppMetricsFile("index.js", toStdString(filename->ToString()))) {
             Local<Value> grandparent = parent->ToObject()->Get(Nan::New<String>(asciiString("parent")).ToLocalChecked());
-            std::cout << "appmetrics.cpp:isGlobalAgent() - got grandparent" << std::endl;
             Local<Value> gpfilename = grandparent->ToObject()->Get(Nan::New<String>(asciiString("filename")).ToLocalChecked());
             if (gpfilename->IsString() && isAppMetricsFile("launcher.js", toStdString(gpfilename->ToString()))) {
-                std::cout << "appmetrics.cpp:isGlobalAgent() - returning true" << std::endl;
                 return true;
             }
         }
     }
-    std::cout << "appmetrics.cpp:isGlobalAgent() - returning false" << std::endl;
     return false;
 }
 
@@ -712,22 +684,16 @@ static bool isGlobalAgent(Local<Object> module) {
 // ending .../appmetrics/launcher.js
 static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     Nan::HandleScope scope;
-    std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - start" << std::endl;
-// The following line contains a method that breaks on z/OS.
     Local<Object> cache = getRequireCache(module);
     Local<Array> props = cache->GetOwnPropertyNames();
-    std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - props: " << toStdString(props->ToString()) << std::endl;
     if (props->Length() > 0) {
-        std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - props length is " <<  props->Length() << std::endl;
         for (uint32_t i=0; i<props->Length(); i++) {
             Local<Value> entry = props->Get(i);
             if (entry->IsString() && isAppMetricsFile("launcher.js", toStdString(entry->ToString()))) {
-                std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - returning true " << std::endl;
                 return true;
             }
         }
     }
-    std::cout << "appmetrics.cpp:isGlobalAgentAlreadyLoaded() - returning false" << std::endl;
     return false;
 }
 /*
@@ -739,15 +705,11 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Throw an error if appmetrics has already been loaded globally
      */
-    std::cout << "appmetrics.cpp:init() - start" << std::endl;
     Nan::HandleScope scope;
     if (!isGlobalAgent(module) && isGlobalAgentAlreadyLoaded(module)) {
-      std::cout << "appmetrics.cpp:init() - throwing Conflict error" << std::endl;
         Nan::ThrowError(asciiString("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.").c_str());
-        std::cout << "appmetrics.cpp:init() - returning" << std::endl;
         return;
     }
-    std::cout << "appmetrics.cpp:init() - setup" << std::endl;
     // Setup global data mutex
     uv_mutex_init(messageListMutex);
 
@@ -758,7 +720,6 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Set exported functions
      */
-    std::cout << "appmetrics.cpp:init() - set exported functions" << std::endl;
     exports->Set(Nan::New<String>(asciiString("getOption")).ToLocalChecked(), Nan::New<FunctionTemplate>(getOption)->GetFunction());
     exports->Set(Nan::New<String>(asciiString("setOption")).ToLocalChecked(), Nan::New<FunctionTemplate>(setOption)->GetFunction());
     exports->Set(Nan::New<String>(asciiString("start")).ToLocalChecked(), Nan::New<FunctionTemplate>(start)->GetFunction());
@@ -778,35 +739,27 @@ void init(Local<Object> exports, Local<Object> module) {
      * Initialize healthcenter core library
      */
     applicationDir = findApplicationDir();
-    std::cout << "appmetrics.cpp:init() - applicationDir = " << applicationDir << std::endl;
     appmetricsDir = getModuleDir(module);
-    std::cout << "appmetrics.cpp:init() - appmetricsDir = " << appmetricsDir << std::endl;
-    std::cout << "appmetrics.cpp:init() - initialise healthcenter" << std::endl;
     if (!initLoaderApi()) {
         Nan::ThrowError(asciiString("Failed to initialize Agent Core library").c_str());
         return;
     }
-    std::cout << "appmetrics.cpp:init() - load properties file" << std::endl;
     if (!loadProperties()) {
         loaderApi->logMessage(warning, "Failed to load appmetrics.properties file");
     }
-    std::cout << "appmetrics.cpp:init() - register zip functions" << std::endl;
 //    loaderApi->registerZipFunction(&zip);
-        std::cout << "appmetrics.cpp:init() - set log levels" << std::endl;
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
     loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());
     loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
     /* Initialize watchdog directly so that bindings can be created */
-    std::cout << "appmetrics.cpp:init() - initialise watchdog" << std::endl;
     Isolate* isolate = v8::Isolate::GetCurrent();
     watchdog::Initialize(isolate, exports);
 
     /*
      * Log startup message with version information
      */
-    std::cout << "appmetrics.cpp:init() - log startup message" << std::endl;
     std::stringstream msg;
     msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << nativeString(loaderApi->getAgentVersion()) << ")";
     loaderApi->logMessage(info, msg.str().c_str());
