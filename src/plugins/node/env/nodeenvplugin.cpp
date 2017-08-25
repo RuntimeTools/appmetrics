@@ -276,7 +276,7 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 		data.data = content.c_str();
 		plugin::api.agentPushData(&data);
 	} else {
-		plugin::api.logMessage(debug, "[environment_node] Unable to get Node.js environment information");
+		plugin::api.logMessage(loggingLevel::debug, "[environment_node] Unable to get Node.js environment information");
 	}
 
 }
@@ -284,7 +284,7 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 extern "C" {
 	NODEENVPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 		plugin::api = api;
-		plugin::api.logMessage(debug, "[environment_node] Registering push sources");
+		plugin::api.logMessage(loggingLevel::debug, "[environment_node] Registering push sources");
 	
 		pushsource *head = createPushSource(0, "environment_node");
 		plugin::provid = provID;

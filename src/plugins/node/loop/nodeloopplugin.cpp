@@ -127,7 +127,7 @@ void OnCheck(uv_check_t* handle) {
 extern "C" {
 	NODELOOPPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 	    plugin::api = api;
-	    plugin::api.logMessage(debug, "[loop_node] Registering push sources");
+	    plugin::api.logMessage(loggingLevel::debug, "[loop_node] Registering push sources");
 
 	    pushsource *head = createPushSource(0, "loop_node");
 	    plugin::provid = provID;
