@@ -141,6 +141,13 @@
       ],
     },
     {
+      "target_name": "nodeworkpoolplugin",
+      "type": "shared_library",
+      "sources": [
+        "<(srcdir)/plugins/node/workpool/nodeworkpoolplugin.cpp",
+      ],
+    },
+    {
       "target_name": "nodegcplugin",
       "type": "shared_library",
       "sources": [
@@ -159,6 +166,7 @@
         "nodegcplugin",
         "nodeprofplugin",
         "nodeloopplugin",
+        "nodeworkpoolplugin",
      ],
       "copies": [
         {
@@ -177,6 +185,7 @@
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeprofplugin<(SHARED_LIB_SUFFIX)",
             "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeloopplugin<(SHARED_LIB_SUFFIX)",
+            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeworkpoolplugin<(SHARED_LIB_SUFFIX)",
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)cpuplugin<(SHARED_LIB_SUFFIX)",
             "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)envplugin<(SHARED_LIB_SUFFIX)",

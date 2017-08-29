@@ -60,9 +60,9 @@ uint64_t sum = 0;
 
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-static void GetLoopInformation(uv_timer_s *data) {
+static void GetLoopInformation(uv_timer_t *data) {
 #else
-static void GetLoopInformation(uv_timer_s *data, int status) {
+static void GetLoopInformation(uv_timer_t *data, int status) {
 #endif
 	if (num != 0) {
           // Convert from nanoseconds to milliseconds.
@@ -150,7 +150,7 @@ extern "C" {
 		uv_check_init(uv_default_loop(), &check_handle);
 		uv_unref(reinterpret_cast<uv_handle_t*>(&check_handle));
 
-		plugin::timer = new uv_timer_t;
+		plugin::timer = new uv_timer_t; // why dynamic allocation?
 		uv_timer_init(uv_default_loop(), plugin::timer);
 		uv_unref((uv_handle_t*) plugin::timer); // don't prevent event loop exit
 

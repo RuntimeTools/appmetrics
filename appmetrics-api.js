@@ -60,6 +60,9 @@ function API(agent, appmetrics) {
       case 'loop_node':
         formatLoop(message);
         break;
+      case 'workpool_node':
+        formatWorkPool(message);
+        break;
       default:
         // Just raise any unknown message as an event so someone can parse it themselves
         that.emit(topic, message);
@@ -219,6 +222,23 @@ function API(agent, appmetrics) {
         average: parseFloat(values[4]),
       };
       that.emit('loop', loop);
+    });
+  };
+
+  var formatWorkPool = function(message) {
+    /* workpool_node:
+     *   NodeWorkPoolData,submitted,completed,queued,idle_threads
+     */
+    var lines = message.trim().split('\n');
+    lines.forEach(function(line) {
+      var values = line.split(/[,]+/);
+      var workPool = {
+        submitted: parseInt(values[1]),
+        completed: parseInt(values[2]),
+        queued: parseInt(values[3]),
+        idle_threads: parseInt(values[4]),
+      };
+      that.emit('workpool', workPool);
     });
   };
 

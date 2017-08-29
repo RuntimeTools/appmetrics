@@ -234,6 +234,23 @@ Emitted every 5 seconds, summarising sample based information of the event loop 
     * `latency.max` (Number) the longest sampled latency, in milliseconds.
     * `latency.avg` (Number) the average sampled latency, in milliseconds.
 
+### Event: 'workpool'
+Emitted every 5 seconds, summarising sample based information on the UV work
+pool.  `submitted`/`completed` can be used to see the rate of API calls being
+made that use the thread pool. If items are submitted faster than the threadpool
+can process them, they will wait for processing by the next free thread. If
+`queued` is consistently more than zero consider increasing the size of the
+thread pool, using
+[`UV_THREADPOOL_SIZE`](https://nodejs.org/api/cli.html#cli_uv_threadpool_size_size).
+* `data` (Object) the data from the event loop sample:
+  * `submitted` (Number) the number of work items submitted since the last
+    sample
+  * `completed` (Number) the number of work items completed since the last
+    sample
+  * `queued` (Number) the number of items waiting for a idle thread to process
+    them at sample time
+  * `idle_threads` (Number) the number of idle threads at sample time
+
 ### Event: 'gc'
 Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime.
 * `data` (Object) the data from the GC sample:
