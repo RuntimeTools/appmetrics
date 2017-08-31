@@ -98,7 +98,7 @@ var latencyReport = function() {
     max: latencyData.max,
     avg: latencyData.total / latencyData.count,
   };
-  exports.emit('eventloop', { time: Date.now(), latency: latency });
+  module.exports.emit('eventloop', { time: Date.now(), latency: latency });
   latencyData.count = 0;
   latencyData.min = 1 * 60 * 1000;
   latencyData.max = 0;
