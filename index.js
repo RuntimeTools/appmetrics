@@ -124,7 +124,7 @@ if (global.Appmetrics) {
       global.Appmetrics.VERSION +
       '.\n'
   );
-  module.exports = global.Appmetrics;
+  exports = module.exports = global.Appmetrics;
 } else {
   global.Appmetrics = module.exports;
   module.exports.VERSION = VERSION;
