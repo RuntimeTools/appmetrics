@@ -71,7 +71,7 @@ static void GetHeapInformation(uv_timer_s *data, int status) {
 	contentss << "," <<  static_cast<uint64_t>(hs.total_heap_size());
 	contentss << "," <<  static_cast<uint64_t>(hs.used_heap_size());
 	contentss << '\n';
-	
+
 	std::string content = contentss.str();
 
 	// Send data
@@ -100,17 +100,17 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 extern "C" {
 	NODEHEAPPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 	    plugin::api = api;
-	    plugin::api.logMessage(debug, "[heap_node] Registering push sources");
-	
+	    plugin::api.logMessage(::debug, "[heap_node] Registering push sources");
+
 	    pushsource *head = createPushSource(0, "heap_node");
 	    plugin::provid = provID;
 	    return head;
 	}
-	
+
 	NODEHEAPPLUGIN_DECL int ibmras_monitoring_plugin_init(const char* properties) {
 		return 0;
 	}
-	
+
 	NODEHEAPPLUGIN_DECL int ibmras_monitoring_plugin_start() {
 		plugin::api.logMessage(fine, "[heap_node] Starting");
 
@@ -126,14 +126,14 @@ extern "C" {
 //        uv_async_send(async); // close and cleanup in call back
         return 0;
 	}
-	
+
 	NODEHEAPPLUGIN_DECL int ibmras_monitoring_plugin_stop() {
 		plugin::api.logMessage(fine, "[heap_node] Stopping");
         uv_timer_stop(plugin::timer);
 		uv_close((uv_handle_t*) plugin::timer, cleanupHandle);
 		return 0;
 	}
-	
+
 	NODEHEAPPLUGIN_DECL const char* ibmras_monitoring_getVersion() {
 		return "1.0";
 	}
