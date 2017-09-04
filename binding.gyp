@@ -189,10 +189,11 @@
          ],
          "conditions": [
            ['OS=="os390"', {
-             # no hcmqtt, cpu or headless plugin
+             # no hcmqtt, cpu or memory plugin
              "files!": [
                "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
                "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)cpuplugin<(SHARED_LIB_SUFFIX)",
+               "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
                # the following don't work on zOS yet
                "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
              ],
