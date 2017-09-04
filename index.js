@@ -98,7 +98,7 @@ var latencyReport = function() {
     max: latencyData.max,
     avg: latencyData.total / latencyData.count,
   };
-  exports.emit('eventloop', { time: Date.now(), latency: latency });
+  module.exports.emit('eventloop', { time: Date.now(), latency: latency });
   latencyData.count = 0;
   latencyData.min = 1 * 60 * 1000;
   latencyData.max = 0;
@@ -124,7 +124,7 @@ if (global.Appmetrics) {
       global.Appmetrics.VERSION +
       '.\n'
   );
-  module.exports = global.Appmetrics;
+  exports = module.exports = global.Appmetrics;
 } else {
   global.Appmetrics = module.exports;
   module.exports.VERSION = VERSION;
