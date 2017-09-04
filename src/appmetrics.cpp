@@ -173,7 +173,7 @@ static bool loadProperties() {
         std::string propFilename(fileJoin(*applicationDir, std::string(PROPERTIES_FILE)));
         loaded = loaderApi->loadPropertiesFile(propFilename.c_str());
     } else {
-        loaderApi->logMessage(debug, "Cannot load properties from application directory, main module not defined");
+        loaderApi->logMessage(loggingLevel::debug, "Cannot load properties from application directory, main module not defined");
     }
 
     // Load from current working directory, if possible

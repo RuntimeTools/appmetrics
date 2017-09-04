@@ -188,7 +188,7 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 extern "C" {
 	NODEGCPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 	    plugin::api = api;
-	    plugin::api.logMessage(debug, "[gc_node] Registering push sources");
+	    plugin::api.logMessage(loggingLevel::debug, "[gc_node] Registering push sources");
 	
 	    pushsource *head = createPushSource(0, "gc_node");
 	    plugin::provid = provID;
