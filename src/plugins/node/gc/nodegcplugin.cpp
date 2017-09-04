@@ -40,7 +40,7 @@ namespace plugin {
 	agentCoreFunctions api;
 	uint32 provid = 0;
 	bool timingOK;
-	
+
 #ifdef _WINDOWS
 	LARGE_INTEGER gcSteadyStart, gcSteadyEnd;
 #elif defined(_LINUX) || defined(_AIX)
@@ -134,12 +134,12 @@ void beforeGC(v8::Isolate *isolate, GCType type, GCCallbackFlags flags) {
 
 void afterGC(v8::Isolate *isolate, GCType type, GCCallbackFlags flags) {
 	unsigned long long gcRealEnd;
-	
+
 	// GC pause time
 	if (plugin::timingOK) {
-		plugin::timingOK = GetSteadyTime(&plugin::gcSteadyEnd);	
+		plugin::timingOK = GetSteadyTime(&plugin::gcSteadyEnd);
 	}
-	const uint64 gcDuration = plugin::timingOK ? CalculateDuration(plugin::gcSteadyStart, plugin::gcSteadyEnd) : 0; 
+	const uint64 gcDuration = plugin::timingOK ? CalculateDuration(plugin::gcSteadyStart, plugin::gcSteadyEnd) : 0;
 
 	// Get "real" time
 	gcRealEnd = GetRealTime();
@@ -154,13 +154,13 @@ void afterGC(v8::Isolate *isolate, GCType type, GCCallbackFlags flags) {
 
 	std::stringstream contentss;
 	contentss << "NodeGCData";
-	contentss << "," << gcRealEnd; 
+	contentss << "," << gcRealEnd;
 	contentss << "," << gcType;
 	contentss << "," << static_cast<uint64_t>(hs.total_heap_size());
 	contentss << "," << static_cast<uint64_t>(hs.used_heap_size());
 	contentss << "," << gcDuration;
 	contentss << '\n';
-	
+
 	std::string content = contentss.str();
 
 	// Send data
@@ -188,17 +188,17 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 extern "C" {
 	NODEGCPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 	    plugin::api = api;
-	    plugin::api.logMessage(debug, "[gc_node] Registering push sources");
-	
+	    plugin::api.logMessage(::debug, "[gc_node] Registering push sources");
+
 	    pushsource *head = createPushSource(0, "gc_node");
 	    plugin::provid = provID;
 	    return head;
 	}
-	
+
 	NODEGCPLUGIN_DECL int ibmras_monitoring_plugin_init(const char* properties) {
 		return 0;
 	}
-	
+
 	NODEGCPLUGIN_DECL int ibmras_monitoring_plugin_start() {
 		plugin::api.logMessage(fine, "[gc_node] Starting");
 
@@ -212,7 +212,7 @@ extern "C" {
 		// TODO Unhook GC hooks...
 		return 0;
 	}
-	
+
 	NODEGCPLUGIN_DECL const char* ibmras_monitoring_getVersion() {
 		return "1.0";
 	}

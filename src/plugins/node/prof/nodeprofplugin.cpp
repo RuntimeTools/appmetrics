@@ -58,7 +58,7 @@ static unsigned long long GetRealTime() {
 namespace plugin {
 	// NOTE(tunniclm): only access these variables from the V8/Node/uv thread
 	agentCoreFunctions api;
-	uint32 provid = 0;	
+	uint32 provid = 0;
 	bool enabled = false;
 	bool profiling = false;
 	uv_timer_t *timer;
@@ -137,7 +137,7 @@ static void ConstructNodeData(const CpuProfileNode *node, int id, int parentId, 
 		delete[] function;
 		return;
 	}
-	
+
 	if (jsonEnabled){
 		string strScript (script);
 		string strFunction (function);
@@ -160,12 +160,12 @@ static void ConstructNodeData(const CpuProfileNode *node, int id, int parentId, 
 		result << "\"id\":" << id << ",";
 		result << "\"children\":[";
 	}
-	
+
 	else{
 		result << "NodeProfData,Node," << id << ',' << parentId << ',';
 		result << script << ',' << function << ',' << line << ',' << selfSamples << '\n';
 	}
-	
+
 	// clean up
 	delete[] script;
 	delete[] function;
@@ -198,7 +198,7 @@ static char * ConstructData(const CpuProfile *profile) {
 		result << "{\"date\":" << GetRealTime() << ",";
 		result << "\"head\":";
 	}
-	else result << "NodeProfData,Start," << GetRealTime() << '\n';	
+	else result << "NodeProfData,Start," << GetRealTime() << '\n';
 	visit(topRoot, ConstructNodeData, 0, result);
 	if (jsonEnabled){
 		result << "}";
@@ -212,7 +212,7 @@ static char * ConstructData(const CpuProfile *profile) {
 static Isolate* GetIsolate() {
 	Isolate *isolate = v8::Isolate::GetCurrent();
 	if (isolate == NULL) {
-		plugin::api.logMessage(debug, "[profiling_node] No V8 Isolate found");
+		plugin::api.logMessage(::debug, "[profiling_node] No V8 Isolate found");
 	}
 	return isolate;
 }
@@ -272,11 +272,11 @@ void collectData() {
 
 			delete[] serialisedProfile;
 		} else {
-			plugin::api.logMessage(debug,
+			plugin::api.logMessage(::debug,
 					"[profiling_node] Failed to serialise method profile"); // CHECK(tunniclm): Should this be a warning?
 		}
 	} else {
-		plugin::api.logMessage(debug,
+		plugin::api.logMessage(::debug,
 				"[profiling_node] No method profile found"); // CHECK(tunniclm): Should this be a warning?
 	}
 
@@ -321,11 +321,11 @@ static void publishEnabled() {
 
 	std::stringstream logMsg;
 	logMsg << "[profiling_node] Sending config message [" << msg << "]";
-	plugin::api.logMessage(debug,  logMsg.str().c_str());
-	
+	plugin::api.logMessage(::debug,  logMsg.str().c_str());
+
 	plugin::api.agentSendMessage(("configuration/" + sourceName).c_str(), msg.length(),
 								  (void*) msg.c_str());
-} 
+}
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 static void StartProfilerWithoutTiming(uv_async_t *async) {
@@ -334,7 +334,7 @@ static void StartProfilerWithoutTiming(uv_async_t *async, int status) {
 #endif
 	if (plugin::enabled) return;
 	plugin::enabled = true;
-	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+	plugin::api.logMessage(::debug, "[profiling_node] Publishing config");
     publishEnabled();
 	StartTheProfiler();
 }
@@ -347,7 +347,7 @@ static void StopProfilerWithoutTiming(uv_async_t *async, int status) {
 	collectData();
 	if (!plugin::enabled) return;
 	plugin::enabled = false;
-	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+	plugin::api.logMessage(::debug, "[profiling_node] Publishing config");
     publishEnabled();
 }
 
@@ -368,9 +368,9 @@ static void enableOnV8Thread(uv_async_t *async, int status) {
 #endif
 	if (plugin::enabled) return;
 	plugin::enabled = true;
-	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+	plugin::api.logMessage(::debug, "[profiling_node] Publishing config");
     publishEnabled();
-	
+
 	StartTheProfiler();
 	uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, getProfilingInterval(), getProfilingInterval());
 }
@@ -385,17 +385,17 @@ static void disableOnV8Thread(uv_async_t *async, int status) {
 #endif
 	if (!plugin::enabled) return;
 	plugin::enabled = false;
-	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+	plugin::api.logMessage(::debug, "[profiling_node] Publishing config");
     publishEnabled();
 
 	uv_timer_stop(plugin::timer);
-	
+
 	const CpuProfile *profile = StopTheProfiler();
 	ReleaseProfile(profile);
 }
 
 // NOTE(tunniclm): Don't access plugin::enabled or plugin::profiling in here
-//                 since this function may not be running on the V8/Node/uv 
+//                 since this function may not be running on the V8/Node/uv
 //                 thread. uv_async_send() is thread-safe.
 void setEnabled(bool value) {
 	if (value) {
@@ -421,41 +421,41 @@ extern "C" {
 	//                 it accesses non thread-safe fields
 	NODEPROFPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 		plugin::api = api;
-	
+
 		std::string enabledProp(plugin::api.getProperty("com.ibm.diagnostics.healthcenter.data.profiling"));
 		plugin::enabled = (enabledProp == "on");
-	
-		plugin::api.logMessage(debug, "[profiling_node] Registering push sources");
+
+		plugin::api.logMessage(::debug, "[profiling_node] Registering push sources");
 		pushsource *head = createPushSource(0, "profiling_node");
 		plugin::provid = provID;
 		return head;
 	}
-	
+
 	// NOTE(tunniclm): Must be called from the V8/Node/uv thread as
 	//                 it accesses non thread-safe fields
 	NODEPROFPLUGIN_DECL int ibmras_monitoring_plugin_init(const char* properties) {
 		// NOTE(tunniclm): We don't have the agentCoreFunctions yet, so we can't do any init that requires
-		//                 calling into the API (eg getting properties.)	
+		//                 calling into the API (eg getting properties.)
 		return 0;
 	}
-	
+
 	// NOTE(tunniclm): Must be called from the V8/Node/uv thread
 	//                 since it calls non thread-safe V8 APIs and
 	//                 uv APIs and accesses non thread-safe fields
 	NODEPROFPLUGIN_DECL int ibmras_monitoring_plugin_start() {
-		if (plugin::enabled) {	
+		if (plugin::enabled) {
 			plugin::api.logMessage(fine, "[profiling_node] Starting enabled");
 		} else {
 			plugin::api.logMessage(fine, "[profiling_node] Starting disabled");
 		}
-	
-		plugin::api.logMessage(debug, "[profiling_node] Publishing config");
-		publishEnabled();	
-	
+
+		plugin::api.logMessage(::debug, "[profiling_node] Publishing config");
+		publishEnabled();
+
 		plugin::timer = new uv_timer_t;
 		uv_timer_init(uv_default_loop(), plugin::timer);
 		uv_unref((uv_handle_t*) plugin::timer); // don't prevent event loop exit
-		
+
 		// Create the handles for disable/enable events.
 		asyncStartProfiler = new uv_async_t;
 		uv_async_init(uv_default_loop(), asyncStartProfiler, StartProfilerWithoutTiming);
@@ -473,26 +473,26 @@ extern "C" {
 		uv_async_init(uv_default_loop(), asyncDisable, disableOnV8Thread);
 		uv_unref((uv_handle_t*)asyncDisable);
 
-		if (plugin::enabled) {	
-			plugin::api.logMessage(debug, "[profiling_node] Start profiling");
+		if (plugin::enabled) {
+			plugin::api.logMessage(::debug, "[profiling_node] Start profiling");
 			StartTheProfiler();
-		
-			plugin::api.logMessage(debug, "[profiling_node] Starting timer");
+
+			plugin::api.logMessage(::debug, "[profiling_node] Starting timer");
 			uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, getProfilingInterval(), getProfilingInterval());
 		}
-	
+
 		return 0;
 	}
-	
+
 	NODEPROFPLUGIN_DECL int ibmras_monitoring_plugin_stop() {
 		plugin::api.logMessage(fine, "[profiling_node] Stopping");
-	
+
 		if (plugin::enabled) {
 			plugin::enabled = false;
-	
+
 			uv_timer_stop(plugin::timer);
 			uv_close((uv_handle_t*) plugin::timer, cleanupHandle);
-		
+
 			const CpuProfile *profile = StopTheProfiler();
 			ReleaseProfile(profile);
 		}
@@ -504,28 +504,28 @@ extern "C" {
 
 		return 0;
 	}
-	
+
 	NODEPROFPLUGIN_DECL void ibmras_monitoring_receiveMessage(const char *id, uint32 size, void *data) {
 		std::string idstring(id);
 
 		if (idstring == "profiling_node") {
 			//std::stringstream ss;
 			//ss << "Received message with id [" << idstring << "], size [" << size << "]";
-			//plugin::api.logMessage(debug, ss.str().c_str());
-			
+			//plugin::api.logMessage(::debug, ss.str().c_str());
+
 			std::string message((const char*) data, size);
 			//if (size > 0) {
 			//	std::string msg = "Message content [" + message + "]";
-			//	plugin::api.logMessage(debug, msg.c_str());
+			//	plugin::api.logMessage(::debug, msg.c_str());
 			//}
 			std::size_t found = message.find(',');
 			std::string command = message.substr(0, found);
 			std::string rest = message.substr(found + 1);
-			
+
 			if (rest == "profiling_node_subsystem") {
 				bool enabled = (command == "on");
 				//std::string msg = "Setting [" + rest + "] to " + (enabled ? "enabled" : "disabled");
-				//plugin::api.logMessage(debug, msg.c_str());
+				//plugin::api.logMessage(::debug, msg.c_str());
 				setEnabled(enabled);
 
             } else if (rest == "profiling_node_v8json"){
@@ -549,7 +549,7 @@ extern "C" {
             }
 		}
 	}
-	
+
 	NODEPROFPLUGIN_DECL const char* ibmras_monitoring_getVersion() {
 		return "3.0";
 	}
