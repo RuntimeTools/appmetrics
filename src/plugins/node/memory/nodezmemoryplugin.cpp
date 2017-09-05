@@ -132,7 +132,7 @@ static void GetMemoryInformation(uv_timer_s *data) {
 	contentss << FREE_PHYSICAL_MEMORY << EQUALS << getFreePhysicalMemorySize() << std::endl;
 
 	std::string content = contentss.str();
-  plugin::api.logMessage(debug, "[memory_node] Content: " + contentss);
+  plugin::api.logMessage(debug, "[memory_node] Content: %s", content.c_str());
 	// Send data
   plugin::api.logMessage(debug, "[memory_node] Constructing message object");
 	monitordata mdata;
