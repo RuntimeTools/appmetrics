@@ -50,6 +50,19 @@ const std::string VIRTUAL_MEMORY = "virtualmemory";
 const std::string FREE_PHYSICAL_MEMORY = "freephysicalmemory";
 const std::string TOTAL_PHYSICAL_MEMORY = "totalphysicalmemory";
 
+static std::string asciiString(std::string s) {
+#if defined(_ZOS)
+    char* cp = new char[s.length() + 1];
+    std::strcpy(cp, s.c_str());
+    __etoa(cp);
+    std::string returnString (cp);
+    delete[] cp;
+    return returnString;
+#else
+    return s;
+#endif
+}
+
 static char* NewCString(const std::string& s) {
 	char *result = new char[s.length() + 1];
 	std::strcpy(result, s.c_str());
@@ -67,8 +80,8 @@ static int64 getTime() {
 }
 
 static int64 getTotalPhysicalMemorySize() {
-  Local<Object> osObject = Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("os").ToLocalChecked())->ToObject();
-  Local<Function> osTotalMem = Local<Function>::Cast(osObject->Get(Nan::New<String>("totalmem").ToLocalChecked())->ToObject());
+  Local<Object> osObject = Nan::GetCurrentContext()->Global()->Get(asciiString(Nan::New<String>("os").ToLocalChecked()))->ToObject();
+  Local<Function> osTotalMem = Local<Function>::Cast(osObject->Get(asciiString(Nan::New<String>("totalmem").ToLocalChecked()))->ToObject());
   Nan::Callback callback(osTotalMem);
   Local<Value> retval = callback.Call(0, 0);
   return retval->IntegerValue();
