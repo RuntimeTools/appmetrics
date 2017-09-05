@@ -17,6 +17,10 @@
 #define _XOPEN_SOURCE_EXTENDED 1
 #endif
 
+#if defined(_ZOS)
+#include <unistd.h>
+#endif
+
 #include "ibmras/monitoring/AgentExtensions.h"
 #include "Typesdef.h"
 #include "v8.h"
