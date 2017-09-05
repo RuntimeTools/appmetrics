@@ -102,6 +102,7 @@ HttpsProbe.prototype.filterUrl = function(req) {
 HttpsProbe.prototype.metricsEnd = function(probeData, method, url, res, httpsReq) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
+    var routePath = typeof(httpsReq.route) === 'undefined' ? undefined : httpsReq.route.path;
     am.emit('https', {
       time: probeData.timer.startTimeMillis,
       method: method,
@@ -111,6 +112,8 @@ HttpsProbe.prototype.metricsEnd = function(probeData, method, url, res, httpsReq
       statusCode: res.statusCode,
       contentType: res.getHeader('content-type'),
       requestHeader: httpsReq.headers,
+      baseUrl: httpsReq.baseUrl, 
+      route: routePath,
     });
   }
 };

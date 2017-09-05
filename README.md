@@ -279,16 +279,19 @@ Emitted when a profiling sample is available from the underlying V8 runtime.
 
 ## API: Dependency Events (probes)
 
-### Event: 'http'
-Emitted when a HTTP request is made of the application.
+### Event: 'http'/'https'
+Emitted when a HTTP/HTTPS request is made of the application.
 * `data` (Object) the data from the HTTP request:
     * `time` (Number) the milliseconds when the request was made. This can be converted to a Date using `new Date(data.time)`.
     * `method` (String) the HTTP method used for the request.
     * `url` (String) the URL on which the request was made.
     * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
     * `header` (String) the response header for the HTTP request.
+    * `statusCode` (String) the response status code for the HTTP request.
     * `contentType` (String) the content type of the HTTP request.
     * `requestHeader` (Object) the request header for HTTP request.
+    * `baseURL` (String) the base url for the HTTP request.
+    * `route` (String) the route path for the HTTP request. 
 
 ### Event: 'http-outbound'
 Emitted when the application makes an outbound HTTP request.
@@ -299,7 +302,7 @@ Emitted when the application makes an outbound HTTP request.
     * `contentType` (String) the HTTP response content-type.
     * `statusCode` (String) the HTTP response status code.
     * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
-    * 'requestHeaders' (Object) the HTTP request headers.
+    * `requestHeaders` (Object) the HTTP request headers.
 
 ### Event: 'leveldown'
 Emitted when a LevelDB query is made using the `leveldown` module.
