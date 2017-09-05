@@ -94,8 +94,8 @@ static int64 getTotalPhysicalMemorySize() {
   Local<Value> args[0];
   plugin::api.logMessage(debug, "[memory_node] calling function");
   Local<Value> retval = osTotalMem->Call(global, 0, args);
-  int64 ret = retval->IntegarValue();
-  plugin::api.logMessage(debug, "call returned; returning " + std::string(ret));
+  int64 ret = retval->IntegerValue();
+  plugin::api.logMessage(debug, "call returned; returning " + std::to_string(ret));
   return ret;
 }
 
