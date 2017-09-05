@@ -95,7 +95,7 @@ static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(debug, "[memory_node] calling function");
   Local<Value> retval = osTotalMem->Call(global, 0, args);
   int64 ret = retval->IntegerValue();
-  plugin::api.logMessage(debug, "call returned; returning " + std::to_string(ret));
+  plugin::api.logMessage(debug, "call returned; returning " + std::to_string(ret).c_str());
   return ret;
 }
 
@@ -132,7 +132,7 @@ static void GetMemoryInformation(uv_timer_s *data) {
 	contentss << FREE_PHYSICAL_MEMORY << EQUALS << getFreePhysicalMemorySize() << std::endl;
 
 	std::string content = contentss.str();
-  plugin::api.logMessage(debug, "[memory_node] Content: " + content);
+  plugin::api.logMessage(debug, "[memory_node] Content: " + content.c_str());
 	// Send data
   plugin::api.logMessage(debug, "[memory_node] Constructing message object");
 	monitordata mdata;
