@@ -80,8 +80,8 @@ static int64 getTime() {
 }
 
 static int64 getTotalPhysicalMemorySize() {
-  Local<Object> osObject = Nan::GetCurrentContext()->Global()->Get(asciiString(Nan::New<String>("os").ToLocalChecked()))->ToObject();
-  Local<Function> osTotalMem = Local<Function>::Cast(osObject->Get(asciiString(Nan::New<String>("totalmem").ToLocalChecked()))->ToObject());
+  Local<Object> osObject = Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("os")).ToLocalChecked())->ToObject();
+  Local<Function> osTotalMem = Local<Function>::Cast(osObject->Get(Nan::New<String>(asciiString("totalmem")).ToLocalChecked())->ToObject());
   Nan::Callback callback(osTotalMem);
   Local<Value> retval = callback.Call(0, 0);
   return retval->IntegerValue();
