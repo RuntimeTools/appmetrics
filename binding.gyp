@@ -144,6 +144,13 @@
       ],
     },
     {
+      "target_name": "nodezmemoryplugin",
+      "type": "shared_library",
+      "sources": [
+        "<(srcdir)/plugins/node/memory/nodezmemoryplugin.cpp",
+      ],
+    },
+    {
       "target_name": "nodegcplugin",
       "type": "shared_library",
       "sources": [
@@ -162,6 +169,13 @@
         "nodeprofplugin",
         "nodeloopplugin",
         "nodegcplugin",
+     ],
+     "conditions": [
+       ['OS=="os390"', {
+         "dependencies+": [
+           "nodezmemoryplugin",
+         ],
+       }],
      ],
      "copies": [
        {
@@ -196,6 +210,9 @@
                "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
                # the following don't work on zOS yet
                "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
+             ],
+             "files+": [
+               "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodezmemoryplugin<(SHARED_LIB_SUFFIX)",
              ],
            }],
          ],
