@@ -38,7 +38,7 @@
     "conditions": [
       ['OS=="aix"', {
         "defines": [ "_AIX", "AIX" ],
-        "libraries": [ "-Wl,-bexpall,-brtllib,-G,-bernotok,-brtl" ],
+        "libraries": [ "-Wl,-bexpall,-brtllib,-G,-bernotok,-brtl,-L.,-bnoipath" ],
       }],
       ['OS=="mac"', {
         "defines": [ "__MACH__", "__APPLE__",  ],
@@ -46,6 +46,7 @@
       }],
       ['OS=="os390"', {
         "defines": [ "_ZOS", "_UNIX03_THREADS" ],
+        "cflags_cc": ['-Wc,EXPORTALL'],
       }],
       ['OS=="linux"', {
         "defines": [ "_LINUX", "LINUX" ],
@@ -128,7 +129,6 @@
         "<(srcdir)/plugins/node/heap/nodeheapplugin.cpp",
       ],
     },
-
     {
       "target_name": "nodeprofplugin",
       "type": "shared_library",
@@ -166,17 +166,18 @@
         "heapdump",
         "appmetrics",
         "nodeenvplugin",
+        "nodegcplugin",
         "nodeprofplugin",
         "nodeloopplugin",
-        "nodegcplugin",
-     ],
-     "conditions": [
-       ['OS=="os390"', {
-         "dependencies+": [
-           "nodezmemoryplugin",
-         ],
-       }],
-     ],
+        "nodeheapplugin",
+      ],
+      "conditions": [
+        ['OS=="os390"', {
+          "dependencies+": [
+            "nodezmemoryplugin",
+          ],
+        }],
+      ],
      "copies": [
        {
          "destination": "./",

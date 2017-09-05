@@ -60,6 +60,40 @@ static void cleanupHandle(uv_handle_t *handle) {
 	delete handle;
 }
 
+static int64 getTime() {
+        struct timeval tv;
+        gettimeofday(&tv, NULL);
+        return ((int64) tv.tv_sec)*1000 + tv.tv_usec/1000;
+}
+
+static int64 getTotalPhysicalMemorySize() {
+  Local<Object> osObject = Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("os").ToLocalChecked())->ToObject();
+  Local<Function> osTotalMem = (Local<Function>)osObject->Get(Nan::New<String>("totalmem").ToLocalChecked())->ToObject();
+  Nan::Callback callback(osTotalMem);
+  Local<Value> retval = callback.Call(0, []);
+  return retval->IntegerValue();
+}
+
+static int64 getProcessPhysicalMemorySize() {
+  //TODO: see if we can improve this on z/OS
+  return -1;
+}
+
+static int64 getProcessPrivateMemorySize() {
+  //TODO: see if we can improve this on z/OS
+  return -1;
+}
+
+static int64 getProcessVirtualMemorySize() {
+  //TODO: see if we can improve this on z/OS
+  return -1;
+}
+
+static int64 getFreePhysicalMemorySize() {
+  //TODO: see if we can improve this on z/OS
+  return -1;
+}
+
 static void GetMemoryInformation(uv_timer_s *data) {
 	std::stringstream contentss;
 
@@ -82,40 +116,6 @@ static void GetMemoryInformation(uv_timer_s *data) {
 	mdata.data = content.c_str();
 	plugin::api.agentPushData(&mdata);
 
-}
-
-int64 getTime() {
-        struct timeval tv;
-        gettimeofday(&tv, NULL);
-        return ((int64) tv.tv_sec)*1000 + tv.tv_usec/1000;
-}
-
-int64 getTotalPhysicalMemorySize() {
-  Local<Object> osObject = Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("os").ToLocalChecked())->ToObject();
-  Local<Function> osTotalMem = osObject->Get(Nan::New<String>("totalmem").ToLocalChecked())->ToFunction();
-  Nan::Callback callback(osTotalMem);
-  Local<Value> retval = callback.Call();
-  return retval->IntegerValue();
-}
-
-int64 getProcessPhysicalMemorySize() {
-  //TODO: see if we can improve this on z/OS
-  return -1;
-}
-
-int64 getProcessPrivateMemorySize() {
-  //TODO: see if we can improve this on z/OS
-  return -1;
-}
-
-int64 getProcessVirtualMemorySize() {
-  //TODO: see if we can improve this on z/OS
-  return -1;
-}
-
-int64 getFreePhysicalMemorySize() {
-  //TODO: see if we can improve this on z/OS
-  return -1;
 }
 
 pushsource* createPushSource(uint32 srcid, const char* name) {
@@ -160,7 +160,7 @@ extern "C" {
 		return 0;
 	}
 
-	NODEHEAPPLUGIN_DECL const char* ibmras_monitoring_getVersion() {
+	NODEZMEMPLUGIN_DECL const char* ibmras_monitoring_getVersion() {
 		return "1.0";
 	}
 }
