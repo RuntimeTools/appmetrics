@@ -84,11 +84,19 @@ static int64 getTime() {
 }
 
 static int64 getTotalPhysicalMemorySize() {
-  Local<Object> osObject = Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("os")).ToLocalChecked())->ToObject();
+  plugin::api.logMessage(debug, "[memory_node] >>getTotalPhysicalMemorySize()");
+  Local<Object> global = Nan::GetCurrentContext()->Global();
+  plugin::api.logMessage(debug, "[memory_node] got global object");
+  Local<Object> osObject = global->Get(Nan::New<String>(asciiString("os")).ToLocalChecked())->ToObject();
+  plugin::api.logMessage(debug, "[memory_node] got os object");
   Local<Function> osTotalMem = Local<Function>::Cast(osObject->Get(Nan::New<String>(asciiString("totalmem")).ToLocalChecked())->ToObject());
-  Nan::Callback callback(osTotalMem);
-  Local<Value> retval = callback.Call(0, 0);
-  return retval->IntegerValue();
+  plugin::api.logMessage(debug, "[memory_node] got os.totalmem function");
+  Local<Value> args[0];
+  plugin::api.logMessage(debug, "[memory_node] calling function");
+  Local<Value> retval = osTotalMem->Call(global, 0, args);
+  int64 ret = retval->IntegarValue();
+  plugin::api.logMessage(debug, "call returned; returning " + std::string(ret));
+  return ret;
 }
 
 static int64 getProcessPhysicalMemorySize() {
@@ -112,6 +120,7 @@ static int64 getFreePhysicalMemorySize() {
 }
 
 static void GetMemoryInformation(uv_timer_s *data) {
+  plugin::api.logMessage(fine, "[memory_node] Getting memory information");
 	std::stringstream contentss;
 
   contentss << MEMORY_SOURCE << COMMA;
@@ -123,14 +132,16 @@ static void GetMemoryInformation(uv_timer_s *data) {
 	contentss << FREE_PHYSICAL_MEMORY << EQUALS << getFreePhysicalMemorySize() << std::endl;
 
 	std::string content = contentss.str();
-
+  plugin::api.logMessage(debug, "[memory_node] Content: " + content);
 	// Send data
+  plugin::api.logMessage(debug, "[memory_node] Constructing message object");
 	monitordata mdata;
 	mdata.persistent = false;
 	mdata.provID = plugin::provid;
 	mdata.sourceID = 0;
 	mdata.size = static_cast<uint32>(content.length());
 	mdata.data = content.c_str();
+
 	plugin::api.agentPushData(&mdata);
 
 }
