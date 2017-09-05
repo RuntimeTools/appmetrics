@@ -85,6 +85,7 @@ static int64 getTime() {
 
 static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(debug, "[memory_node] >>getTotalPhysicalMemorySize()");
+  Nan::HandleScope scope;
   Local<Object> global = Nan::GetCurrentContext()->Global();
   plugin::api.logMessage(debug, "[memory_node] got global object");
   Local<Object> osObject = global->Get(Nan::New<String>(asciiString("os")).ToLocalChecked())->ToObject();
