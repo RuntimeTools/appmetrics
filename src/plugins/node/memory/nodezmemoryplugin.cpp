@@ -90,7 +90,11 @@ static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(debug, "[memory_node] got global object");
   Local<Object> osObject = global->Get(Nan::New<String>(asciiString("os")).ToLocalChecked())->ToObject();
   plugin::api.logMessage(debug, "[memory_node] got os object");
-  Local<Value> osTotalMem = osObject->Get(Nan::New<String>(asciiString("totalmem")).ToLocalChecked());
+  if (osObject->IsNullOrUndefined()) {
+    plugin::api.logMessage(debug, "[memory_node] os object not defined");
+    return -1;
+  }
+  Local<Object> osTotalMem = osObject->Get(Nan::New<String>(asciiString("totalmem")).ToLocalChecked())->ToObject();
   plugin::api.logMessage(debug, "[memory_node] got os.totalmem value");
   if (!osTotalMem->IsFunction()) {
     plugin::api.logMessage(debug, "[memory_node] os.totalmem is not a function");
