@@ -104,10 +104,10 @@ static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(debug, "[memory_node] got os.totalmem function");
   Local<Value> args[0];
   plugin::api.logMessage(debug, "[memory_node] calling function");
-  Local<Value> retval = osTotalMemFunc->Call(global, 0, args);
-  int64 ret = retval->IntegerValue();
+//  Local<Value> retval = osTotalMemFunc->Call(global, 0, args);
+//  int64 ret = retval->IntegerValue();
   plugin::api.logMessage(debug, "call returned");
-  return ret;
+  return -1;
 }
 
 static int64 getProcessPhysicalMemorySize() {
