@@ -90,7 +90,7 @@ static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(debug, "[memory_node] got global object");
   Local<Object> osObject = global->Get(Nan::New<String>(asciiString("os")).ToLocalChecked())->ToObject();
   plugin::api.logMessage(debug, "[memory_node] got os object");
-  if (osObject->IsNullOrUndefined()) {
+  if (osObject->IsNull() || osObject->IsUndefined()) {
     plugin::api.logMessage(debug, "[memory_node] os object not defined");
     return -1;
   }
