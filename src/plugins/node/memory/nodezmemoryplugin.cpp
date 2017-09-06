@@ -90,25 +90,13 @@ static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(debug, "[memory_node] got global object");
   Local<Object> reqObject = global->Get(Nan::New<String>(asciiString("require")).ToLocalChecked())->ToObject();
   plugin::api.logMessage(debug, "[memory_node] got require object");
-  if (!reqObject->IsFunction()) {
-    plugin::api.logMessage(debug, "[memory_node] reqObject is not a function");
-    return -1;
-  }
   Local<Value> args[1] = {Nan::New<String>(asciiString("os")).ToLocalChecked()};
   plugin::api.logMessage(debug, "[memory_node] calling require function");
   Local<Object> osObject;
   Nan::CallAsFunction(reqObject, osObject, 1, args);
   plugin::api.logMessage(debug, "[memory_node] got os object");
-  if (osObject->IsNull() || osObject->IsUndefined()) {
-    plugin::api.logMessage(debug, "[memory_node] os object not defined");
-    return -1;
-  }
   Local<Object> osTotalMem = osObject->Get(Nan::New<String>(asciiString("totalmem")).ToLocalChecked())->ToObject();
   plugin::api.logMessage(debug, "[memory_node] got os.totalmem value");
-  if (!osTotalMem->IsFunction()) {
-    plugin::api.logMessage(debug, "[memory_node] os.totalmem is not a function");
-    return -1;
-  }
   plugin::api.logMessage(debug, "[memory_node] got os.totalmem function");
   Local<Value> args2[0];
   plugin::api.logMessage(debug, "[memory_node] calling function");
