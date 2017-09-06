@@ -90,11 +90,17 @@ static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(debug, "[memory_node] got global object");
   Local<Object> osObject = global->Get(Nan::New<String>(asciiString("os")).ToLocalChecked())->ToObject();
   plugin::api.logMessage(debug, "[memory_node] got os object");
-  Local<Function> osTotalMem = Local<Function>::Cast(osObject->Get(Nan::New<String>(asciiString("totalmem")).ToLocalChecked())->ToObject());
+  Local<Value> osTotalMem = osObject->Get(Nan::New<String>(asciiString("totalmem")).ToLocalChecked());
+  plugin::api.logMessage(debug, "[memory_node] got os.totalmem value");
+  if (!osTotalMem->IsFunction()) {
+    plugin::api.logMessage(debug, "[memory_node] os.totalmem is not a function");
+    return -1;
+  }
+  Local<Function> osTotalMemFunc = Local<Function>::Cast(osTotalMem);
   plugin::api.logMessage(debug, "[memory_node] got os.totalmem function");
   Local<Value> args[0];
   plugin::api.logMessage(debug, "[memory_node] calling function");
-  Local<Value> retval = osTotalMem->Call(global, 0, args);
+  Local<Value> retval = osTotalMemFunc->Call(global, 0, args);
   int64 ret = retval->IntegerValue();
   plugin::api.logMessage(debug, "call returned");
   return ret;
