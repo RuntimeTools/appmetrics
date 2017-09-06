@@ -95,10 +95,10 @@ static int64 getTotalPhysicalMemorySize() {
     return -1;
   }
   Local<Function> reqFunc = Local<Function>::Cast(reqObject);
-  Local<Value> args[1];
-  args[0] = Nan::New<String>(asciiString("os")).ToLocalChecked();
+  Local<Value> args[1] = {Nan::New<String>(asciiString("os")).ToLocalChecked()};
   plugin::api.logMessage(debug, "[memory_node] calling require function");
-  Local<Object> osObject = reqFunc->Call(global, 1, args);
+  Local<Value> osObject;
+  reqFunc->Call(scope, scope->Global(), 1, args).ToLocal(&result);
   plugin::api.logMessage(debug, "[memory_node] got os object");
   if (osObject->IsNull() || osObject->IsUndefined()) {
     plugin::api.logMessage(debug, "[memory_node] os object not defined");
