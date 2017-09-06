@@ -94,10 +94,10 @@ var ensureSupportedPlatformOrExit = function() {
 };
 
 var getSupportedNodeVersionOrExit = function() {
-  var supportedMajorVersions = "v4, v5, v6, v7, v8"
+  var supportedMajorVersions = 'v4, v5, v6, v7, v8';
   // version strings are of the format 'vN.N.N' where N is a positive integer.
   // we want the first N.
-  var majorVersion =  process.version.substring(1, process.version.indexOf('.'));
+  var majorVersion = process.version.substring(1, process.version.indexOf('.'));
   if (supportedMajorVersions.indexOf('v' + majorVersion) === -1) {
     console.log('Unsupported version ' + process.version + '. Trying rebuild.');
     fail();
@@ -136,7 +136,7 @@ function fail() {
 }
 
 function zipAndExtract(targetDir, relativeFilepath, destDir) {
-fs
+  fs
     .createReadStream(targetDir + relativeFilepath)
     .pipe(zlib.createGunzip())
     .on('error', function(err) {

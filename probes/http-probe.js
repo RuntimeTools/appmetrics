@@ -98,19 +98,19 @@ HttpProbe.prototype.filterUrl = function(req) {
  */
 
 HttpProbe.prototype.metricsEnd = function(probeData, method, url, res, httpReq) {
-  if(probeData && probeData.timer) {
+  if (probeData && probeData.timer) {
     probeData.timer.stop();
-    var routePath = typeof(httpReq.route) === 'undefined' ? undefined : httpReq.route.path;
+    var routePath = typeof (httpReq.route) === 'undefined' ? undefined : httpReq.route.path;
     am.emit('http', {
-      time: probeData.timer.startTimeMillis, 
-      method: method, 
-      url: url, 
-      duration: probeData.timer.timeDelta, 
-      header: res._header, 
-      statusCode: res.statusCode, 
-      contentType: res.getHeader('content-type'), 
-      requestHeader: httpReq.headers, 
-      baseUrl: httpReq.baseUrl, 
+      time: probeData.timer.startTimeMillis,
+      method: method,
+      url: url,
+      duration: probeData.timer.timeDelta,
+      header: res._header,
+      statusCode: res.statusCode,
+      contentType: res.getHeader('content-type'),
+      requestHeader: httpReq.headers,
+      baseUrl: httpReq.baseUrl,
       route: routePath,
     });
   }

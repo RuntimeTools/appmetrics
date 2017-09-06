@@ -61,8 +61,6 @@ function checkHttpsData(data, t) {
   t.ok(isInteger(data.statusCode), 'statusCode is an integer');
   t.equals(data.hasOwnProperty('contentType'), true, 'Should have HTTPS property contentType;');
   t.equals(data.hasOwnProperty('requestHeader'), true, 'Should have HTTPS property requestHeader;');
-  t.equals(data.hasOwnProperty('baseUrl'), true, 'Should have HTTPS property baseUrl;');
-  t.equals(data.hasOwnProperty('route'), true, 'Should have HTTPS property route;');
 }
 
 function checkHttpsRequestData(data, t) {
@@ -73,9 +71,6 @@ function checkHttpsRequestData(data, t) {
   t.equals(data.hasOwnProperty('requestHeader'), true, 'Should have HTTPS property requestHeader;');
   t.equals(data.hasOwnProperty('header'), true, 'Should have HTTPS property header;');
   t.equals(data.hasOwnProperty('contentType'), true, 'Should have HTTPS property contentType;');
-  t.equals(data.hasOwnProperty('baseUrl'), true, 'Should have HTTPS property baeUrl;');
-  t.equals(data.hasOwnProperty('route'), true, 'Should have HTTPS property route;');
-
 }
 
 function isInteger(n) {
