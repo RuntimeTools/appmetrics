@@ -494,9 +494,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-3.0.2
+3.0.3
 
 ## Release History
+`3.0.3` - Bug fixes.
 `3.0.2` - Probe defect for Node 8 support.  
 `3.0.1` - Packaging bug fix to allow build from source if binary not present.  
 `3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.  

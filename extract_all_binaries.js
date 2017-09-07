@@ -41,7 +41,7 @@ var AGENTCORE_PLATFORMS = [
   'win32-x64',
 ];
 var AGENTCORE_VERSION = '3.2.1';
-var APPMETRICS_VERSION = '3.0.2';
+var APPMETRICS_VERSION = '3.0.3';
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
