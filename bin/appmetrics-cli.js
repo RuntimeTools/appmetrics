@@ -19,7 +19,10 @@
 var node_args = process.execArgv;
 
 // First argv[0] should be 'node' and argv[1] the name of this file.
+// We want to IGNORE these 2 args
 var args = process.argv.splice(0);
+args.shift();
+args.shift();
 
 var arg = args.shift();
 while (typeof arg != 'undefined') {
