@@ -279,27 +279,27 @@ Emitted when a profiling sample is available from the underlying V8 runtime.
 
 ## API: Dependency Events (probes)
 
-### Event: 'http'
-Emitted when a HTTP request is made of the application.
-* `data` (Object) the data from the HTTP request:
+### Event: 'http'/'https'
+Emitted when a HTTP/HTTPS request is made of the application.
+* `data` (Object) the data from the HTTP(S) request:
     * `time` (Number) the milliseconds when the request was made. This can be converted to a Date using `new Date(data.time)`.
-    * `method` (String) the HTTP method used for the request.
+    * `method` (String) the HTTP(S) method used for the request.
     * `url` (String) the URL on which the request was made.
-    * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
-    * `header` (String) the response header for the HTTP request.
-    * `contentType` (String) the content type of the HTTP request.
-    * `requestHeader` (Object) the request header for HTTP request.
+    * `duration` (Number) the time taken for the HTTP(S) request to be responded to in ms.
+    * `header` (String) the response header for the HTTP(S) request.
+    * `contentType` (String) the content type of the HTTP(S) request.
+    * `requestHeader` (Object) the request header for HTTP(S) request.
 
-### Event: 'http-outbound'
-Emitted when the application makes an outbound HTTP request.
-* `data` (Object) the data from the HTTP request:
+### Event: 'http-outbound'/'https-outbound'
+Emitted when the application makes an outbound HTTP/HTTPS request.
+* `data` (Object) the data from the HTTP(S) request:
     * `time` (Number) the milliseconds when the request was made. This can be converted to a Date using `new Date(data.time)`.
-    * `method` (String) the HTTP method used for the request.
+    * `method` (String) the HTTP(S) method used for the request.
     * `url` (String) the URL on which the request was made.
-    * `contentType` (String) the HTTP response content-type.
+    * `contentType` (String) the HTTP(S) response content-type.
     * `statusCode` (String) the HTTP response status code.
-    * `duration` (Number) the time taken for the HTTP request to be responded to in ms.
-    * 'requestHeaders' (Object) the HTTP request headers.
+    * `duration` (Number) the time taken for the HTTP(S) request to be responded to in ms.
+    * 'requestHeaders' (Object) the HTTP(S) request headers.
 
 ### Event: 'leveldown'
 Emitted when a LevelDB query is made using the `leveldown` module.
@@ -494,10 +494,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-3.0.3
+3.1.0
 
 ## Release History
-`3.0.3` - Bug fixes.
+`3.1.0` - HTTPS probe added.
 `3.0.2` - Probe defect for Node 8 support.  
 `3.0.1` - Packaging bug fix to allow build from source if binary not present.  
 `3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.  
