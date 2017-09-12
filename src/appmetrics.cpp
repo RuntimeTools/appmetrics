@@ -327,13 +327,10 @@ static bool initLoaderApi() {
 
 // set the property to given value (called from index.js)
 NAN_METHOD(setOption) {
-  std::cout << "appmetrics.cpp:setOption() - entry" << std::endl;
-	if (info.Length() > 1) {
+  if (info.Length() > 1) {
 		Local<String> value = info[0]->ToString();
-    std::cout << "appmetrics.cpp:setOption() - value = " << toStdString(value) << std::endl;
-		Local<String> value1 = info[1]->ToString();
-    std::cout << "appmetrics.cpp:setOption() - value1 = " << toStdString(value1) << std::endl;
-		loaderApi->setProperty(toStdString(value).c_str(),toStdString(value1).c_str());
+    Local<String> value1 = info[1]->ToString();
+    loaderApi->setProperty(toStdString(value).c_str(),toStdString(value1).c_str());
     } else {
         loaderApi->logMessage(warning, "Incorrect number of parameters passed to setOption");
     }
@@ -343,9 +340,7 @@ NAN_METHOD(setOption) {
 NAN_METHOD(getOption) {
 	if (info.Length() > 0) {
 		Local<String> value = info[0]->ToString();
-    std::cout << "appmetrics.cpp:getOption() - value = " << toStdString(value) << std::endl;
-		std::string property = loaderApi->getProperty(toStdString(value).c_str());
-    std::cout << "appmetrics.cpp:getOption() - property = " << property << std::endl;
+    std::string property = loaderApi->getProperty(toStdString(value).c_str());
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 		v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str());
 #else
@@ -453,7 +448,6 @@ static void emitMessage(uv_async_t *handle, int status) {
 
 //static void sendData(const std::string &sourceId, unsigned int size, void *data) {
 static void sendData(const char* sourceId, unsigned int size, void *data) {
-    std::cout << "appmetrics.cpp:sendData() - entry for " << nativeString(std::string(sourceId)) << std::endl;
     if( size == 0 ) {
         return;
     }

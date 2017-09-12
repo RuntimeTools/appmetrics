@@ -46,6 +46,7 @@ function API(agent, appmetrics) {
         break;
       case 'common_memory':
       case 'memory':
+      case 'memory_node':
         formatMemory(message);
         break;
       case 'gc_node':
