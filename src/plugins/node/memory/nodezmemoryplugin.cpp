@@ -67,6 +67,19 @@ static std::string asciiString(std::string s) {
 #endif
 }
 
+static std::string nativeString(std::string s) {
+#if defined(_ZOS)
+    char* cp = new char[s.length() + 1];
+    std::strcpy(cp, s.c_str());
+    __atoe(cp);
+    std::string returnString (cp);
+    delete[] cp;
+    return returnString;
+#else
+    return s;
+#endif
+}
+
 static char* NewCString(const std::string& s) {
 	char *result = new char[s.length() + 1];
 	std::strcpy(result, s.c_str());
@@ -93,7 +106,8 @@ static int64 getTotalPhysicalMemorySize() {
     Local<Value> key = globalNames->Get(i);
     if (key->IsString()) {
         String::Utf8Value value(key);
-        plugin::api.logMessage(debug, *value);
+        std::string s(*value);
+        plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
     }
   }
   Local<Object> reqObject = global->Get(Nan::New<String>(asciiString("require")).ToLocalChecked())->ToObject();
@@ -103,7 +117,7 @@ static int64 getTotalPhysicalMemorySize() {
     Local<Value> key = reqNames->Get(i);
     if (key->IsString()) {
         String::Utf8Value value(key);
-        plugin::api.logMessage(debug, *value);
+        plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
     }
   }
   //Local<Object> args[1];
