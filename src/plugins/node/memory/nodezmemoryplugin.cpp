@@ -110,11 +110,21 @@ static int64 getTotalPhysicalMemorySize() {
         plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
     }
   }
-  Local<Object> reqObject = global->Get(Nan::New<String>(asciiString("require")).ToLocalChecked())->ToObject();
-  plugin::api.logMessage(debug, "[memory_node] got require object - iterating names");
-  Local<Array> reqNames = reqObject->GetOwnPropertyNames();
-  for (int i = 0; i < reqNames->Length(); ++i) {
-    Local<Value> key = reqNames->Get(i);
+  Local<Object> processObject = global->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject();
+  plugin::api.logMessage(debug, "[memory_node] got process object - iterating names");
+  Local<Array> processNames = processObject->GetOwnPropertyNames();
+  for (int i = 0; i < processNames->Length(); ++i) {
+    Local<Value> key = processNames->Get(i);
+    if (key->IsString()) {
+        String::Utf8Value value(key);
+        plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
+    }
+  }
+  Local<Object> mainObject = global->Get(Nan::New<String>(asciiString("mainModule")).ToLocalChecked())->ToObject();
+  plugin::api.logMessage(debug, "[memory_node] got mainModule object - iterating names");
+  Local<Array> mainNames = mainObject->GetOwnPropertyNames();
+  for (int i = 0; i < mainNames->Length(); ++i) {
+    Local<Value> key = mainNames->Get(i);
     if (key->IsString()) {
         String::Utf8Value value(key);
         plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
