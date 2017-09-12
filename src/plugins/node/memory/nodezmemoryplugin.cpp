@@ -110,6 +110,16 @@ static int64 getTotalPhysicalMemorySize() {
         plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
     }
   }
+  Local<Object> appmetObject = global->Get(Nan::New<String>(asciiString("Appmetrics")).ToLocalChecked())->ToObject();
+  plugin::api.logMessage(debug, "[memory_node] got Appmetrics object - iterating names");
+  Local<Array> appmetNames = appmetObject->GetOwnPropertyNames();
+  for (int i = 0; i < appmetNames->Length(); ++i) {
+    Local<Value> key = appmetNames->Get(i);
+    if (key->IsString()) {
+        String::Utf8Value value(key);
+        plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
+    }
+  }
   Local<Object> processObject = global->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject();
   plugin::api.logMessage(debug, "[memory_node] got process object - iterating names");
   Local<Array> processNames = processObject->GetOwnPropertyNames();
