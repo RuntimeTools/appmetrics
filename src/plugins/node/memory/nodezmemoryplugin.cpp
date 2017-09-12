@@ -120,7 +120,7 @@ static int64 getTotalPhysicalMemorySize() {
         plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
     }
   }
-  Local<Value> totalMemValue = global->Get(Nan::New<String>(asciiString("getTotalPhysicalMemorySize")).ToLocalChecked());
+  Local<Value> totalMemValue = appmetObject->Get(Nan::New<String>(asciiString("getTotalPhysicalMemorySize")).ToLocalChecked());
   plugin::api.logMessage(debug, "[memory_node] got getTotalPhysicalMemorySize value");
   if (totalMemValue->IsFunction()) {
     plugin::api.logMessage(debug, "[memory_node] getTotalPhysicalMemorySize is a function");
