@@ -120,27 +120,16 @@ static int64 getTotalPhysicalMemorySize() {
         plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
     }
   }
-  Local<Object> processObject = global->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject();
-  plugin::api.logMessage(debug, "[memory_node] got process object - iterating names");
-  Local<Array> processNames = processObject->GetOwnPropertyNames();
-  for (int i = 0; i < processNames->Length(); ++i) {
-    Local<Value> key = processNames->Get(i);
-    if (key->IsString()) {
-        String::Utf8Value value(key);
-        plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
-    }
+  Local<Value> totalMemValue = global->Get(Nan::New<String>(asciiString("getTotalPhysicalMemorySize")).ToLocalChecked());
+  plugin::api.logMessage(debug, "[memory_node] got getTotalPhysicalMemorySize value");
+  if (totalMemValue->IsFunction()) {
+    plugin::api.logMessage(debug, "[memory_node] getTotalPhysicalMemorySize is a function");
+  } else {
+    plugin::api.logMessage(debug, "[memory_node] getTotalPhysicalMemorySize is NOT a function");
   }
-  Local<Object> mainObject = global->Get(Nan::New<String>(asciiString("mainModule")).ToLocalChecked())->ToObject();
-  plugin::api.logMessage(debug, "[memory_node] got mainModule object - iterating names");
-  Local<Array> mainNames = mainObject->GetOwnPropertyNames();
-  for (int i = 0; i < mainNames->Length(); ++i) {
-    Local<Value> key = mainNames->Get(i);
-    if (key->IsString()) {
-        String::Utf8Value value(key);
-        plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
-    }
-  }
-  //Local<Object> args[1];
+  Local<Function> totalMemFunc = Local<Function>::Cast(totalMemValue);
+  Local<Value> args[0];
+  Local<Value> result = totalMemFunc->Call(global, 0, args);
   //args[0] = Nan::New<String>(asciiString("os")).ToLocalChecked()->ToObject();
   plugin::api.logMessage(debug, "[memory_node] calling require function");
   //Local<Object> osObject;

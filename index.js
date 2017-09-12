@@ -21,6 +21,7 @@ var aspect = require('./lib/aspect.js');
 var request = require('./lib/request.js');
 var fs = require('fs');
 var agent = require('./appmetrics');
+const os = require('os');
 // commenting out on z/OS at the moment
 // var headlessZip = require('./headless_zip.js');
 // var heapdump = require('./heapdump.js');
@@ -314,6 +315,10 @@ module.exports.setJSONProfilingMode = function(val) {
 
 module.exports.getJSONProfilingMode = function() {
   return jsonProfilingMode;
+};
+
+module.exports.getTotalPhysicalMemorySize = function() {
+  return os.totalmem();
 };
 /* commenting out on z/OS for now
 module.exports.writeSnapshot = function(args) {
