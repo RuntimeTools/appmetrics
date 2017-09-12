@@ -453,7 +453,7 @@ static void emitMessage(uv_async_t *handle, int status) {
 
 //static void sendData(const std::string &sourceId, unsigned int size, void *data) {
 static void sendData(const char* sourceId, unsigned int size, void *data) {
-    std::cout << "appmetrics.cpp:sendData() - entry for " << sourceId << std::endl;
+    std::cout << "appmetrics.cpp:sendData() - entry for " << nativeString(std::string(sourceId)) << std::endl;
     if( size == 0 ) {
         return;
     }
