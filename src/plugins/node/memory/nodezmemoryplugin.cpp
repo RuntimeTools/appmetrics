@@ -100,51 +100,24 @@ static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(debug, "[memory_node] >>getTotalPhysicalMemorySize()");
   Nan::HandleScope scope;
   Local<Object> global = Nan::GetCurrentContext()->Global();
-  plugin::api.logMessage(debug, "[memory_node] got global object - iterating names");
-  Local<Array> globalNames = global->GetOwnPropertyNames();
-  for (int i = 0; i < globalNames->Length(); ++i) {
-    Local<Value> key = globalNames->Get(i);
-    if (key->IsString()) {
-        String::Utf8Value value(key);
-        std::string s(*value);
-        plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
-    }
-  }
   Local<Object> appmetObject = global->Get(Nan::New<String>(asciiString("Appmetrics")).ToLocalChecked())->ToObject();
-  plugin::api.logMessage(debug, "[memory_node] got Appmetrics object - iterating names");
-  Local<Array> appmetNames = appmetObject->GetOwnPropertyNames();
-  for (int i = 0; i < appmetNames->Length(); ++i) {
-    Local<Value> key = appmetNames->Get(i);
-    if (key->IsString()) {
-        String::Utf8Value value(key);
-        plugin::api.logMessage(debug, nativeString(std::string(*value)).c_str());
-    }
-  }
   Local<Value> totalMemValue = appmetObject->Get(Nan::New<String>(asciiString("getTotalPhysicalMemorySize")).ToLocalChecked());
-  plugin::api.logMessage(debug, "[memory_node] got getTotalPhysicalMemorySize value");
   if (totalMemValue->IsFunction()) {
     plugin::api.logMessage(debug, "[memory_node] getTotalPhysicalMemorySize is a function");
   } else {
     plugin::api.logMessage(debug, "[memory_node] getTotalPhysicalMemorySize is NOT a function");
+    return -1;
   }
   Local<Function> totalMemFunc = Local<Function>::Cast(totalMemValue);
   Local<Value> args[0];
   Local<Value> result = totalMemFunc->Call(global, 0, args);
-  //args[0] = Nan::New<String>(asciiString("os")).ToLocalChecked()->ToObject();
-  plugin::api.logMessage(debug, "[memory_node] calling require function");
-  //Local<Object> osObject;
-  //Nan::CallAsFunction(reqObject, osObject, 1, args);
-  plugin::api.logMessage(debug, "[memory_node] got os object");
-  //Local<Object> osTotalMem = osObject->Get(Nan::New<String>(asciiString("totalmem")).ToLocalChecked())->ToObject();
-  plugin::api.logMessage(debug, "[memory_node] got os.totalmem value");
-  plugin::api.logMessage(debug, "[memory_node] got os.totalmem function");
-  //Local<Object> args2[0];
-  plugin::api.logMessage(debug, "[memory_node] calling function");
-  //Local<Object> retval;
-  //Nan::CallAsFunction(osTotalMem, retval, 0, args2);
-//  int64 ret = retval->IntegerValue();
-  plugin::api.logMessage(debug, "call returned");
-  return -1;
+  if (result->IsNumber()) {
+    plugin::api.logMessage(debug, "[memory_node] result of calling getTotalPhysicalMemorySize is a number");
+    return result->IntegerValue();
+  } else {
+    plugin::api.logMessage(debug, "[memory_node] result of calling getTotalPhysicalMemorySize is NOT a number");
+    return -1;
+  }
 }
 
 static int64 getProcessPhysicalMemorySize() {
@@ -181,6 +154,8 @@ static void GetMemoryInformation(uv_timer_s *data) {
 
 	std::string content = contentss.str();
   // Send data
+  plugin::api.logMessage(debug, "[memory_node] Content of message:");
+  plugin::api.logMessage(debug, content.c_str());
   plugin::api.logMessage(debug, "[memory_node] Constructing message object");
 	monitordata mdata;
 	mdata.persistent = false;
