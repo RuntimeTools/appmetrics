@@ -87,9 +87,25 @@ static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(debug, "[memory_node] >>getTotalPhysicalMemorySize()");
   Nan::HandleScope scope;
   Local<Object> global = Nan::GetCurrentContext()->Global();
-  plugin::api.logMessage(debug, "[memory_node] got global object");
+  plugin::api.logMessage(debug, "[memory_node] got global object - iterating names");
+  Local<Array> globalNames = global->GetOwnPropertyNames();
+  for (int i = 0; i < globalNames->Length(); ++i) {
+    Local<Value> key = globalNames->Get(i);
+    if (key->IsString()) {
+        String::Utf8Value value(key);
+        plugin::api.logMessage(debug, *value);
+    }
+  }
   Local<Object> reqObject = global->Get(Nan::New<String>(asciiString("require")).ToLocalChecked())->ToObject();
-  plugin::api.logMessage(debug, "[memory_node] got require object");
+  plugin::api.logMessage(debug, "[memory_node] got require object - iterating names");
+  Local<Array> reqNames = reqObject->GetOwnPropertyNames();
+  for (int i = 0; i < reqNames->Length(); ++i) {
+    Local<Value> key = reqNames->Get(i);
+    if (key->IsString()) {
+        String::Utf8Value value(key);
+        plugin::api.logMessage(debug, *value);
+    }
+  }
   Local<Object> args[1];
   args[0] = Nan::New<String>(asciiString("os")).ToLocalChecked()->ToObject();
   plugin::api.logMessage(debug, "[memory_node] calling require function");
