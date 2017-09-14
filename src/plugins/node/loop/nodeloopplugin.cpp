@@ -35,11 +35,10 @@
 #define NODELOOPPLUGIN_DECL
 #endif
 
-#define LOOP_INTERVAL 60000
+#define LOOP_INTERVAL 5000 // Same as `eventloop` metric
 namespace plugin {
 	agentCoreFunctions api;
 	uint32 provid = 0;
-	bool timingOK;
     uv_timer_t *timer;
 }
 
@@ -51,11 +50,13 @@ static char* NewCString(const std::string& s) {
 	return result;
 }
 
+uv_prepare_t prepare_handle;
 uv_check_t check_handle;
-int32_t min = 9999;
-int32_t max = 0;
-int32_t num = 0;
-int32_t sum = 0;
+uint64_t tick_start;
+uint64_t min = UINT64_MAX;
+uint64_t max = 0;
+uint64_t num = 0;
+uint64_t sum = 0;
 
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
@@ -64,20 +65,21 @@ static void GetLoopInformation(uv_timer_s *data) {
 static void GetLoopInformation(uv_timer_s *data, int status) {
 #endif
 	if (num != 0) {
-	  double mean = 0;
-		mean = sum / num;
+          // Convert from nanoseconds to milliseconds.
+
+	  double mean = (sum / 1e6) / num;
 
 	  std::stringstream contentss;
 	  contentss << "NodeLoopData";
-	  contentss << "," << min;
-	  contentss << "," << max;
+	  contentss << "," << (min / 1e6);
+	  contentss << "," << (max / 1e6);
 	  contentss << "," << num;
 	  contentss << "," << mean;
 	  contentss << '\n';
 
 	  std::string content = contentss.str();
 
-	  min = 9999;
+	  min = UINT64_MAX;
 	  max = 0;
 	  num = 0;
 	  sum = 0;
@@ -108,11 +110,19 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 }
 
 void OnCheck(uv_check_t* handle) {
-	const uv_loop_t* const loop = handle->loop;
-	const uint64_t now = uv_hrtime() / static_cast<uint64_t>(1e6);
+        tick_start = uv_hrtime();
+}
 
-	const int32_t delta = static_cast<int32_t>(
-			now <= loop->time ? 0 : (now - loop->time));
+void OnPrepare(uv_prepare_t* handle) {
+        if (!tick_start) return;
+
+        const uint64_t tick_end = uv_hrtime();
+        if (tick_end < tick_start) {
+                // Should not happen, but ignore, next check will reset
+                // the start time.
+                return;
+        }
+        const double delta = tick_end - tick_start;
 
 	if (delta < min) {
 		min = delta;
@@ -135,6 +145,8 @@ extern "C" {
 	}
 
 	NODELOOPPLUGIN_DECL int ibmras_monitoring_plugin_init(const char* properties) {
+		uv_prepare_init(uv_default_loop(), &prepare_handle);
+		uv_unref(reinterpret_cast<uv_handle_t*>(&prepare_handle));
 		uv_check_init(uv_default_loop(), &check_handle);
 		uv_unref(reinterpret_cast<uv_handle_t*>(&check_handle));
 
@@ -148,7 +160,8 @@ extern "C" {
 	NODELOOPPLUGIN_DECL int ibmras_monitoring_plugin_start() {
 		plugin::api.logMessage(fine, "[loop_node] Starting");
 
-		uv_check_start(&check_handle, reinterpret_cast<uv_check_cb>(OnCheck));
+		uv_prepare_start(&prepare_handle, OnPrepare);
+		uv_check_start(&check_handle, OnCheck);
 		uv_timer_start(plugin::timer, GetLoopInformation, LOOP_INTERVAL, LOOP_INTERVAL);
 
 		return 0;
@@ -158,6 +171,7 @@ extern "C" {
 		plugin::api.logMessage(fine, "[loop_node] Stopping");
 
 		uv_timer_stop(plugin::timer);
+		uv_prepare_stop(&prepare_handle);
 		uv_check_stop(&check_handle);
 
 		return 0;

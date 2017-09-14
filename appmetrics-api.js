@@ -213,10 +213,10 @@ function API(agent, appmetrics) {
     lines.forEach(function(line) {
       var values = line.split(/[,]+/);
       var loop = {
-        minimum: parseInt(values[1]),
-        maximum: parseInt(values[2]),
+        minimum: parseFloat(values[1]),
+        maximum: parseFloat(values[2]),
         count: parseInt(values[3]),
-        average: parseInt(values[4]),
+        average: parseFloat(values[4]),
       };
       that.emit('loop', loop);
     });
