@@ -32,6 +32,10 @@
 #include <string>
 #include <sstream>
 
+#if defined(_ZOS)
+#include <unistd.h>
+#endif
+
 #define DEFAULT_CAPACITY 1024
 
 #if defined(_WINDOWS)
@@ -83,30 +87,43 @@ static std::string ToStdString(Local<String> s) {
 	return result;
 }
 
+static std::string asciiString(std::string s) {
+#if defined(_ZOS)
+    char* cp = new char[s.length() + 1];
+    std::strcpy(cp, s.c_str());
+    __etoa(cp);
+    std::string returnString (cp);
+    delete[] cp;
+    return returnString;
+#else
+    return s;
+#endif
+}
+
 static Local<Object> GetProcessObject() {
-	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("process").ToLocalChecked())->ToObject();
+	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject();
 }
 
 static Local<Object> GetProcessConfigObject() {
-	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("process").ToLocalChecked())->ToObject()->Get(Nan::New<String>("config").ToLocalChecked())->ToObject();
+	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject()->Get(Nan::New<String>(asciiString("config")).ToLocalChecked())->ToObject();
 
 }
 	
 static std::string GetNodeVersion() {
-	Local<String> version = GetProcessObject()->Get(Nan::New<String>("version").ToLocalChecked())->ToString();
+	Local<String> version = GetProcessObject()->Get(Nan::New<String>(asciiString("version")).ToLocalChecked())->ToString();
 	return ToStdString(version);
 }
 
 static std::string GetNodeTag() {
-	Local<String> tag = GetProcessConfigObject()->Get(Nan::New<String>("variables").ToLocalChecked())->ToObject()->Get(Nan::New<String>("node_tag").ToLocalChecked())->ToString();
+	Local<String> tag = GetProcessConfigObject()->Get(Nan::New<String>(asciiString("variables")).ToLocalChecked())->ToObject()->Get(Nan::New<String>(asciiString("node_tag")).ToLocalChecked())->ToString();
 	return ToStdString(tag);
 }
 
 static std::string GetNodeArguments(const std::string separator="@@@") {
 	std::stringstream ss;
 	Local<Object> process = GetProcessObject();
-	Local<Object> nodeArgv = process->Get(Nan::New<String>("execArgv").ToLocalChecked())->ToObject();
-	int64 nodeArgc = nodeArgv->Get(Nan::New<String>("length").ToLocalChecked())->ToInteger()->Value();
+	Local<Object> nodeArgv = process->Get(Nan::New<String>(asciiString("execArgv")).ToLocalChecked())->ToObject();
+	int64 nodeArgc = nodeArgv->Get(Nan::New<String>(asciiString("length")).ToLocalChecked())->ToInteger()->Value();
 
 	int written = 0;
 	if (nodeArgc > 0) {
@@ -127,8 +144,8 @@ size_t GuessSpaceSizeFromArgs(std::string argName) {
 	size_t result = 0;
 
 	Local<Object> process = GetProcessObject();
-	Local<Object> nodeArgv = process->Get(Nan::New<String>("execArgv").ToLocalChecked())->ToObject();
-	int64 nodeArgc = nodeArgv->Get(Nan::New<String>("length").ToLocalChecked())->ToInteger()->Value();
+	Local<Object> nodeArgv = process->Get(Nan::New<String>(asciiString("execArgv")).ToLocalChecked())->ToObject();
+	int64 nodeArgc = nodeArgv->Get(Nan::New<String>(asciiString("length")).ToLocalChecked())->ToInteger()->Value();
 
 	for (int i = 0; i < nodeArgc; i++) {
 		std::string arg = ToStdString(nodeArgv->Get(i)->ToString());
