@@ -22,6 +22,12 @@ app.appmetrics.enable('profiling');
 
 var tap = require('tap');
 
+var testOptions = {};
+// skip the test if we're testing on z/OS platform
+if (process.platform === 'os390') {
+  testOptions = {skip: true};
+}
+
 tap.tearDown(function() {
   app.endRun();
 });
@@ -43,7 +49,7 @@ tap.test('lrtime is a function or undefined', function(t) {
   t.end();
 });
 
-tap.test('CPU Data', function(t) {
+tap.test('CPU Data', testOptions, function(t) {
   monitor.once('cpu', function(cpuData) {
     t.ok(isInteger(cpuData.time), 'Timestamp is an integer');
     t.ok(isNumeric(cpuData.process), 'Contains numeric process usage');
