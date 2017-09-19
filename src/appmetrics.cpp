@@ -544,7 +544,8 @@ NAN_METHOD(sendControlCommand) {
     return;
 
 }
-/*
+
+#if !defined(_ZOS)
 NAN_METHOD(setHeadlessZipFunction) {
     if (!info[0]->IsFunction()) {
         return Nan::ThrowError("First argument must be a function");
@@ -552,7 +553,8 @@ NAN_METHOD(setHeadlessZipFunction) {
     Nan::Callback *callback = new Nan::Callback(info[0].As<Function>());
     headless::setZipFunction(callback);
 }
-*/
+#endif
+
 NAN_METHOD(localConnect) {
     if (!isMonitorApiValid()) {
         Nan::ThrowError(asciiString("Monitoring API is not initialized").c_str());
@@ -689,11 +691,13 @@ static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     }
     return false;
 }
-/*
+
+#if !defined(_ZOS)
 void zip(const char* outputDir) {
 	headless::zip(outputDir);
 }
-*/
+#endif
+
 void init(Local<Object> exports, Local<Object> module) {
     /*
      * Throw an error if appmetrics has already been loaded globally
@@ -721,7 +725,9 @@ void init(Local<Object> exports, Local<Object> module) {
     exports->Set(Nan::New<String>(asciiString("localConnect")).ToLocalChecked(), Nan::New<FunctionTemplate>(localConnect)->GetFunction());
     exports->Set(Nan::New<String>(asciiString("nativeEmit")).ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmit)->GetFunction());
     exports->Set(Nan::New<String>(asciiString("sendControlCommand")).ToLocalChecked(), Nan::New<FunctionTemplate>(sendControlCommand)->GetFunction());
-//    exports->Set(Nan::New<String>(asciiString("setHeadlessZipFunction")).ToLocalChecked(), Nan::New<FunctionTemplate>(setHeadlessZipFunction)->GetFunction());
+#if !defined(_ZOS)
+    exports->Set(Nan::New<String>(asciiString("setHeadlessZipFunction")).ToLocalChecked(), Nan::New<FunctionTemplate>(setHeadlessZipFunction)->GetFunction());
+#endif
 #if defined(_LINUX)
     exports->Set(Nan::New<String>("lrtime").ToLocalChecked(), Nan::New<FunctionTemplate>(lrtime)->GetFunction());
 #endif
@@ -740,7 +746,9 @@ void init(Local<Object> exports, Local<Object> module) {
     if (!loadProperties()) {
         loaderApi->logMessage(warning, "Failed to load appmetrics.properties file");
     }
-//    loaderApi->registerZipFunction(&zip);
+#if !defined(_ZOS)
+    loaderApi->registerZipFunction(&zip);
+#endif
     loaderApi->setLogLevels();
     /* changing this to pass agentcore.version and adding new appmetrics.version for use in the client */
     loaderApi->setProperty("agentcore.version", loaderApi->getAgentVersion());

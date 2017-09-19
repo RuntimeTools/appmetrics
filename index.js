@@ -22,9 +22,11 @@ var request = require('./lib/request.js');
 var fs = require('fs');
 var agent = require('./appmetrics');
 const os = require('os');
-// commenting out on z/OS at the moment
-// var headlessZip = require('./headless_zip.js');
-// var heapdump = require('./heapdump.js');
+var notOnZOS = !(process.platform === 'os390');
+if (notOnZOS) {
+  var headlessZip = require('./headless_zip.js');
+  var heapdump = require('./heapdump.js');
+}
 var VERSION = require('./package.json').version;
 var assert = require('assert');
 // Set the plugin search path
@@ -42,18 +44,19 @@ var propertyMappings = {
   mqtt: 'com.ibm.diagnostics.healthcenter.mqtt',
   profiling: 'com.ibm.diagnostics.healthcenter.data.profiling',
 };
-/*
-var headlessPropertyMappings = {
-  'appmetrics.file.collection': 'com.ibm.diagnostics.healthcenter.headless',
-  'appmetrics.file.max.size': 'com.ibm.diagnostics.healthcenter.headless.files.max.size',
-  'appmetrics.file.run.duration': 'com.ibm.diagnostics.healthcenter.headless.run.duration',
-  'appmetrics.file.delay.start': 'com.ibm.diagnostics.healthcenter.headless.delay.start',
-  'appmetrics.file.run.pause.duration': 'com.ibm.diagnostics.healthcenter.headless.run.pause.duration',
-  'appmetrics.file.run.number.of.runs': 'com.ibm.diagnostics.healthcenter.headless.run.number.of.runs',
-  'appmetrics.file.files.to.keep': 'com.ibm.diagnostics.healthcenter.headless.files.to.keep',
-  'appmetrics.file.output.directory': 'com.ibm.diagnostics.healthcenter.headless.output.directory',
-};
-*/
+
+if (notOnZOS) {
+  var headlessPropertyMappings = {
+    'appmetrics.file.collection': 'com.ibm.diagnostics.healthcenter.headless',
+    'appmetrics.file.max.size': 'com.ibm.diagnostics.healthcenter.headless.files.max.size',
+    'appmetrics.file.run.duration': 'com.ibm.diagnostics.healthcenter.headless.run.duration',
+    'appmetrics.file.delay.start': 'com.ibm.diagnostics.healthcenter.headless.delay.start',
+    'appmetrics.file.run.pause.duration': 'com.ibm.diagnostics.healthcenter.headless.run.pause.duration',
+    'appmetrics.file.run.number.of.runs': 'com.ibm.diagnostics.healthcenter.headless.run.number.of.runs',
+    'appmetrics.file.files.to.keep': 'com.ibm.diagnostics.healthcenter.headless.files.to.keep',
+    'appmetrics.file.output.directory': 'com.ibm.diagnostics.healthcenter.headless.output.directory',
+  };
+}
 /*
  * Load module probes into probes array by searching the probes directory.
  * We handle the 'trace' probe as a special case because we don't want to put
@@ -320,27 +323,31 @@ module.exports.getJSONProfilingMode = function() {
 module.exports.getTotalPhysicalMemorySize = function() {
   return os.totalmem();
 };
-/* commenting out on z/OS for now
-module.exports.writeSnapshot = function(args) {
-  return heapdump.writeSnapshot(args);
-};
-*/
+
+if (notOnZOS) {
+  module.exports.writeSnapshot = function(args) {
+    return heapdump.writeSnapshot(args);
+  };
+}
+
 module.exports.start = function start() {
   agent.setOption(propertyMappings['applicationID'], main_filename);
-/*  for (var property in headlessPropertyMappings) {
-    var prop = agent.getOption(property);
-    if (prop) {
-      agent.setOption(headlessPropertyMappings[property], prop);
+  if (notOnZOS) {
+    for (var property in headlessPropertyMappings) {
+      var prop = agent.getOption(property);
+      if (prop) {
+        agent.setOption(headlessPropertyMappings[property], prop);
+      }
+    }
+    var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
+    if (headlessOutputDir) {
+      headlessZip.setHeadlessOutputDir(headlessOutputDir);
+    }
+    var headlessFilesToKeep = agent.getOption('com.ibm.diagnostics.healthcenter.headless.files.to.keep');
+    if (headlessFilesToKeep && !isNaN(headlessFilesToKeep) && headlessFilesToKeep > 0) {
+      headlessZip.setFilesToKeep(headlessFilesToKeep);
     }
   }
-  var headlessOutputDir = agent.getOption('com.ibm.diagnostics.healthcenter.headless.output.directory');
-  if (headlessOutputDir) {
-    headlessZip.setHeadlessOutputDir(headlessOutputDir);
-  }
-  var headlessFilesToKeep = agent.getOption('com.ibm.diagnostics.healthcenter.headless.files.to.keep');
-  if (headlessFilesToKeep && !isNaN(headlessFilesToKeep) && headlessFilesToKeep > 0) {
-    headlessZip.setFilesToKeep(headlessFilesToKeep);
-  } */
   var am = this;
   agent.start();
   process.on('exit', function() {
@@ -349,12 +356,13 @@ module.exports.start = function start() {
       clearInterval(latencyCheckLoop);
       clearInterval(latencyReportLoop);
     }
-//    var headlessMode = agent.getOption('com.ibm.diagnostics.healthcenter.headless');
+    if (notOnZOS) {
+      var headlessMode = agent.getOption('com.ibm.diagnostics.healthcenter.headless');
+    }
     am.stop();
-/*
-    if (headlessMode == 'on') {
+    if (notOnZOS && headlessMode == 'on') {
       headlessZip.tryZipOnExit();
-    } */
+    }
   });
 
   // Start the probes
