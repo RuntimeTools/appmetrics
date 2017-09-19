@@ -63,6 +63,10 @@ tap.test('Headless mode should produce a .hcd file', testOptions, function(t) {
   }, 70000);
 });
 
+tap.tearDown(function() {
+  cleanUp();
+});
+
 function cleanUp() {
   deleteDir(outputDir);
   app.endRun();
