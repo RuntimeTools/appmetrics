@@ -25,7 +25,7 @@ var tap = require('tap');
 var testOptions = {};
 // skip the test if we're testing on z/OS platform
 if (process.platform === 'os390') {
-  testOptions = {skip: true};
+  testOptions = {skip: 'Test N/A on z/OS'};
 }
 
 tap.tearDown(function() {

@@ -36,7 +36,7 @@ tap.plan(1); // NOTE: This needs to be updated when tests are added/removed
 var testOptions = {};
 // skip the test if we're testing on z/OS platform
 if (process.platform === 'os390') {
-  testOptions = {skip: true};
+  testOptions = {skip: 'Test N/A on z/OS'};
 }
 
 tap.test('Headless mode should produce a .hcd file', testOptions, function(t) {
