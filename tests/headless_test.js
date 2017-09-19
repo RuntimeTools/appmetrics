@@ -33,7 +33,13 @@ app.start();
 var tap = require('tap');
 tap.plan(1); // NOTE: This needs to be updated when tests are added/removed
 
-tap.test('Headless mode should produce a .hcd file', function(t) {
+var testOptions = {};
+// skip the test if we're testing on z/OS platform
+if (process.platform === 'os390') {
+  testOptions = {skip: true};
+}
+
+tap.test('Headless mode should produce a .hcd file', testOptions, function(t) {
   setTimeout(function() {
     fs.readdir(outputDir, function(error, files) {
       if (error) {

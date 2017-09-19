@@ -357,36 +357,31 @@ NAN_METHOD(getOption) {
 NAN_METHOD(start) {
 	if (!running) {
 		running = true;
-
-        loaderApi->init();
-
-        loaderApi->start();
-
-	//headless::start();
-    }
-    if (!initMonitorApi()) {
-        loaderApi->logMessage(warning, "Failed to initialize monitoring API");
-    }
-
-
+    loaderApi->init();
+    loaderApi->start();
+#if !defined(_ZOS)
+	  headless::start();
+#endif
+  }
+  if (!initMonitorApi()) {
+    loaderApi->logMessage(warning, "Failed to initialize monitoring API");
+  }
 }
 
 NAN_METHOD(stop) {
-
-    if (running) {
-        running = false;
-        loaderApi->stop();
-        loaderApi->shutdown();
-	//headless::stop();
-    }
-
+  if (running) {
+    running = false;
+    loaderApi->stop();
+    loaderApi->shutdown();
+#if !defined(_ZOS)
+	  headless::stop();
+#endif
+  }
 }
 
 NAN_METHOD(spath) {
-
-    Local<String> value = info[0]->ToString();
-    loaderApi->setProperty("com.ibm.diagnostics.healthcenter.plugin.path", toStdString(value).c_str());
-
+  Local<String> value = info[0]->ToString();
+  loaderApi->setProperty("com.ibm.diagnostics.healthcenter.plugin.path", toStdString(value).c_str());
 }
 
 static void freePayload(MessageData* payload) {

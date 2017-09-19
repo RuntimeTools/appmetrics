@@ -158,6 +158,17 @@ aspect.after(module.__proto__, 'require', data, function(obj, methodName, args, 
   }
 });
 
+if (notOnZOS) {
+  agent.setHeadlessZipFunction(headlessZip.headlessZip);
+}
+
+// Export any functions exported by the agent
+for (var prop in agent) {
+  if (typeof agent[prop] == 'function') {
+    module.exports[prop] = agent[prop];
+  }
+}
+
 /*
  * Provide API to enable data collection for a given data type.
  * Profiling is done via a control message to the core monitoring agent.
@@ -259,14 +270,6 @@ module.exports.setConfig = function(data, config) {
       });
   }
 };
-
-// Export any functions exported by the agent
-for (var prop in agent) {
-  if (typeof agent[prop] == 'function') {
-    module.exports[prop] = agent[prop];
-  }
-//  agent.setHeadlessZipFunction(headlessZip.headlessZip);
-}
 
 // Export emit() API for JS data providers
 module.exports.emit = function(topic, data) {
