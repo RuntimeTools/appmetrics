@@ -97,25 +97,25 @@ static int64 getTime() {
 }
 
 static int64 getTotalPhysicalMemorySize() {
-  plugin::api.logMessage(debug, "[memory_node] >>getTotalPhysicalMemorySize()");
+  plugin::api.logMessage(loggingLevel::debug, "[memory_node] >>getTotalPhysicalMemorySize()");
   Nan::HandleScope scope;
   Local<Object> global = Nan::GetCurrentContext()->Global();
   Local<Object> appmetObject = global->Get(Nan::New<String>(asciiString("Appmetrics")).ToLocalChecked())->ToObject();
   Local<Value> totalMemValue = appmetObject->Get(Nan::New<String>(asciiString("getTotalPhysicalMemorySize")).ToLocalChecked());
   if (totalMemValue->IsFunction()) {
-    plugin::api.logMessage(debug, "[memory_node] getTotalPhysicalMemorySize is a function");
+    plugin::api.logMessage(loggingLevel::debug, "[memory_node] getTotalPhysicalMemorySize is a function");
   } else {
-    plugin::api.logMessage(debug, "[memory_node] getTotalPhysicalMemorySize is NOT a function");
+    plugin::api.logMessage(loggingLevel::debug, "[memory_node] getTotalPhysicalMemorySize is NOT a function");
     return -1;
   }
   Local<Function> totalMemFunc = Local<Function>::Cast(totalMemValue);
   Local<Value> args[0];
   Local<Value> result = totalMemFunc->Call(global, 0, args);
   if (result->IsNumber()) {
-    plugin::api.logMessage(debug, "[memory_node] result of calling getTotalPhysicalMemorySize is a number");
+    plugin::api.logMessage(loggingLevel::debug, "[memory_node] result of calling getTotalPhysicalMemorySize is a number");
     return result->IntegerValue();
   } else {
-    plugin::api.logMessage(debug, "[memory_node] result of calling getTotalPhysicalMemorySize is NOT a number");
+    plugin::api.logMessage(loggingLevel::debug, "[memory_node] result of calling getTotalPhysicalMemorySize is NOT a number");
     return -1;
   }
 }
@@ -154,9 +154,9 @@ static void GetMemoryInformation(uv_timer_s *data) {
 
 	std::string content = contentss.str();
   // Send data
-  plugin::api.logMessage(debug, "[memory_node] Content of message:");
-  plugin::api.logMessage(debug, content.c_str());
-  plugin::api.logMessage(debug, "[memory_node] Constructing message object");
+  plugin::api.logMessage(loggingLevel::debug, "[memory_node] Content of message:");
+  plugin::api.logMessage(loggingLevel::debug, content.c_str());
+  plugin::api.logMessage(loggingLevel::debug, "[memory_node] Constructing message object");
 	monitordata mdata;
 	mdata.persistent = false;
 	mdata.provID = plugin::provid;
@@ -183,7 +183,7 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 extern "C" {
 	NODEZMEMPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 	    plugin::api = api;
-	    plugin::api.logMessage(debug, "[memory_node] Registering push sources");
+	    plugin::api.logMessage(loggingLevel::debug, "[memory_node] Registering push sources");
 
 	    pushsource *head = createPushSource(0, "memory_node");
 	    plugin::provid = provID;
