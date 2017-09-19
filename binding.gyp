@@ -5,14 +5,12 @@
     "nandir%": "<!(node -e \"try {require('nan')}catch (e){console.log(e)}\")",
     'build_id%': '.<!(["python", "./generate_build_id.py"])',
     'appmetricsversion%':  '<!(["python", "./get_from_json.py", "./package.json", "version"])',
-  },
-  "conditions": [
-    ['OS=="aix"', {
-      "variables": {
+    "conditions": [
+      ['OS=="aix"', {
         "SHARED_LIB_SUFFIX": ".a",
-      },
-    }],
-  ],
+      }],
+    ],
+  },
 
   "target_defaults": {
     "cflags_cc!": [ '-fno-exceptions' ],
@@ -68,8 +66,6 @@
       }]
     ],
   },
-
-
 
   "targets": [
     {
@@ -144,20 +140,12 @@
       ],
     },
     {
-      "target_name": "nodezmemoryplugin",
-      "type": "shared_library",
-      "sources": [
-        "<(srcdir)/plugins/node/memory/nodezmemoryplugin.cpp",
-      ],
-    },
-    {
       "target_name": "nodegcplugin",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/gc/nodegcplugin.cpp",
       ],
     },
-
     {
       "target_name": "install",
       "type": "none",
@@ -220,5 +208,18 @@
        },
      ],
     },
+  ],
+  "conditions": [
+    ['OS=="os390"', {
+      "targets+": [
+        {
+          "target_name": "nodezmemoryplugin",
+          "type": "shared_library",
+          "sources": [
+            "<(srcdir)/plugins/node/memory/nodezmemoryplugin.cpp",
+          ],
+        },
+      ],
+    }],
   ],
 }
