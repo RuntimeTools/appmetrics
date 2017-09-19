@@ -23,7 +23,9 @@
 #include "uv.h"
 #include "ibmras/monitoring/AgentExtensions.h"
 #include "plugins/node/prof/watchdog.h"
-//#include "headlessutils.h"
+#if !defined(_ZOS)
+#include "headlessutils.h"
+#endif
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 #include "objecttracker.hpp"
