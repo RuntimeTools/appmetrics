@@ -40,7 +40,7 @@ var AGENTCORE_PLATFORMS = [
   'win32-ia32',
   'win32-x64',
 ];
-var AGENTCORE_VERSION = '3.2.1';
+var AGENTCORE_VERSION = '3.2.2';
 var APPMETRICS_VERSION = '3.1.0';
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
