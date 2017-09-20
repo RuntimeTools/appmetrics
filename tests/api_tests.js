@@ -222,6 +222,8 @@ tap.test('Eventloop Data', function(t) {
 monitor.once('initialized', function() {
   tap.test('Environment Data', function(t) {
     var nodeEnv = monitor.getEnvironment();
+    console.log('Got initialized event!');
+    console.dir(nodeEnv);
     runNodeEnvTests(nodeEnv, t);
     runCommonEnvTests(nodeEnv, t);
     t.end();

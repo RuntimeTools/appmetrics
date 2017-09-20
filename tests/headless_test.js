@@ -31,15 +31,16 @@ appmetrics.configure({
 app.start();
 
 var tap = require('tap');
-tap.plan(1); // NOTE: This needs to be updated when tests are added/removed
 
-var testOptions = {};
 // skip the test if we're testing on z/OS platform
 if (process.platform === 'os390') {
-  testOptions = {skip: 'Test N/A on z/OS'};
+  tap.plan(0);
+  cleanUp();
+} else {
+  tap.plan(1); // NOTE: This needs to be updated when tests are added/removed
 }
 
-tap.test('Headless mode should produce a .hcd file', testOptions, function(t) {
+tap.test('Headless mode should produce a .hcd file', function(t) {
   setTimeout(function() {
     fs.readdir(outputDir, function(error, files) {
       if (error) {
