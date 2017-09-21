@@ -22,13 +22,13 @@ app.appmetrics.enable('profiling');
 
 var tap = require('tap');
 
-var zOSOptions = {};
-var notzOSOptions = {};
+var skipIfzOS = {};
+var skipIfNotzOS = {};
 // skip the test if we're testing on z/OS platform
 if (process.platform === 'os390') {
-  zOSOptions = {skip: 'Test N/A on z/OS'};
+  skipIfzOS = {skip: 'Test N/A on z/OS'};
 } else {
-  notzOSOptions = {skip: 'Test N/A on non-z/OS platform'};
+  skipIfNotzOS = {skip: 'Test N/A on non-z/OS platform'};
 }
 
 tap.tearDown(function() {
@@ -52,7 +52,7 @@ tap.test('lrtime is a function or undefined', function(t) {
   t.end();
 });
 
-tap.test('CPU Data', zOSOptions, function(t) {
+tap.test('CPU Data', skipIfzOS, function(t) {
   monitor.once('cpu', function(cpuData) {
     t.ok(isInteger(cpuData.time), 'Timestamp is an integer');
     t.ok(isNumeric(cpuData.process), 'Contains numeric process usage');
@@ -235,11 +235,11 @@ monitor.once('initialized', function() {
 
 function runCommonEnvTests(commonEnvData, t) {
   var ARCHS = ['x86', 'x86_64', 'ppc32', 'ppc64', 'ppc64le', 's390', 's390x'];
+  var ZOS_ARCHS = ['3906', '2964', '2965', '2827', '2828', '2817', '2818'];
   var OSES = ['AIX', 'Linux', 'Windows', 'Mac OS X', 'OS/390'];
-  var arch = commonEnvData['os.arch'];
 
-  t.ok(ARCHS.indexOf(arch) != -1, 'Contains a recognised value for dist os.arch', zOSOptions);
-  t.ok(isInteger(arch) && arch > 2000 && arch < 4000, 'Contains a recognised value for z/OS os.arch', notzOSOptions);
+  t.ok(ARCHS.indexOf(commonEnvData['os.arch']) != -1, 'Contains a recognised value for os.arch', skipIfzOS);
+  t.ok(ZOS_ARCHS.indexOf(commonEnvData['os.arch']) != -1, 'Contains a recognised value for z/OS os.arch', skipIfNotzOS);
 
   var found = false;
   for (var entry in OSES) {
@@ -268,11 +268,11 @@ function runCommonEnvTests(commonEnvData, t) {
     //            + commonEnvData['jar.version'] + "), expected 99.99.99.123456789012");
   }
 
-  t.ok(isInteger(commonEnvData['number.of.processors']), 'number.of.processors is an integer', zOSOptions);
+  t.ok(isInteger(commonEnvData['number.of.processors']), 'number.of.processors is an integer', skipIfzOS);
 
-  t.ok(commonEnvData['number.of.processors'] > 0, 'number.of.processors is > 1', zOSOptions);
+  t.ok(commonEnvData['number.of.processors'] > 0, 'number.of.processors is > 1', skipIfzOS);
 
-  t.match(commonEnvData['command.line'], /\S/, "command.line isn't empty", zOSOptions);
+  t.match(commonEnvData['command.line'], /\S/, "command.line isn't empty", skipIfzOS);
 
   var envVarCount = 0;
   var keys = Object.keys(commonEnvData);
