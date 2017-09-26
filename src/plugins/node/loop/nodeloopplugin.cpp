@@ -76,8 +76,21 @@ void getThreadCPUTime(uint64_t* cpu_user, uint64_t* cpu_sys) {
 		*cpu_sys = (uint64_t)(stats.ru_stime.tv_sec * 1000) + (uint64_t)(stats.ru_stime.tv_usec / 1000);
 #endif
 	}
+#elif defined(__APPLE__)
+	mach_msg_type_number_t count = THREAD_BASIC_INFO_COUNT;
+	mach_port_t thread = pthread_mach_thread_np(pthread_self());
+	thread_basic_info thr_info;
+
+	kern_return_t rc = thread_info(thread, THREAD_BASIC_INFO,
+			(thread_info_t) &thr_info, &count);
+
+	if (rc == KERN_SUCCESS) {
+		*cpu_user = (thr_info.user_time.seconds * 1000) + (thr_info.user_time.microseconds / 1000);
+		*cpu_sys = (thr_info.system_time.seconds * 1000) + (thr_info.system_time.microseconds / 1000);
+	}
 #else
-	std::cout << "RUSAGE_THREAD undefined\n";
+	*cpu_user = 0;
+	*cpu_sys = 0;
 #endif
 }
 
@@ -104,8 +117,8 @@ static void GetLoopInformation(uv_timer_s *data, int status) {
 	  contentss << "," << (max / 1e6);
 	  contentss << "," << num;
 	  contentss << "," << mean;
-	  contentss << "," << ((double)(cpu_user - last_cpu_user)) / cpu_duration;
-	  contentss << "," << ((double)(cpu_sys - last_cpu_sys)) / cpu_duration;
+	  contentss << "," << (double)(((double)(cpu_user - last_cpu_user)) / cpu_duration);
+	  contentss << "," << (double)(((double)(cpu_sys - last_cpu_sys)) / cpu_duration);
 	  contentss << '\n';
 
 	  std::string content = contentss.str();

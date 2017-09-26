@@ -247,12 +247,14 @@ Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime
 Emitted when all possible environment variables have been collected. Use `appmetrics.monitor.getEnvironment()` to access the available environment variables.
 
 ### Event: 'loop'
-Emitted every 60 seconds, summarising event tick information in time interval
+Emitted every 5 seconds, summarising event tick information in time interval
 * `data` (Object) the data from the event loop sample:
     * `count` (Number) the number of event loop ticks in the last interval.
     * `minimum` (Number) the shortest (i.e. fastest) tick in milliseconds.
     * `maximum` (Number) the longest (slowest) tick in milliseconds.
     * `average` (Number) the average tick time in milliseconds.
+    * `cpu_user` (Number) the percentage of 1 CPU used by the event loop thread in user code the last interval. This is a value between 0.0 and 1.0.
+    * `cpu_system` (Number) the percentage of 1 CPU used by the event loop thread in system code in the last interval. This is a value between 0.0 and 1.0.
 
 ### Event: 'memory'
 Emitted when a memory monitoring sample is taken.

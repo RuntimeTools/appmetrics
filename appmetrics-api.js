@@ -218,8 +218,8 @@ function API(agent, appmetrics) {
         maximum: parseFloat(values[2]),
         count: parseInt(values[3]),
         average: parseFloat(values[4]),
-        cpu_user: parseInt(values[5]),
-        cpu_sys: parseInt(values[6]),
+        cpu_user: parseFloat(values[5]),
+        cpu_system: parseFloat(values[6]),
       };
       that.emit('loop', loop);
     });
