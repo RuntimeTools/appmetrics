@@ -25,6 +25,7 @@
 #include <ctime>
 #else
 #include <sys/time.h>
+#include <sys/resource.h>
 #endif
 
 #define DEFAULT_CAPACITY 10240
@@ -58,6 +59,27 @@ uint64_t max = 0;
 uint64_t num = 0;
 uint64_t sum = 0;
 
+uint64_t last_cpu_user = 0;
+uint64_t last_cpu_sys = 0;
+uint64_t last_cpu_ts = 0;
+
+void getThreadCPUTime(uint64_t* cpu_user, uint64_t* cpu_sys) {
+	// Get the CPU time for this thread
+#ifdef RUSAGE_THREAD
+	struct rusage stats;
+	if (getrusage(RUSAGE_THREAD, &stats) == 0) {
+#if defined(__APPLE__) || defined(_AIX)
+		*cpu_user = (uint64_t)(stats.ru_utime.tv_sec * 1000) + (uint64_t)(stats.ru_utime.tv_usec / 1000);
+		*cpu_sys = (uint64_t)(stats.ru_stime.tv_sec * 1000) + (uint64_t)(stats.ru_stime.tv_usec / 1000);
+#else
+		*cpu_user = (uint64_t)(stats.ru_utime.tv_sec * 1000) + (uint64_t)(stats.ru_utime.tv_usec / 1000);
+		*cpu_sys = (uint64_t)(stats.ru_stime.tv_sec * 1000) + (uint64_t)(stats.ru_stime.tv_usec / 1000);
+#endif
+	}
+#else
+	std::cout << "RUSAGE_THREAD undefined\n";
+#endif
+}
 
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 static void GetLoopInformation(uv_timer_s *data) {
@@ -65,9 +87,16 @@ static void GetLoopInformation(uv_timer_s *data) {
 static void GetLoopInformation(uv_timer_s *data, int status) {
 #endif
 	if (num != 0) {
-          // Convert from nanoseconds to milliseconds.
+
+	  uint64_t cpu_user = 0;
+	  uint64_t cpu_sys = 0;
+	  uint64_t cpu_ts = uv_hrtime() / (1000*1000);
+	  getThreadCPUTime(&cpu_user, &cpu_sys);
+
+	  // Convert from nanoseconds to milliseconds.
 
 	  double mean = (sum / 1e6) / num;
+	  double cpu_duration = (double)(cpu_ts - last_cpu_ts);
 
 	  std::stringstream contentss;
 	  contentss << "NodeLoopData";
@@ -75,6 +104,8 @@ static void GetLoopInformation(uv_timer_s *data, int status) {
 	  contentss << "," << (max / 1e6);
 	  contentss << "," << num;
 	  contentss << "," << mean;
+	  contentss << "," << ((double)(cpu_user - last_cpu_user)) / cpu_duration;
+	  contentss << "," << ((double)(cpu_sys - last_cpu_sys)) / cpu_duration;
 	  contentss << '\n';
 
 	  std::string content = contentss.str();
@@ -83,6 +114,9 @@ static void GetLoopInformation(uv_timer_s *data, int status) {
 	  max = 0;
 	  num = 0;
 	  sum = 0;
+	  last_cpu_user = cpu_user;
+	  last_cpu_sys = cpu_sys;
+	  last_cpu_ts = cpu_ts;
 
 
 	  // Send data
@@ -159,6 +193,9 @@ extern "C" {
 
 	NODELOOPPLUGIN_DECL int ibmras_monitoring_plugin_start() {
 		plugin::api.logMessage(fine, "[loop_node] Starting");
+
+		last_cpu_ts = uv_hrtime() / (1000*1000);
+		getThreadCPUTime(&last_cpu_user, &last_cpu_sys);
 
 		uv_prepare_start(&prepare_handle, OnPrepare);
 		uv_check_start(&check_handle, OnCheck);
