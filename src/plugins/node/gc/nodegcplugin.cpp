@@ -44,14 +44,7 @@ namespace plugin {
 	agentCoreFunctions api;
 	uint32 provid = 0;
 	bool timingOK;
-	
-#ifdef _WINDOWS
-	LARGE_INTEGER gcSteadyStart, gcSteadyEnd;
-#elif defined(_LINUX) || defined(_AIX)
-	struct timespec gcSteadyStart, gcSteadyEnd;
-#elif defined(__MACH__) || defined(__APPLE__) || defined(_ZOS)
-	struct timeval gcSteadyStart, gcSteadyEnd;
-#endif
+        uint64_t gcSteadyStart, gcSteadyEnd;
 }
 
 using namespace v8;
@@ -62,18 +55,18 @@ static char* NewCString(const std::string& s) {
 	return result;
 }
 
+static bool GetSteadyTime(uint64_t* now) {
+  *now = uv_hrtime();
+  return true;
+}
+static uint64_t CalculateDuration(uint64_t start, uint64_t finish) {
+	return (finish - start) / 1000000;
+}
+
 /*
  * OSX
  */
 #if defined(__MACH__) || defined(__APPLE__) || defined(_ZOS)
-static bool GetSteadyTime(struct timeval* tv) {
-	//int rc = clock_gettime(CLOCK_MONOTONIC, tv);
-	int rc = gettimeofday(tv, 0);
-	return rc == 0;
-}
-static uint64 CalculateDuration(struct timeval start, struct timeval finish) {
-	return static_cast<uint64>((finish.tv_sec - start.tv_sec) * 1000 + (finish.tv_usec - start.tv_usec) / 1000);
-}
 static unsigned long long GetRealTime() {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -86,13 +79,6 @@ static unsigned long long GetRealTime() {
  * Linux
  */
 #if defined(_LINUX) || defined(_AIX)
-static bool GetSteadyTime(struct timespec* tv) {
-	int rc = clock_gettime(CLOCK_MONOTONIC, tv);
-	return rc == 0;
-}
-static uint64 CalculateDuration(struct timespec start, struct timespec finish) {
-	return static_cast<uint64>((finish.tv_sec - start.tv_sec) * 1000 + (finish.tv_nsec - start.tv_nsec) / 1000000);
-}
 static unsigned long long GetRealTime() {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -105,26 +91,6 @@ static unsigned long long GetRealTime() {
  * Windows
  */
 #ifdef _WINDOWS
-static LARGE_INTEGER freq;
-static bool freqInitialized = FALSE;
-static bool GetSteadyTime(LARGE_INTEGER* pcount) {
-	if (!freqInitialized) {
-		if (QueryPerformanceFrequency(&freq) == 0) {
-			return FALSE;
-		}
-		freqInitialized = TRUE;
-	}
-	BOOL rc = QueryPerformanceCounter(pcount);
-	return rc != 0;
-}
-static uint64 CalculateDuration(LARGE_INTEGER start, LARGE_INTEGER finish) {
-	if (!freqInitialized) return 0L;
-	LARGE_INTEGER elapsedMilliseconds;
-	elapsedMilliseconds.QuadPart = finish.QuadPart - start.QuadPart;
-	elapsedMilliseconds.QuadPart *= 1000;
-	elapsedMilliseconds.QuadPart /= freq.QuadPart;
-	return static_cast<uint64>(elapsedMilliseconds.QuadPart);
-}
 static unsigned long long GetRealTime() {
 	SYSTEMTIME st;
 	GetSystemTime(&st);
