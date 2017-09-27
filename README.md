@@ -238,7 +238,13 @@ Emitted every 5 seconds, summarising sample based information of the event loop 
 Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime.
 * `data` (Object) the data from the GC sample:
     * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
-    * `type` (String) the type of GC cycle, either 'M' or 'S'.
+    * `type` (String) the type of GC cycle, either:
+      - `'M'`: MarkSweepCompact, aka "major"
+      - `'S'`: Scavenge, aka "minor"
+      - `'I'`: IncrementalMarking, aka "incremental" (only exists on node 5.x
+        and greater)
+      - '`W'`: ProcessWeakCallbacks, aka "weakcb" (only exists on node 5.x
+        and greater)
     * `size` (Number) the size of the JavaScript heap in bytes.
     * `used` (Number) the amount of memory used on the JavaScript heap in bytes.
     * `duration` (Number) the duration of the GC cycle in milliseconds.
