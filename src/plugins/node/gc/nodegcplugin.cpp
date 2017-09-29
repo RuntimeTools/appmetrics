@@ -115,17 +115,7 @@ void afterGC(v8::Isolate *isolate, GCType type, GCCallbackFlags flags) {
 	gcRealEnd = GetRealTime();
 
 	// GC type
-	const char *gcType = NULL;
-        switch (type) {
-          case kGCTypeMarkSweepCompact: gcType = "M"; break;
-          case kGCTypeScavenge: gcType = "S"; break;
-#if NODE_VERSION_AT_LEAST(5, 0, 0)
-          case kGCTypeIncrementalMarking: gcType = "I"; break;
-          case kGCTypeProcessWeakCallbacks: gcType = "W"; break;
-#endif
-          // Should never happen, but call it minor if type is unrecognized.
-          default: gcType = "S"; break;
-        }
+	const char *gcType = (type == kGCTypeMarkSweepCompact) ? "M" : "S";
 
 	// GC heap stats
 	HeapStatistics hs;
