@@ -42,7 +42,7 @@
         "defines": [ "__MACH__", "__APPLE__",  ],
          "libraries": [ "-undefined dynamic_lookup" ],
       }],
-      ['OS=="os390"', {
+      ['OS in "os390 zos"', {
         "defines": [ "_ZOS", "_UNIX03_THREADS" ],
         "cflags_cc": ['-Wc,EXPORTALL'],
       }],
@@ -160,7 +160,7 @@
         "nodeheapplugin",
       ],
       "conditions": [
-        ['OS=="os390"', {
+        ['OS in "os390 zos"', {
           "dependencies+": [
             "nodezmemoryplugin",
           ],
@@ -191,7 +191,7 @@
            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
          ],
          "conditions": [
-           ['OS=="os390"', {
+           ['OS in "os390 zos"', {
              # no hcmqtt, cpu or memory plugin
              "files!": [
                "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
@@ -210,7 +210,7 @@
     },
   ],
   "conditions": [
-    ['OS=="os390"', {
+    ['OS in "os390 zos"', {
       "targets+": [
         {
           "target_name": "nodezmemoryplugin",
