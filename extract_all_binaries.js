@@ -39,6 +39,7 @@ var AGENTCORE_PLATFORMS = [
   'linux-x64',
   'win32-ia32',
   'win32-x64',
+  'os390-s390x',
 ];
 var AGENTCORE_VERSION = '3.2.2';
 var APPMETRICS_VERSION = '3.1.0';
