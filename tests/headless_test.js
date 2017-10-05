@@ -31,37 +31,43 @@ appmetrics.configure({
 app.start();
 
 var tap = require('tap');
-tap.plan(1); // NOTE: This needs to be updated when tests are added/removed
 
-var testOptions = {};
 // skip the test if we're testing on z/OS platform
 if (process.platform === 'os390') {
-  testOptions = {skip: 'Test N/A on z/OS'};
-}
+  tap.plan(0);
+  cleanUp();
+} else {
+  tap.plan(1); // NOTE: This needs to be updated when tests are added/removed
 
-tap.test('Headless mode should produce a .hcd file', testOptions, function(t) {
-  setTimeout(function() {
-    fs.readdir(outputDir, function(error, files) {
-      if (error) {
-        t.fail('An error occurred: ' + error);
-        t.end();
-        cleanUp();
-        return;
-      }
-      for (var i = 0, len = files.length; i < len; i++) {
-        if (/(\w+)\.hcd/.test(files[i].toString())) {
-          t.pass(files[i] + ' HCD file found');
+
+  tap.test('Headless mode should produce a .hcd file', function(t) {
+    setTimeout(function() {
+      fs.readdir(outputDir, function(error, files) {
+        if (error) {
+          t.fail('An error occurred: ' + error);
           t.end();
           cleanUp();
           return;
         }
-      }
-      t.fail('No .hcd file found');
-      t.end();
-      cleanUp();
-    });
-  }, 70000);
-});
+        for (var i = 0, len = files.length; i < len; i++) {
+          if (/(\w+)\.hcd/.test(files[i].toString())) {
+            t.pass(files[i] + ' HCD file found');
+            t.end();
+            cleanUp();
+            return;
+          }
+        }
+        t.fail('No .hcd file found');
+        t.end();
+        cleanUp();
+      });
+    }, 70000);
+  });
+
+  tap.tearDown(function() {
+    cleanUp();
+  });
+}
 
 function cleanUp() {
   deleteDir(outputDir);
