@@ -8,8 +8,8 @@ Node Application Metrics monitoring and profiling agent
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
 [![Homepage](https://img.shields.io/badge/homepage-Node%20Application%20Metrics-blue.svg)](https://developer.ibm.com/node/monitoring-post-mortem/application-metrics-node-js/)
 
-Node Application Metrics instruments the Node.js runtime for performance monitoring, providing the monitoring data via an API. 
-Additionally the data can be visualized by using the [Node Application Metrics Dashboard](https://github.com/RuntimeTools/appmetrics-dash). 
+Node Application Metrics instruments the Node.js runtime for performance monitoring, providing the monitoring data via an API.
+Additionally the data can be visualized by using the [Node Application Metrics Dashboard](https://github.com/RuntimeTools/appmetrics-dash).
 
 The data can also be visualized in Eclipse using the [IBM Monitoring and Diagnostics Tools - Health Center][1] client. Profiling data is available in Health Center, but is not yet available in the Dashboard. See https://www.ibm.com/developerworks/java/jdk/tools/healthcenter/ for more details.
 
@@ -43,7 +43,7 @@ Node Application Metrics provides the following built-in data collection sources
  Function trace     | Tracing of application function calls that occur during a request (disabled by default)
 ## Performance overhead
 
-Our testing has shown that the performance overhead in terms of processing is minimal, adding less than 0.5 % to the CPU usage of your application. The additional memory required is around 20 MB to gather information about your system and application. 
+Our testing has shown that the performance overhead in terms of processing is minimal, adding less than 0.5 % to the CPU usage of your application. The additional memory required is around 20 MB to gather information about your system and application.
 
 We gathered this information by monitoring the sample application [Acme Air][3]. We used MongoDB as our datastore and used JMeter to drive load though the program.  We have performed this testing with Node.js version 6.10.3
 
@@ -75,10 +75,10 @@ $ npm install -g appmetrics
 ```
 A global install will put the module inside a directory tied to your Node.js SDK.
 
-* On Windows, either: 
+* On Windows, either:
   * `<UserDirectory>\AppData\Roaming\npm\node_modules`
   * or: `<NodeInstallDirectory>\node_modules`
-* On other platforms: 
+* On other platforms:
   * `<node_install_directory>/lib/node_modules`
 
 It also adds the `node-hc` command to another directory tied to your Node.js SDK, one that was added to your executable search path by the Node.js SDK installer.
@@ -93,7 +93,7 @@ It also adds the `node-hc` command to another directory tied to your Node.js SDK
 
 Node Application Metrics can be configured in two ways, by using the configuration file described below or via a call to configure(options).
 
-Node Application Metrics comes with a configuration file inside the [module installation directory](#installation) (`.../node_modules/appmetrics/appmetrics.properties`). This can be used to configure connection options, logging and data source options. 
+Node Application Metrics comes with a configuration file inside the [module installation directory](#installation) (`.../node_modules/appmetrics/appmetrics.properties`). This can be used to configure connection options, logging and data source options.
 
 Node Application Metrics will attempt to load `appmetrics.properties` from one of the following locations (in order):
 
@@ -108,7 +108,7 @@ Many of the options provide configuration of the Health Center core agent librar
 The following options are specific to appmetrics:
 
 * `com.ibm.diagnostics.healthcenter.data.profiling=[off|on]`
-  Specifies whether method profiling data will be captured. The default value is `off`.  This specifies the value at start-up; it can be enabled and disabled dynamically as the application runs, either by a monitoring client or the API. 
+  Specifies whether method profiling data will be captured. The default value is `off`.  This specifies the value at start-up; it can be enabled and disabled dynamically as the application runs, either by a monitoring client or the API.
 
 ## Running Node Application Metrics
 
@@ -152,7 +152,9 @@ monitoring.on('cpu', function (cpu) {
 ```
 
 ## Health Center Eclipse IDE client
+**_Not supported on z/OS_**
 ### Connecting to the client
+
 Connecting to the Health Center client requires the additional installation of a MQTT broker. The Node Application Metrics agent sends data to the MQTT broker specified in the `appmetrics.properties` file or set via a call to configure(options). Installation and configuration documentation for the Health Center client is available from the [Health Center documentation in IBM Knowledge Center][2].
 
 Note that both the API and the Health Center client can be used at the same time and will receive the same data. Use of the API requires a local install and application modification (see *[Modifying your application to use the local installation](#modifying-your-application-to-use-the-local-installation)*).
@@ -161,8 +163,8 @@ Further information regarding the use of the Health Center client with Node Appl
 
 ## API Documentation
 ### appmetrics.configure(options)
-Sets various properties on the appmetrics monitoring agent. If the agent has already been started, this function does nothing. 
-* `options`(Object) key value pairs of properties and values to be set on the monitoring agent. 
+Sets various properties on the appmetrics monitoring agent. If the agent has already been started, this function does nothing.
+* `options`(Object) key value pairs of properties and values to be set on the monitoring agent.
 
 Property name              | Property value            | Effect
 :--------------------|:-------------------------|:-----------------------------
@@ -171,7 +173,7 @@ Property name              | Property value            | Effect
  `mqttHost`             | `host name`         | Specifies the host name of the mqtt broker
  `mqttPort` | `port number`              | Specifies the port number of the mqtt broker
  `profiling` | `[off|on]`              | Specifies whether method profiling data will be captured. The default value is off
- 
+
 
 ### appmetrics.start()
 Starts the appmetrics monitoring agent. If the agent is already running this function does nothing.
@@ -197,7 +199,7 @@ Set the configuration to be applied to a specific data type. The configuration a
 
  Source              | Configuration            | Effect
 :--------------------|:-------------------------|:-----------------------------
- `http`              | `filters`                | (Array) of URL filter Objects consisting of: 
+ `http`              | `filters`                | (Array) of URL filter Objects consisting of:
                      |                          | `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
                      |                          | `to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.             
  `requests`          | `excludeModules`         | (Array) of String names of modules to exclude from request tracking.
@@ -210,7 +212,8 @@ Allows custom monitoring events to be added into the Node Application Metrics ag
 * `data` (Object) the data to be made available with the event. The object must not contain circular references, and by convention should contain a `time` value representing the milliseconds when the event occurred.
 
 ### appmetrics.writeSnapshot([filename],[callback])
-Dumps the v8 heap via `heapdump`. 
+**_Not supported on z/OS_**
+Dumps the v8 heap via `heapdump`.
 For more information, see https://github.com/bnoordhuis/node-heapdump/blob/master/README.md
 
 ### appmetrics.monitor()
@@ -309,10 +312,10 @@ Emitted when a LevelDB query is made using the `leveldown` module.
     * `time` (Number) the time in milliseconds when the LevelDB query was made. This can be converted to a Date using `new Date(data.time)`.
     * `method` (String) The leveldown method being used.
     * `key` (Object) The key being used for a call to `get`, `put` or `del` (Undefined for other methods)
-    * `value` (Object) The value being added to the LevelDB database using the `put` method (Undefined for other methods) 
-    * `opCount` (Number) The number of operations carried out by a `batch` method (Undefined for other methods) 
+    * `value` (Object) The value being added to the LevelDB database using the `put` method (Undefined for other methods)
+    * `opCount` (Number) The number of operations carried out by a `batch` method (Undefined for other methods)
     * `duration` (Number) the time taken for the LevelDB query to be responded to in ms.
-    
+
 ### Event: 'loopback-datasource-juggler'
 Emitted when a function is called on the `loopback-datasource-juggler` module
 * `data` (Object) the data from the loopback-datasource-juggler event:
@@ -416,7 +419,7 @@ Emitted when a query is executed using the `strong-oracle` module.
     * `time` (Number) the milliseconds when the Strong Oracle query was made. This can be converted to a Date using `new Date(data.time)`.
     * `query` (String) the query made of the database.
     * `duration` (Number) the time taken for the Strong Oracle query to be responded to in ms.
-    
+
 ## API: Requests
 
 ### Event: 'request'
@@ -438,11 +441,13 @@ Requests are a special type of event emitted by appmetrics.  All the probes name
 
 The Node Application Metrics agent supports the following runtime environments where a Node.js runtime is available:
 
-* **Node.js v4, v6 ,v7 and v8** on:
+* **Node.js v4, v7 and v8** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
   * 64-bit or 32-bit runtime on AIX (PPC64)
   * 64-bit runtime on Mac OS X (x64)
+* **Node.js v6** on all the above, plus:
+  * 64-bit runtime on z/OS (os390)
 
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
@@ -496,9 +501,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-3.1.0
+3.1.1
 
 ## Release History
+`3.1.1` - Node v6 on z/OS support.
 `3.1.0` - HTTPS probe added.
 `3.0.2` - Probe defect for Node 8 support.  
 `3.0.1` - Packaging bug fix to allow build from source if binary not present.  
