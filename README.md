@@ -166,13 +166,13 @@ Further information regarding the use of the Health Center client with Node Appl
 Sets various properties on the appmetrics monitoring agent. If the agent has already been started, this function does nothing.
 * `options`(Object) key value pairs of properties and values to be set on the monitoring agent.
 
-Property name              | Property value            | Effect
+Property name        | Property value type      | Property description
 :--------------------|:-------------------------|:-----------------------------
- `applicationID`              | `string`      | Specifies a unique identifier for the mqtt connection             
- `mqtt`          | `[off|on]`         | Specifies whether the monitoring agent sends data to the mqtt broker. The default value is on
- `mqttHost`             | `host name`         | Specifies the host name of the mqtt broker
- `mqttPort` | `port number`              | Specifies the port number of the mqtt broker
- `profiling` | `[off|on]`              | Specifies whether method profiling data will be captured. The default value is off
+ `applicationID`     | `string`                 | Specifies a unique identifier for the mqtt connection             
+ `mqtt`              | `string['off'\|'on']`    | Specifies whether the monitoring agent sends data to the mqtt broker. The default value is `'on'`
+ `mqttHost`          | `string`                 | Specifies the host name of the mqtt broker
+ `mqttPort`          | `string['[0-9]*']`       | Specifies the port number of the mqtt broker
+ `profiling`         | `string['off'\|'on']`    | Specifies whether method profiling data will be captured. The default value is `'off'`
 
 
 ### appmetrics.start()
@@ -197,11 +197,9 @@ Set the configuration to be applied to a specific data type. The configuration a
 * `type` (String) the type of event to apply the configuration to.
 * `config` (Object) key value pairs of configurations to be applied to the specified event. The available configuration options are as follows:
 
- Source              | Configuration            | Effect
+ Type                | Configuration key        | Configuration Value
 :--------------------|:-------------------------|:-----------------------------
- `http`              | `filters`                | (Array) of URL filter Objects consisting of:
-                     |                          | `pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'
-                     |                          | `to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.             
+ `http`              | `filters`                | (Array) of URL filter Objects consisting of:<ul><li>`pattern` (String) a regular expression pattern to match HTTP method and URL against, eg. 'GET /favicon.ico$'</li><li>`to` (String) a conversion for the URL to allow grouping. A value of `''` causes the URL to be ignored.</li></ul>
  `requests`          | `excludeModules`         | (Array) of String names of modules to exclude from request tracking.
  `trace`             | `includeModules`         | (Array) of String names for modules to include in function tracing. By default only non-module functions are traced when trace is enabled.
  `advancedProfiling` | `threshold`              | (Number) millisecond run time of an event loop cycle that will trigger profiling
