@@ -504,8 +504,8 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 3.1.1
 
 ## Release History
-`3.1.1` - Node v6 on z/OS support.
-`3.1.0` - HTTPS probe added.
+`3.1.1` - Node v6 on z/OS support.  
+`3.1.0` - HTTPS probe added.  
 `3.0.2` - Probe defect for Node 8 support.  
 `3.0.1` - Packaging bug fix to allow build from source if binary not present.  
 `3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.  
