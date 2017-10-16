@@ -119,7 +119,7 @@ function formatURL(httpsOptions) {
   if (httpsOptions.host) {
     url += httpsOptions.host;
   } else if (httpsOptions.hostname) {
-    url += httpsOptions.host;
+    url += httpsOptions.hostname;
   } else {
     url += 'localhost';
   }
