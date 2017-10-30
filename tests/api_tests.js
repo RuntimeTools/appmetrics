@@ -124,7 +124,8 @@ tap.test('GC Data', function(t) {
     // Test if all the GC data values are integers and type is either M or S.
     t.ok(isInteger(gcData.time), 'Timestamp is an integer');
 
-    t.ok(gcData.type === 'M' || gcData.type === 'S', 'Contains an expected GC type (expected "M" or "S")');
+    const gcTypes = {M: 1, S: 1, I: 1, W: 1};
+    t.ok(gcTypes[gcData.type], '"' + gcData.type + '" is an expected GC type');
 
     t.ok(isInteger(gcData.size), 'Heap size is an integer');
 
