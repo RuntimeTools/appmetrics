@@ -114,7 +114,7 @@ tap.test('Memory Data', function(t) {
 
     t.ok(memData.physical_free === -1 || memData.physical_free >= 0, 'Contains a valid free physical memory');
 
-    t.ok(memData.physical_used === -1 || memData.physical_used >= 0, 'Contains a valid used physical memory');
+    t.ok(memData.physical_used === -1 || memData.physical_used >= 0, 'Contains a valid used physical memory', memData);
     t.end();
   });
 });
