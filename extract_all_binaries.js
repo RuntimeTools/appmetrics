@@ -41,7 +41,7 @@ var AGENTCORE_PLATFORMS = [
   'win32-x64',
   'os390-s390x',
 ];
-var AGENTCORE_VERSION = '3.2.5';
+var AGENTCORE_VERSION = '3.2.6';
 var APPMETRICS_VERSION = '3.1.2';
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
