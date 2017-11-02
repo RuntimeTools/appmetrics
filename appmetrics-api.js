@@ -67,13 +67,24 @@ function API(agent, appmetrics) {
     }
   };
 
+  let totalProcessCPULoad = 0.0;
+  let totalSystemCPULoad = 0.0;
+  let cpuLoadSamples = 0;
+
   var formatCPU = function(message) {
     // cpu : startCPU@#1412609879696@#0.000499877@#0.137468
     var values = message.trim().split('@#'); // needs to be trimmed because of leading \n character
+    let processCPU = parseFloat(values[2]);
+    let systemCPU = parseFloat(values[3]);
+    totalProcessCPULoad += processCPU;
+    totalSystemCPULoad += systemCPU;
+    cpuLoadSamples++;
     var cpu = {
       time: parseInt(values[1]),
-      process: parseFloat(values[2]),
-      system: parseFloat(values[3]),
+      process: processCPU,
+      system: systemCPU,
+      processMean: totalProcessCPULoad / cpuLoadSamples,
+      systemMean: totalSystemCPULoad / cpuLoadSamples,
     };
     that.emit('cpu', cpu);
   };
@@ -154,7 +165,11 @@ function API(agent, appmetrics) {
     that.emit('memory', memory);
   };
 
-  var formatGC = function(message) {
+  let gcDurationTotals = {};
+  let gcCounts = {};
+  let maxHeapUsed = 0;
+
+  function formatGC(message) {
     /* gc_node : NodeGCData,1413903289280,S,48948480,13828320,7
          *                     , timestamp   ,M|S, size , used   , pause (ms)
          *
@@ -162,16 +177,29 @@ function API(agent, appmetrics) {
          * so first separate the lines, followed by the normal parsing.
          *
          */
-    var lines = message.trim().split('\n');
+    let lines = message.trim().split('\n');
     /* Split each line into the comma-separated values. */
     lines.forEach(function(line) {
-      var values = line.split(/[,]+/);
+      let values = line.split(/[,]+/);
+      let type = values[2];
+      let duration = parseInt(values[5]);
+      let used = parseInt(values[4]);
+      maxHeapUsed = Math.max(maxHeapUsed, used);
+      if (gcDurationTotals[type]) {
+        gcDurationTotals[type] += duration;
+        gcCounts[type]++;
+      } else {
+        gcDurationTotals[type] = duration;
+        gcCounts[type] = 1;
+      }
       var gc = {
         time: parseInt(values[1]),
-        type: values[2],
+        type: type,
         size: parseInt(values[3]),
-        used: parseInt(values[4]),
-        duration: parseInt(values[5]),
+        used: used,
+        duration: duration,
+        totalProportion: (gcDurationTotals[type] / (process.uptime() * 1000)),
+        usedMax: maxHeapUsed,
       };
       that.emit('gc', gc);
     });
