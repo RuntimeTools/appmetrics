@@ -22,12 +22,17 @@ var request = require('../lib/request.js');
 
 var url = require('url');
 var util = require('util');
+var semver = require('semver');
 
-// In https 'get' calls 'request' so we only instrument 'request'
-var methods = ['request'];
+var methods;
+// In Node.js < v8.9.0 'get' calls 'request' so we only instrument 'request'
+if (semver.lt(process.version, '8.9.0')) {
+  methods = ['request'];
+} else {
+  methods = ['request', 'get'];
+}
 
 // Probe to instrument outbound https requests
-
 function HttpsOutboundProbe() {
   Probe.call(this, 'https'); // match the name of the module we're instrumenting
 }
