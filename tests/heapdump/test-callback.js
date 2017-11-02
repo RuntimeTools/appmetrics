@@ -25,7 +25,7 @@ function testFuncCall(test) {
     res.end();
   });
   server.on('listening', function() {
-    console.log('Listening on http://127.0.0.1:8000/');
+    console.log(`Listening on http://localhost:${server.address().port}/`);
     console.log('PID %d', process.pid);
 
     var heapSnapshotFile = 'heapdump-*.heapsnapshot';

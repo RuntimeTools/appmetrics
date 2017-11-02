@@ -82,17 +82,17 @@ function isNumeric(n) {
 }
 
 // Request with a callback
-http.get('http://localhost:8000', function(res) {});
+http.get(`http://localhost:${server.address().port}/`, function(res) {});
 
 // Request without a callback
-http.get('http://localhost:8000');
+http.get(`http://localhost:${server.address().port}/`);
 
 // Enable requests
 monitor.enable('requests');
 monitor.disable('http');
 
 // Request with a callback
-http.get('http://localhost:8000', function(res) {});
+http.get(`http://localhost:${server.address().port}/`, function(res) {});
 
 // Request without a callback
-http.get('http://localhost:8000');
+http.get(`http://localhost:${server.address().port}/`);

@@ -23,4 +23,4 @@ module.exports.server = http.createServer((req, res) => {
   res.end('Hello World');
 });
 
-this.server.listen(8000);
+this.server.listen(0);
