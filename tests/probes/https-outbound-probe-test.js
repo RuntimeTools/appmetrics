@@ -41,7 +41,8 @@ monitor.on('https-outbound', function(data) {
 function checkHttpOutboundData(data, t) {
   t.ok(isInteger(data.time), 'Timestamp is an integer');
   t.equals(data.method, 'GET', 'Should report GET as HTTP request method');
-  t.equals(data.url, 'https://localhost:8000/', 'Should report https://localhost:8000/ as URL');
+  t.equals(data.url, `https://localhost:${server.address().port}/`,
+    `Should report https://localhost:${server.address().port}/ as URL`);
   if (data.requestHeaders) {
     t.equals(data.requestHeaders.hello, 'world', 'Should report world as value of hello header');
   }
@@ -57,17 +58,17 @@ function isNumeric(n) {
 
 var options = {
   host: 'localhost',
-  port: 8000,
+  port: server.address().port,
   headers: {
     hello: 'world',
   },
 };
 
 // Request with a callback
-https.get('https://localhost:8000/', function(res) {});
+https.get(`https://localhost:${server.address().port}/`, function(res) {});
 
 // Request without a callback
-https.get('https://localhost:8000/');
+https.get(`https://localhost:${server.address().port}/`);
 
 // Request with headers
 https.request(options).end();

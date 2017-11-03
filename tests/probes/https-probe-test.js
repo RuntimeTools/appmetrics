@@ -82,14 +82,14 @@ function isNumeric(n) {
 }
 
 // Request with a callback
-https.get('https://localhost:8000/', function(res) {});
+https.get(`https://localhost:${server.address().port}/`, function(res) {});
 
 // Request without a callback
-https.get('https://localhost:8000/');
+https.get(`https://localhost:${server.address().port}/`);
 
 var options = {
   host: 'localhost',
-  port: 8000,
+  port: server.address().port,
   headers: {
     hello: 'world',
   },
@@ -104,8 +104,8 @@ setTimeout(function() {
   monitor.disable('https');
 
   // Request with a callback
-  https.get('https://localhost:8000/', function(res) {});
+  https.get(`https://localhost:${server.address().port}/`, function(res) {});
 
   // Request without a callback
-  https.get('https://localhost:8000/');
+  https.get(`https://localhost:${server.address().port}/`);
 }, 2000);

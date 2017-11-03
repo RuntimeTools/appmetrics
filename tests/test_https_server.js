@@ -30,4 +30,4 @@ module.exports.server = https.createServer(httpsOptions, (req, res) => {
   res.end('Hello World');
 });
 
-this.server.listen(8000);
+this.server.listen(0);

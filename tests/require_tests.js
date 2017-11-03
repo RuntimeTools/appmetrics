@@ -25,7 +25,7 @@ tap.test('Calling require without start should not break', function(t) {
 
   // HTTP outbound request
   // (previously triggered http-outbound probe to emit an event which caused a SIGSEGV)
-  http.get('http://localhost:8000', function(res) {
+  http.get(`http://localhost:${server.address().port}/`, function(res) {
     server.close();
     t.end();
   });
