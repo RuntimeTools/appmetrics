@@ -27,19 +27,18 @@ util.inherits(CouchbaseProbe, Probe);
 
 CouchbaseProbe.prototype.aspectBucketMethod = function(bucket, method) {
   var that = this;
-
   aspect.before(bucket, method, function(target, methodName, methodArgs, probeData) {
     that.metricsProbeStart(probeData, method, methodArgs);
     if (aspect.findCallbackArg(methodArgs) != undefined) {
       aspect.aroundCallback(methodArgs, probeData, function(target, args) {
-        that.metricsProbeEnd(probeData, method, methodArgs, args[0]);
+        that.metricsProbeEnd(probeData, methodName, bucket._name, args[0]);
       });
     }
   });
 };
 
 // Most used couchbase bucket methods
-const bucketMethods = ['upsert', 'insert', 'replace', 'remove', 'get', 'getMulti'];
+const bucketMethods = ['query', 'upsert', 'insert', 'replace', 'remove', 'get', 'getMulti'];
 
 CouchbaseProbe.prototype.attach = function(name, target) {
   var that = this;
@@ -49,8 +48,9 @@ CouchbaseProbe.prototype.attach = function(name, target) {
 
   var mock = target['Mock']['Cluster'].prototype;
   var cluster = target['Cluster'].prototype;
-
   var data = {};
+
+  // couchbase mock cluster
   aspect.after(mock, 'openBucket', data, function(target, methodName, args, probeData, bucket) {
     for(key in bucketMethods) {
       that.aspectBucketMethod(bucket, bucketMethods[key]);
@@ -58,6 +58,7 @@ CouchbaseProbe.prototype.attach = function(name, target) {
     return bucket;
   });
 
+  // couchbase cluster
   aspect.after(cluster, 'openBucket', data, function(target, methodName, args, probeData, bucket) {
     for(key in bucketMethods) {
       that.aspectBucketMethod(bucket, bucketMethods[key]);
@@ -77,13 +78,13 @@ CouchbaseProbe.prototype.attach = function(name, target) {
  *    method:   the method called on the bucket
  *    duration: the time for the request to respond
  */
-CouchbaseProbe.prototype.metricsEnd = function(probeData, method, methodArgs, err) {
+CouchbaseProbe.prototype.metricsEnd = function(probeData, method, bucketName, err) {
   if (probeData && probeData.timer) {
     probeData.timer.stop();
     var eventTimer = probeData.timer;
     am.emit('couchbase', {
       time: eventTimer.startTimeMillis,
-      bucket: methodArgs[0],
+      bucket: bucketName,
       method: method,
       duration: eventTimer.timeDelta,
       error: err
