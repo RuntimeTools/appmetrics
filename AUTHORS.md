@@ -18,3 +18,4 @@ Authors ordered by first contribution:
  - Gibson Fahnestock (https://github.com/gibfahn)
  - ? (https://github.com/nqvst)
  - Vladislav Botvin (https://github.com/darky)
+ - Jake Warren (https://github.com/astub)
