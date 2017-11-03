@@ -16,7 +16,7 @@
 import json,sys
 
 if len(sys.argv) < 2:
-    print "Usage get_from_json file <field>"
+    print("Usage get_from_json file <field>")
     exit (-1)
 
 with open(sys.argv[1]) as f:
