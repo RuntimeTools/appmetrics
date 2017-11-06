@@ -100,7 +100,7 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 extern "C" {
 	NODEHEAPPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 	    plugin::api = api;
-	    plugin::api.logMessage(debug, "[heap_node] Registering push sources");
+	    plugin::api.logMessage(loggingLevel::debug, "[heap_node] Registering push sources");
 	
 	    pushsource *head = createPushSource(0, "heap_node");
 	    plugin::provid = provID;

@@ -32,6 +32,10 @@
 #include <string>
 #include <sstream>
 
+#if defined(_ZOS)
+#include <unistd.h>
+#endif
+
 #define DEFAULT_CAPACITY 1024
 
 #if defined(_WINDOWS)
@@ -78,35 +82,64 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 static std::string ToStdString(Local<String> s) {
 	char *buf = new char[s->Length() + 1];
 	s->WriteUtf8(buf);
+#if defined(_ZOS)
+  __atoe(buf);
+#endif
 	std::string result(buf);
 	delete[] buf;
 	return result;
 }
 
+static std::string asciiString(std::string s) {
+#if defined(_ZOS)
+    char* cp = new char[s.length() + 1];
+    std::strcpy(cp, s.c_str());
+    __etoa(cp);
+    std::string returnString (cp);
+    delete[] cp;
+    return returnString;
+#else
+    return s;
+#endif
+}
+
+static std::string nativeString(std::string s) {
+#if defined(_ZOS)
+    char* cp = new char[s.length() + 1];
+    std::strcpy(cp, s.c_str());
+    __atoe(cp);
+    std::string returnString (cp);
+    delete[] cp;
+    return returnString;
+#else
+    return s;
+#endif
+}
+
 static Local<Object> GetProcessObject() {
-	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("process").ToLocalChecked())->ToObject();
+	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject();
 }
 
 static Local<Object> GetProcessConfigObject() {
-	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>("process").ToLocalChecked())->ToObject()->Get(Nan::New<String>("config").ToLocalChecked())->ToObject();
+	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject()->Get(Nan::New<String>(asciiString("config")).ToLocalChecked())->ToObject();
 
 }
-	
+
 static std::string GetNodeVersion() {
-	Local<String> version = GetProcessObject()->Get(Nan::New<String>("version").ToLocalChecked())->ToString();
+	Local<String> version = GetProcessObject()->Get(Nan::New<String>(asciiString("version")).ToLocalChecked())->ToString();
 	return ToStdString(version);
 }
 
 static std::string GetNodeTag() {
-	Local<String> tag = GetProcessConfigObject()->Get(Nan::New<String>("variables").ToLocalChecked())->ToObject()->Get(Nan::New<String>("node_tag").ToLocalChecked())->ToString();
+	Local<String> tag = GetProcessConfigObject()->Get(Nan::New<String>(asciiString("variables")).ToLocalChecked())->ToObject()->Get(Nan::New<String>(asciiString("node_tag")).ToLocalChecked())->ToString();
 	return ToStdString(tag);
 }
 
 static std::string GetNodeArguments(const std::string separator="@@@") {
 	std::stringstream ss;
 	Local<Object> process = GetProcessObject();
-	Local<Object> nodeArgv = process->Get(Nan::New<String>("execArgv").ToLocalChecked())->ToObject();
-	int64 nodeArgc = nodeArgv->Get(Nan::New<String>("length").ToLocalChecked())->ToInteger()->Value();
+	Local<Object> nodeArgv = process->Get(Nan::New<String>(asciiString("execArgv")).ToLocalChecked())->ToObject();
+	int64 nodeArgc = nodeArgv->Get(Nan::New<String>(asciiString("length")).ToLocalChecked())->ToInteger()->Value();
 
 	int written = 0;
 	if (nodeArgc > 0) {
@@ -115,7 +148,7 @@ static std::string GetNodeArguments(const std::string separator="@@@") {
 			ss << ToStdString(nodeArgv->Get(i)->ToString());
 		}
 	}
-	
+
 	return ss.str();
 }
 
@@ -127,8 +160,8 @@ size_t GuessSpaceSizeFromArgs(std::string argName) {
 	size_t result = 0;
 
 	Local<Object> process = GetProcessObject();
-	Local<Object> nodeArgv = process->Get(Nan::New<String>("execArgv").ToLocalChecked())->ToObject();
-	int64 nodeArgc = nodeArgv->Get(Nan::New<String>("length").ToLocalChecked())->ToInteger()->Value();
+	Local<Object> nodeArgv = process->Get(Nan::New<String>(asciiString("execArgv")).ToLocalChecked())->ToObject();
+	int64 nodeArgc = nodeArgv->Get(Nan::New<String>(asciiString("length")).ToLocalChecked())->ToInteger()->Value();
 
 	for (int i = 0; i < nodeArgc; i++) {
 		std::string arg = ToStdString(nodeArgv->Get(i)->ToString());
@@ -231,7 +264,7 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 	Nan::GetHeapStatistics(&hs);
 	plugin::heapSizeLimit = hs.heap_size_limit();
 	uv_close((uv_handle_t*) async, cleanupHandle);
-	
+
 	if (plugin::nodeVersion != "") {
 		std::stringstream contentss;
 		contentss << "#EnvironmentSource\n";
@@ -241,9 +274,9 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 			contentss << plugin::nodeTag;
 		}
 		contentss << '\n';
-		
-		contentss << "appmetrics.version=" << plugin::api.getProperty("appmetrics.version") << '\n'; // eg "1.0.4"
-		contentss << "agentcore.version=" << std::string(plugin::api.getProperty("agent.version")) << '\n'; // eg "3.0.7"
+
+		contentss << "appmetrics.version=" << nativeString(std::string(plugin::api.getProperty("appmetrics.version"))) << '\n'; // eg "1.0.4"
+		contentss << "agentcore.version=" << nativeString(std::string(plugin::api.getProperty("agent.version"))) << '\n'; // eg "3.0.7"
 
 		if (plugin::nodeVendor != "") {
 			contentss << "runtime.vendor=" << plugin::nodeVendor << '\n';
@@ -266,7 +299,7 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 
 
 		contentss << "command.line.arguments=" << plugin::commandLineArguments << '\n';
-		
+
 		std::string content = contentss.str();
 		monitordata data;
 		data.persistent = false;
@@ -276,7 +309,7 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 		data.data = content.c_str();
 		plugin::api.agentPushData(&data);
 	} else {
-		plugin::api.logMessage(debug, "[environment_node] Unable to get Node.js environment information");
+		plugin::api.logMessage(loggingLevel::debug, "[environment_node] Unable to get Node.js environment information");
 	}
 
 }
@@ -284,32 +317,32 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 extern "C" {
 	NODEENVPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 		plugin::api = api;
-		plugin::api.logMessage(debug, "[environment_node] Registering push sources");
-	
+		plugin::api.logMessage(loggingLevel::debug, "[environment_node] Registering push sources");
+
 		pushsource *head = createPushSource(0, "environment_node");
 		plugin::provid = provID;
 		return head;
 	}
-	
+
 	NODEENVPLUGIN_DECL int ibmras_monitoring_plugin_init(const char* properties) {
 		return 0;
 	}
-	
+
 	NODEENVPLUGIN_DECL int ibmras_monitoring_plugin_start() {
 		plugin::api.logMessage(fine, "[environment_node] Starting");
-		
+
 		// Run GetNodeInformation() on the Node event loop
 		uv_async_t *async = new uv_async_t;
 		uv_async_init(uv_default_loop(), async, GetNodeInformation);
 		uv_async_send(async); // close and cleanup in call back
 		return 0;
 	}
-	
+
 	NODEENVPLUGIN_DECL int ibmras_monitoring_plugin_stop() {
 		plugin::api.logMessage(fine, "[environment_node] Stopping");
 		return 0;
 	}
-	
+
 	NODEENVPLUGIN_DECL const char* ibmras_monitoring_getVersion() {
 		return "1.0";
 	}

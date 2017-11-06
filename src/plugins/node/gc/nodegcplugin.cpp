@@ -13,6 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *******************************************************************************/
+#if defined(_ZOS)
+#define _XOPEN_SOURCE_EXTENDED 1
+#undef _ALL_SOURCE
+#endif
 
 #include "ibmras/monitoring/AgentExtensions.h"
 #include "Typesdef.h"
@@ -40,14 +44,7 @@ namespace plugin {
 	agentCoreFunctions api;
 	uint32 provid = 0;
 	bool timingOK;
-	
-#ifdef _WINDOWS
-	LARGE_INTEGER gcSteadyStart, gcSteadyEnd;
-#elif defined(_LINUX) || defined(_AIX)
-	struct timespec gcSteadyStart, gcSteadyEnd;
-#elif defined(__MACH__) || defined(__APPLE__)
-	struct timeval gcSteadyStart, gcSteadyEnd;
-#endif
+        uint64_t gcSteadyStart, gcSteadyEnd;
 }
 
 using namespace v8;
@@ -58,18 +55,18 @@ static char* NewCString(const std::string& s) {
 	return result;
 }
 
+static bool GetSteadyTime(uint64_t* now) {
+  *now = uv_hrtime();
+  return true;
+}
+static uint64_t CalculateDuration(uint64_t start, uint64_t finish) {
+	return (finish - start) / 1000000;
+}
+
 /*
  * OSX
  */
-#if defined(__MACH__) || defined(__APPLE__)
-static bool GetSteadyTime(struct timeval* tv) {
-	//int rc = clock_gettime(CLOCK_MONOTONIC, tv);
-	int rc = gettimeofday(tv, 0);
-	return rc == 0;
-}
-static uint64 CalculateDuration(struct timeval start, struct timeval finish) {
-	return static_cast<uint64>((finish.tv_sec - start.tv_sec) * 1000 + (finish.tv_usec - start.tv_usec) / 1000);
-}
+#if defined(__MACH__) || defined(__APPLE__) || defined(_ZOS)
 static unsigned long long GetRealTime() {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -82,13 +79,6 @@ static unsigned long long GetRealTime() {
  * Linux
  */
 #if defined(_LINUX) || defined(_AIX)
-static bool GetSteadyTime(struct timespec* tv) {
-	int rc = clock_gettime(CLOCK_MONOTONIC, tv);
-	return rc == 0;
-}
-static uint64 CalculateDuration(struct timespec start, struct timespec finish) {
-	return static_cast<uint64>((finish.tv_sec - start.tv_sec) * 1000 + (finish.tv_nsec - start.tv_nsec) / 1000000);
-}
 static unsigned long long GetRealTime() {
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
@@ -101,26 +91,6 @@ static unsigned long long GetRealTime() {
  * Windows
  */
 #ifdef _WINDOWS
-static LARGE_INTEGER freq;
-static bool freqInitialized = FALSE;
-static bool GetSteadyTime(LARGE_INTEGER* pcount) {
-	if (!freqInitialized) {
-		if (QueryPerformanceFrequency(&freq) == 0) {
-			return FALSE;
-		}
-		freqInitialized = TRUE;
-	}
-	BOOL rc = QueryPerformanceCounter(pcount);
-	return rc != 0;
-}
-static uint64 CalculateDuration(LARGE_INTEGER start, LARGE_INTEGER finish) {
-	if (!freqInitialized) return 0L;
-	LARGE_INTEGER elapsedMilliseconds;
-	elapsedMilliseconds.QuadPart = finish.QuadPart - start.QuadPart;
-	elapsedMilliseconds.QuadPart *= 1000;
-	elapsedMilliseconds.QuadPart /= freq.QuadPart;
-	return static_cast<uint64>(elapsedMilliseconds.QuadPart);
-}
 static unsigned long long GetRealTime() {
 	SYSTEMTIME st;
 	GetSystemTime(&st);
@@ -128,11 +98,11 @@ static unsigned long long GetRealTime() {
 }
 #endif
 
-void beforeGC(GCType type, GCCallbackFlags flags) {
+void beforeGC(v8::Isolate *isolate, GCType type, GCCallbackFlags flags) {
 	plugin::timingOK = GetSteadyTime(&plugin::gcSteadyStart);
 }
 
-void afterGC(GCType type, GCCallbackFlags flags) {
+void afterGC(v8::Isolate *isolate, GCType type, GCCallbackFlags flags) {
 	unsigned long long gcRealEnd;
 	
 	// GC pause time
@@ -145,7 +115,17 @@ void afterGC(GCType type, GCCallbackFlags flags) {
 	gcRealEnd = GetRealTime();
 
 	// GC type
-	const char *gcType = (type == kGCTypeMarkSweepCompact) ? "M" : "S";
+	const char *gcType = NULL;
+        switch (type) {
+          case kGCTypeMarkSweepCompact: gcType = "M"; break;
+          case kGCTypeScavenge: gcType = "S"; break;
+#if NODE_VERSION_AT_LEAST(5, 0, 0)
+          case kGCTypeIncrementalMarking: gcType = "I"; break;
+          case kGCTypeProcessWeakCallbacks: gcType = "W"; break;
+#endif
+          // Should never happen, but call it minor if type is unrecognized.
+          default: gcType = "S"; break;
+        }
 
 	// GC heap stats
 	HeapStatistics hs;
@@ -188,7 +168,7 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 extern "C" {
 	NODEGCPLUGIN_DECL pushsource* ibmras_monitoring_registerPushSource(agentCoreFunctions api, uint32 provID) {
 	    plugin::api = api;
-	    plugin::api.logMessage(debug, "[gc_node] Registering push sources");
+	    plugin::api.logMessage(loggingLevel::debug, "[gc_node] Registering push sources");
 	
 	    pushsource *head = createPushSource(0, "gc_node");
 	    plugin::provid = provID;
@@ -201,12 +181,12 @@ extern "C" {
 	
 	NODEGCPLUGIN_DECL int ibmras_monitoring_plugin_start() {
 		plugin::api.logMessage(fine, "[gc_node] Starting");
-	
-		V8::AddGCPrologueCallback(beforeGC);
-		V8::AddGCEpilogueCallback(afterGC);
+
+		v8::Isolate::GetCurrent()->AddGCPrologueCallback(beforeGC);
+		v8::Isolate::GetCurrent()->AddGCEpilogueCallback(afterGC);
 		return 0;
 	}
-	
+
 	NODEGCPLUGIN_DECL int ibmras_monitoring_plugin_stop() {
 		plugin::api.logMessage(fine, "[gc_node] Stopping");
 		// TODO Unhook GC hooks...

@@ -15,9 +15,16 @@
  *******************************************************************************/
 'use strict';
 
-var http = require('http');
+var https = require('https');
+var fs = require('fs');
+var path = require('path');
 
-module.exports.server = http.createServer((req, res) => {
+const httpsOptions = {
+  key: fs.readFileSync(path.resolve(__dirname, 'testkey.pem')),
+  cert: fs.readFileSync(path.resolve(__dirname, 'testcert.crt')),
+};
+
+module.exports.server = https.createServer(httpsOptions, (req, res) => {
   // Send "Hello World" to every request
   res.writeHead(200, { 'Content-Type': 'text/plain' });
   res.end('Hello World');

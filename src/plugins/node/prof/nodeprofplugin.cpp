@@ -212,7 +212,7 @@ static char * ConstructData(const CpuProfile *profile) {
 static Isolate* GetIsolate() {
 	Isolate *isolate = v8::Isolate::GetCurrent();
 	if (isolate == NULL) {
-		plugin::api.logMessage(debug, "[profiling_node] No V8 Isolate found");
+		plugin::api.logMessage(loggingLevel::debug, "[profiling_node] No V8 Isolate found");
 	}
 	return isolate;
 }
@@ -272,11 +272,11 @@ void collectData() {
 
 			delete[] serialisedProfile;
 		} else {
-			plugin::api.logMessage(debug,
+			plugin::api.logMessage(loggingLevel::debug,
 					"[profiling_node] Failed to serialise method profile"); // CHECK(tunniclm): Should this be a warning?
 		}
 	} else {
-		plugin::api.logMessage(debug,
+		plugin::api.logMessage(loggingLevel::debug,
 				"[profiling_node] No method profile found"); // CHECK(tunniclm): Should this be a warning?
 	}
 
@@ -321,7 +321,7 @@ static void publishEnabled() {
 
 	std::stringstream logMsg;
 	logMsg << "[profiling_node] Sending config message [" << msg << "]";
-	plugin::api.logMessage(debug,  logMsg.str().c_str());
+	plugin::api.logMessage(loggingLevel::debug,  logMsg.str().c_str());
 	
 	plugin::api.agentSendMessage(("configuration/" + sourceName).c_str(), msg.length(),
 								  (void*) msg.c_str());
@@ -334,7 +334,7 @@ static void StartProfilerWithoutTiming(uv_async_t *async, int status) {
 #endif
 	if (plugin::enabled) return;
 	plugin::enabled = true;
-	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+	plugin::api.logMessage(loggingLevel::debug, "[profiling_node] Publishing config");
     publishEnabled();
 	StartTheProfiler();
 }
@@ -347,7 +347,7 @@ static void StopProfilerWithoutTiming(uv_async_t *async, int status) {
 	collectData();
 	if (!plugin::enabled) return;
 	plugin::enabled = false;
-	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+	plugin::api.logMessage(loggingLevel::debug, "[profiling_node] Publishing config");
     publishEnabled();
 }
 
@@ -368,7 +368,7 @@ static void enableOnV8Thread(uv_async_t *async, int status) {
 #endif
 	if (plugin::enabled) return;
 	plugin::enabled = true;
-	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+	plugin::api.logMessage(loggingLevel::debug, "[profiling_node] Publishing config");
     publishEnabled();
 	
 	StartTheProfiler();
@@ -385,7 +385,7 @@ static void disableOnV8Thread(uv_async_t *async, int status) {
 #endif
 	if (!plugin::enabled) return;
 	plugin::enabled = false;
-	plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+	plugin::api.logMessage(loggingLevel::debug, "[profiling_node] Publishing config");
     publishEnabled();
 
 	uv_timer_stop(plugin::timer);
@@ -425,7 +425,7 @@ extern "C" {
 		std::string enabledProp(plugin::api.getProperty("com.ibm.diagnostics.healthcenter.data.profiling"));
 		plugin::enabled = (enabledProp == "on");
 	
-		plugin::api.logMessage(debug, "[profiling_node] Registering push sources");
+		plugin::api.logMessage(loggingLevel::debug, "[profiling_node] Registering push sources");
 		pushsource *head = createPushSource(0, "profiling_node");
 		plugin::provid = provID;
 		return head;
@@ -449,7 +449,7 @@ extern "C" {
 			plugin::api.logMessage(fine, "[profiling_node] Starting disabled");
 		}
 	
-		plugin::api.logMessage(debug, "[profiling_node] Publishing config");
+		plugin::api.logMessage(loggingLevel::debug, "[profiling_node] Publishing config");
 		publishEnabled();	
 	
 		plugin::timer = new uv_timer_t;
@@ -474,10 +474,10 @@ extern "C" {
 		uv_unref((uv_handle_t*)asyncDisable);
 
 		if (plugin::enabled) {	
-			plugin::api.logMessage(debug, "[profiling_node] Start profiling");
+			plugin::api.logMessage(loggingLevel::debug, "[profiling_node] Start profiling");
 			StartTheProfiler();
 		
-			plugin::api.logMessage(debug, "[profiling_node] Starting timer");
+			plugin::api.logMessage(loggingLevel::debug, "[profiling_node] Starting timer");
 			uv_timer_start(plugin::timer, OnGatherDataOnV8Thread, getProfilingInterval(), getProfilingInterval());
 		}
 	
@@ -511,12 +511,12 @@ extern "C" {
 		if (idstring == "profiling_node") {
 			//std::stringstream ss;
 			//ss << "Received message with id [" << idstring << "], size [" << size << "]";
-			//plugin::api.logMessage(debug, ss.str().c_str());
+			//plugin::api.logMessage(loggingLevel::debug, ss.str().c_str());
 			
 			std::string message((const char*) data, size);
 			//if (size > 0) {
 			//	std::string msg = "Message content [" + message + "]";
-			//	plugin::api.logMessage(debug, msg.c_str());
+			//	plugin::api.logMessage(loggingLevel::debug, msg.c_str());
 			//}
 			std::size_t found = message.find(',');
 			std::string command = message.substr(0, found);
@@ -525,7 +525,7 @@ extern "C" {
 			if (rest == "profiling_node_subsystem") {
 				bool enabled = (command == "on");
 				//std::string msg = "Setting [" + rest + "] to " + (enabled ? "enabled" : "disabled");
-				//plugin::api.logMessage(debug, msg.c_str());
+				//plugin::api.logMessage(loggingLevel::debug, msg.c_str());
 				setEnabled(enabled);
 
             } else if (rest == "profiling_node_v8json"){

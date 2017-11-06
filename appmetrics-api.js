@@ -46,6 +46,7 @@ function API(agent, appmetrics) {
         break;
       case 'common_memory':
       case 'memory':
+      case 'memory_node':
         formatMemory(message);
         break;
       case 'gc_node':
@@ -213,10 +214,12 @@ function API(agent, appmetrics) {
     lines.forEach(function(line) {
       var values = line.split(/[,]+/);
       var loop = {
-        minimum: parseInt(values[1]),
-        maximum: parseInt(values[2]),
+        minimum: parseFloat(values[1]),
+        maximum: parseFloat(values[2]),
         count: parseInt(values[3]),
-        average: parseInt(values[4]),
+        average: parseFloat(values[4]),
+        cpu_user: parseFloat(values[5]),
+        cpu_system: parseFloat(values[6]),
       };
       that.emit('loop', loop);
     });

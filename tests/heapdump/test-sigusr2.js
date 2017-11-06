@@ -28,7 +28,7 @@ function testSigUsr2(test) {
   });
 
   server.on('listening', function() {
-    console.log('Listening on http://127.0.0.1:8000/');
+    console.log(`Listening on http://localhost:${server.address().port}/`);
     console.log('now sending SIGUSR2 to %d', process.pid);
 
     var heapSnapshotFile = 'heapdump-*.heapsnapshot';

@@ -5,14 +5,12 @@
     "nandir%": "<!(node -e \"try {require('nan')}catch (e){console.log(e)}\")",
     'build_id%': '.<!(["python", "./generate_build_id.py"])',
     'appmetricsversion%':  '<!(["python", "./get_from_json.py", "./package.json", "version"])',
-  },
-  "conditions": [
-    ['OS=="aix"', {
-      "variables": {
+    "conditions": [
+      ['OS=="aix"', {
         "SHARED_LIB_SUFFIX": ".a",
-      },
-    }],
-  ],
+      }],
+    ],
+  },
 
   "target_defaults": {
     "cflags_cc!": [ '-fno-exceptions' ],
@@ -38,11 +36,16 @@
     "conditions": [
       ['OS=="aix"', {
         "defines": [ "_AIX", "AIX" ],
-        "libraries": [ "-Wl,-bexpall,-brtllib,-G,-bernotok,-brtl" ],
+        "libraries": [ "-Wl,-bexpall,-brtllib,-G,-bernotok,-brtl,-L.,-bnoipath" ],
       }],
       ['OS=="mac"', {
         "defines": [ "__MACH__", "__APPLE__",  ],
          "libraries": [ "-undefined dynamic_lookup" ],
+      }],
+      ['OS in "os390 zos"', {
+        "defines": [ "_ZOS", "_UNIX03_THREADS" ],
+        "cflags_cc": ['-Wc,EXPORTALL'],
+        'cflags!': [ '-fno-omit-frame-pointer' ],
       }],
       ['OS=="linux"', {
         "defines": [ "_LINUX", "LINUX" ],
@@ -64,8 +67,6 @@
       }]
     ],
   },
-
-
 
   "targets": [
     {
@@ -125,7 +126,6 @@
         "<(srcdir)/plugins/node/heap/nodeheapplugin.cpp",
       ],
     },
-
     {
       "target_name": "nodeprofplugin",
       "type": "shared_library",
@@ -147,7 +147,6 @@
         "<(srcdir)/plugins/node/gc/nodegcplugin.cpp",
       ],
     },
-
     {
       "target_name": "install",
       "type": "none",
@@ -159,33 +158,69 @@
         "nodegcplugin",
         "nodeprofplugin",
         "nodeloopplugin",
-     ],
-      "copies": [
-        {
-          "destination": "./",
-          "files": [
-            "<(PRODUCT_DIR)/appmetrics.node",
-            "<(PRODUCT_DIR)/heapdump.node",
-            "<(agentcoredir)/<(SHARED_LIB_PREFIX)agentcore<(SHARED_LIB_SUFFIX)",
+        "nodeheapplugin",
+      ],
+      "conditions": [
+        ['OS in "os390 zos"', {
+          "dependencies+": [
+            "nodezmemoryplugin",
           ],
-        },
+        }],
+      ],
+     "copies": [
+       {
+         "destination": "./",
+         "files": [
+           "<(PRODUCT_DIR)/appmetrics.node",
+           "<(PRODUCT_DIR)/heapdump.node",
+           "<(agentcoredir)/<(SHARED_LIB_PREFIX)agentcore<(SHARED_LIB_SUFFIX)",
+         ],
+       },
+       {
+         "destination": "./plugins",
+         "files": [
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeenvplugin<(SHARED_LIB_SUFFIX)",
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeheapplugin<(SHARED_LIB_SUFFIX)",
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeprofplugin<(SHARED_LIB_SUFFIX)",
+           "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeloopplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)cpuplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)envplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcapiplugin<(SHARED_LIB_SUFFIX)",
+           "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
+         ],
+         "conditions": [
+           ['OS in "os390 zos"', {
+             # no hcmqtt, cpu or memory plugin
+             "files!": [
+               "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
+               "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)cpuplugin<(SHARED_LIB_SUFFIX)",
+               "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
+               # the following don't work on zOS yet
+               "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
+             ],
+             "files+": [
+               "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodezmemoryplugin<(SHARED_LIB_SUFFIX)",
+             ],
+           }],
+         ],
+       },
+     ],
+    },
+  ],
+  "conditions": [
+    ['OS in "os390 zos"', {
+      "targets+": [
         {
-          "destination": "./plugins",
-          "files": [
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeenvplugin<(SHARED_LIB_SUFFIX)",
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeheapplugin<(SHARED_LIB_SUFFIX)",
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodegcplugin<(SHARED_LIB_SUFFIX)",
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeprofplugin<(SHARED_LIB_SUFFIX)",
-            "<(PRODUCT_DIR)/<(SHARED_LIB_PREFIX)nodeloopplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcmqtt<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)cpuplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)envplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)memoryplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)hcapiplugin<(SHARED_LIB_SUFFIX)",
-            "<(agentcoredir)/plugins/<(SHARED_LIB_PREFIX)headlessplugin<(SHARED_LIB_SUFFIX)",
+          "target_name": "nodezmemoryplugin",
+          "type": "shared_library",
+          "sources": [
+            "<(srcdir)/plugins/node/memory/nodezmemoryplugin.cpp",
           ],
         },
       ],
-    },
+    }],
   ],
 }

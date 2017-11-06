@@ -39,9 +39,10 @@ var AGENTCORE_PLATFORMS = [
   'linux-x64',
   'win32-ia32',
   'win32-x64',
+  'os390-s390x',
 ];
-var AGENTCORE_VERSION = '3.2.1';
-var APPMETRICS_VERSION = '3.0.2';
+var AGENTCORE_VERSION = '3.2.6';
+var APPMETRICS_VERSION = '3.1.2';
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
@@ -94,32 +95,15 @@ var ensureSupportedPlatformOrExit = function() {
 };
 
 var getSupportedNodeVersionOrExit = function() {
-  if (process.version.indexOf('v0.10') === 0) {
-    return '0.10';
+  var supportedMajorVersions = 'v4, v5, v6, v7, v8';
+  // version strings are of the format 'vN.N.N' where N is a positive integer.
+  // we want the first N.
+  var majorVersion = process.version.substring(1, process.version.indexOf('.'));
+  if (supportedMajorVersions.indexOf('v' + majorVersion) === -1) {
+    console.log('Unsupported version ' + process.version + '. Trying rebuild.');
+    fail();
   }
-  if (process.version.indexOf('v0.12') === 0) {
-    return '0.12';
-  }
-  if (process.version.indexOf('v2') === 0) {
-    return '2';
-  }
-  if (process.version.indexOf('v4') === 0) {
-    return '4';
-  }
-  if (process.version.indexOf('v5') === 0) {
-    return '5';
-  }
-  if (process.version.indexOf('v6') === 0) {
-    return '6';
-  }
-  if (process.version.indexOf('v7') === 0) {
-    return '7';
-  }
-  if (process.version.indexOf('v8') === 0) {
-    return '8';
-  }
-  console.log('Unsupported version ' + process.version + '. Trying rebuild.');
-  fail();
+  return majorVersion;
 };
 
 var getAgentCorePlatformVersionDownloadURL = function() {
@@ -135,48 +119,15 @@ var getWindowsRedisFiles = function() {
 };
 
 var downloadAndExtractTGZ = function(filepath, destDir, agentCoreFlag) {
+  var readStreamTargetDir = 'binaries/appmetrics/tgz/';
   if (agentCoreFlag) {
-    if (fs.existsSync('binaries/agentcore/tgz/' + filepath)) {
-      fs
-        .createReadStream('binaries/agentcore/tgz/' + filepath)
-        .pipe(zlib.createGunzip())
-        .on('error', function(err) {
-          console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
-          fail();
-        })
-        .pipe(tar.Extract({ path: destDir }))
-        .on('error', function(err) {
-          console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
-          fail();
-        })
-        .on('close', function() {
-          console.log('Download and extract of ' + filepath + ' finished.');
-        });
-    } else {
-      console.log(filepath + ' does not exist.');
-      fail();
-    }
+    readStreamTargetDir = 'binaries/agentcore/tgz/';
+  }
+  if (fs.existsSync(readStreamTargetDir + filepath)) {
+    zipAndExtract(readStreamTargetDir, filepath, destDir);
   } else {
-    if (fs.existsSync('binaries/appmetrics/tgz/' + filepath)) {
-      fs
-        .createReadStream('binaries/appmetrics/tgz/' + filepath)
-        .pipe(zlib.createGunzip())
-        .on('error', function(err) {
-          console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
-          fail();
-        })
-        .pipe(tar.Extract({ path: destDir }))
-        .on('error', function(err) {
-          console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
-          fail();
-        })
-        .on('close', function() {
-          console.log('Download and extract of ' + filepath + ' finished.');
-        });
-    } else {
-      console.log(filepath + ' does not exist.');
-      fail();
-    }
+    console.log(filepath + ' does not exist.');
+    fail();
   }
 };
 
@@ -185,22 +136,26 @@ function fail() {
   process.exit(1);
 }
 
-var installWinRedis = function(filepath, destDir) {
+function zipAndExtract(targetDir, relativeFilepath, destDir) {
   fs
-    .createReadStream('binaries/winredis/' + filepath)
+    .createReadStream(targetDir + relativeFilepath)
     .pipe(zlib.createGunzip())
     .on('error', function(err) {
-      console.log('ERROR: Failed to gunzip ' + filepath + ': ' + err.message);
+      console.log('ERROR: Failed to gunzip ' + relativeFilepath + ': ' + err.message);
       fail();
     })
     .pipe(tar.Extract({ path: destDir }))
     .on('error', function(err) {
-      console.log('ERROR: Failed to untar ' + filepath + ': ' + err.message);
+      console.log('ERROR: Failed to untar ' + relativeFilepath + ': ' + err.message);
       fail();
     })
     .on('close', function() {
-      console.log('Download and extract of ' + filepath + ' finished.');
+      console.log('Download and extract of ' + relativeFilepath + ' finished.');
     });
+};
+
+var installWinRedis = function(filepath, destDir) {
+  zipAndExtract('binaries/winredis/', filepath, destDir);
 };
 
 /*
