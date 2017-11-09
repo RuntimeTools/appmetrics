@@ -470,9 +470,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-3.1.2
+4.0.0
 
 ## Release History
+`4.0.0` - Remove node-hc and add support for preloading.  
 `3.1.2` - Bug fixes.  
 `3.1.1` - Node v6 on z/OS support.  
 `3.1.0` - HTTPS probe added.  
