@@ -42,7 +42,7 @@ var AGENTCORE_PLATFORMS = [
   'os390-s390x',
 ];
 var AGENTCORE_VERSION = '3.2.6';
-var APPMETRICS_VERSION = '3.1.2';
+var APPMETRICS_VERSION = '4.0.0';
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
