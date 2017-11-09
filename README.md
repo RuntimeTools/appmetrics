@@ -81,13 +81,17 @@ The following options are specific to appmetrics:
 
 ## Running Node Application Metrics
 
-### The `node-hc` command (deprecated)
-In previous versions appmetrics came with an executable, `node-hc`, which could be used instead of the `node` command to run your application and load and start appmetrics. This is now deprecated, instead please use:
+### The `node-hc` command (removed)
+In previous versions appmetrics came with an executable, `node-hc`, which could be used instead of the `node` command to run your application and load and start appmetrics. This has been removed in version 4.0.0, instead please use:
 
 ```sh
 $ node --require appmetrics/start app.js
 ```
-to preload and start appmetrics.
+to preload and start appmetrics, or use the NODE_OPTIONS environment variable:
+
+```sh
+$ export NODE_OPTIONS="require appmetrics/start"
+```
 
 ### Modifying your application to use the local installation
 If you [locally install](#installation) this module with npm then you will additionally have access to the monitoring data via the `appmetrics` API (see *[API Documentation](#api-documentation)*).
@@ -110,7 +114,11 @@ or
 ```sh
 $ node --require appmetrics/start myapp.js
 ```
-which also starts appmetrics monitoring.
+or
+```sh
+$ export NODE_OPTIONS="require appmetrics/start"
+```
+Inlcuding /start means that appmetrics monitoring will also be started. If you don't include /start on the command line appmetrics will be loaded and ready to begin monitoring, but has not yet started.  Call `appmetrics.monitor()` or `appmetrics.start()` in your code to begin monitoring.
 
 Once you have loaded appmetrics you can then use the monitoring object to register callbacks and request information about the application:
 ```js
