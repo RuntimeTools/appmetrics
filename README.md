@@ -87,7 +87,7 @@ In previous versions appmetrics came with an executable, `node-hc`, which could 
 ```sh
 $ node --require appmetrics/start app.js
 ```
-to preload and start appmetrics, or in Node.js 8.0.0 or later, use the NODE_OPTIONS environment variable:
+to preload and start appmetrics, or in Node.js from versions 8.0.0 and 6.12.0 onwards, use the NODE_OPTIONS environment variable:
 
 ```sh
 $ export NODE_OPTIONS="--require appmetrics/start"
