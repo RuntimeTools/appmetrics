@@ -81,19 +81,19 @@ The following options are specific to appmetrics:
 
 ## Running Node Application Metrics
 
-### The `node-hc` command (removed)
-In previous versions appmetrics came with an executable, `node-hc`, which could be used instead of the `node` command to run your application and load and start appmetrics. This has been removed in version 4.0.0, instead please use:
+### Preloading appmetrics
+In previous versions appmetrics came with an executable, `node-hc`, which could be used instead of the `node` command to run your application and load and start appmetrics. This has been removed in version 4.0.0, instead you can use:
 
 ```sh
 $ node --require appmetrics/start app.js
 ```
-to preload and start appmetrics, or use the NODE_OPTIONS environment variable:
+to preload and start appmetrics, or in Node.js 8.0.0 or later, use the NODE_OPTIONS environment variable:
 
 ```sh
-$ export NODE_OPTIONS="require appmetrics/start"
+$ export NODE_OPTIONS="--require appmetrics/start"
 ```
 
-### Modifying your application to use the local installation
+### Modifying your application to use appmetrics
 If you [locally install](#installation) this module with npm then you will additionally have access to the monitoring data via the `appmetrics` API (see *[API Documentation](#api-documentation)*).
 
 To load `appmetrics` and get the monitoring API object, add the following to the start-up code for your application:
@@ -105,20 +105,7 @@ The call to `appmetrics.monitor()` starts the data collection agent, making the 
 
 You should start your application using the `node` command as usual (**not** `node-hc`).
 
-You must call `require('appmetrics');` *before* the require statements for any npm modules you want to monitor. Appmetrics must be initialized first so that it can instrument modules for monitoring as they are loaded. If this is a problem due to the structure of your application you can require the module on the node command line with -r or --require to make sure it is pre-loaded:
-
-```sh
-$ node --require appmetrics myapp.js
-```
-or
-```sh
-$ node --require appmetrics/start myapp.js
-```
-or
-```sh
-$ export NODE_OPTIONS="require appmetrics/start"
-```
-Inlcuding /start means that appmetrics monitoring will also be started. If you don't include /start on the command line appmetrics will be loaded and ready to begin monitoring, but has not yet started.  Call `appmetrics.monitor()` or `appmetrics.start()` in your code to begin monitoring.
+You must call `require('appmetrics');` *before* the require statements for any npm modules you want to monitor. Appmetrics must be initialized first so that it can instrument modules for monitoring as they are loaded. If this is a problem due to the structure of your application you can require the module on the node command line by using -r or --require or by setting NODE_OPTIONS as described above to make sure it is pre-loaded.
 
 Once you have loaded appmetrics you can then use the monitoring object to register callbacks and request information about the application:
 ```js
