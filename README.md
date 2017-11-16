@@ -445,7 +445,7 @@ Requests are a special type of event emitted by appmetrics.  All the probes name
 
 The Node Application Metrics agent supports the following runtime environments where a Node.js runtime is available:
 
-* **Node.js v4, v7 and v8** on:
+* **Node.js v4 and v8** on:
   * 64-bit or 32-bit runtime on Windows (x64 or x86)
   * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
   * 64-bit or 32-bit runtime on AIX (PPC64)
@@ -511,7 +511,7 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 `3.1.3` - Packaging fix.  
 `3.1.2` - Bug fixes.  
 `3.1.1` - Node v6 on z/OS support.  
-`3.1.0` - HTTPS probe added.  
+`3.1.0` - HTTPS probe added. Remove support for Node v7.    
 `3.0.2` - Probe defect for Node 8 support.  
 `3.0.1` - Packaging bug fix to allow build from source if binary not present.  
 `3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.  
