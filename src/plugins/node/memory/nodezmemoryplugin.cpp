@@ -121,8 +121,9 @@ static int64 getTotalPhysicalMemorySize() {
 }
 
 static int64 getProcessPhysicalMemorySize() {
-  //TODO: see if we can improve this on z/OS
-  return -1;
+  size_t size;
+  uv_resident_set_memory(&size);
+  return size;
 }
 
 static int64 getProcessPrivateMemorySize() {
