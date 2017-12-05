@@ -445,13 +445,18 @@ Requests are a special type of event emitted by appmetrics.  All the probes name
 
 The Node Application Metrics agent supports the following runtime environments where a Node.js runtime is available:
 
-* **Node.js v4 and v8** on:
-  * 64-bit or 32-bit runtime on Windows (x64 or x86)
-  * 64-bit or 32-bit runtime on Linux (x64, x86, PPC32, PPC64, PPC64LE, z31, z64)
-  * 64-bit or 32-bit runtime on AIX (PPC64)
-  * 64-bit runtime on Mac OS X (x64)
-* **Node.js v6** on all the above, plus:
+* **Node.js v4** on:
+  * 64-bit or 32-bit Windows (x64 or x86)
+  * 64-bit or 32-bit Linux (x64, x86, ppc64, ppc64le, s390, s390x)
+  * 64-bit AIX (ppc64)
+  * 64-bit macOS (x64)
+* **Node.js v6** on all of the above, plus:
   * 64-bit runtime on z/OS (os390)
+* **Node.js v8** on:
+  * 64-bit Windows (x64)
+  * 64-bit Linux (x64, ppc64, ppc64le, s390x)
+  * 64-bit AIX (ppc64)
+  * 64-bit macOS (x64)
 
 ## Troubleshooting
 Find below some possible problem scenarios and corresponding diagnostic steps. Updates to troubleshooting information will be made available on the [appmetrics wiki][3]: [Troubleshooting](https://github.com/RuntimeTools/appmetrics/wiki/Troubleshooting). If these resources do not help you resolve the issue, you can open an issue on the Node Application Metrics [appmetrics issue tracker][5].
