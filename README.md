@@ -29,6 +29,7 @@ Node Application Metrics provides the following built-in data collection sources
  socket.io          | WebSocket data sent and received by the application
  LevelDB            | LevelDB queries made by the application
  MySQL              | MySQL queries made by the application
+ Couchbase          | Couchbase queries made by the application using [couchnode](https://github.com/couchbase/couchnode)
  MongoDB            | MongoDB queries made by the application
  PostgreSQL         | PostgreSQL queries made by the application
  MQTT               | MQTT messages sent and received by the application
@@ -334,6 +335,15 @@ Emitted when a data is stored, retrieved or modified in Memcached using the `mem
     * `method` (String) the method used in the memcached client, eg `set`, `get`, `append`, `delete`, etc.
     * `key` (String) the key associated with the data.
     * `duration` (Number) the time taken for the operation on the memcached data to occur.
+
+### Event: 'couchbase'
+Emitted when a Couchbase query is made using the [couchnode](https://github.com/couchbase/couchnode) module.
+* `data` (Object) the data from the MongoDB request:
+    * `time` (Number) the milliseconds when the Couchbase query was made. This can be converted to a Date using `new Date(data.time)`
+    * `bucket` (String) the bucket the query was made to in Couchbase.
+    * `duration` (Number) the time taken for the MongoDB query to be responded to in ms.
+    * `method` (String) the executed method for the query, such as 'query', 'upsert', 'insert', 'replace', 'remove', 'get', 'getMulti'.
+    * `error` (String) and error if any that occurred. is null if not error occurred.
 
 ### Event: 'mongo'
 Emitted when a MongoDB query is made using the `mongodb` module.
