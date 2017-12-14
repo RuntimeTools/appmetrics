@@ -2,3 +2,6 @@
 [submodule "omr-agentcore"]
 	path = omr-agentcore
 	url = https://github.com/RuntimeTools/omr-agentcore
+[submodule "node-ibmapm"]
+	path = node-ibmapm
+	url = https://github.com/IBM-APM/node-ibmapm
