@@ -381,4 +381,4 @@ if (global.Appmetrics) {
   };
 
 }
-require('node-ibmapm');
+require('ibmapm');
