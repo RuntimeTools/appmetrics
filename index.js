@@ -22,12 +22,12 @@ if (global.Appmetrics) {
   assert(
     global.Appmetrics.VERSION === VERSION,
     'Multiple versions of Node Application Metrics are being initialized.\n' +
-        'This version ' +
-        VERSION +
-        ' is incompatible with already initialized\n' +
-        'version ' +
-        global.Appmetrics.VERSION +
-        '.\n'
+      'This version ' +
+      VERSION +
+      ' is incompatible with already initialized\n' +
+      'version ' +
+      global.Appmetrics.VERSION +
+      '.\n'
   );
   exports = module.exports = global.Appmetrics;
 } else {
@@ -78,10 +78,10 @@ if (global.Appmetrics) {
     };
   }
   /*
-     * Load module probes into probes array by searching the probes directory.
-     * We handle the 'trace' probe as a special case because we don't want to put
-     * the probe hooks in by default due to the performance cost.
-     */
+ * Load module probes into probes array by searching the probes directory.
+ * We handle the 'trace' probe as a special case because we don't want to put
+ * the probe hooks in by default due to the performance cost.
+ */
   var probes = [];
   var traceProbe;
 
@@ -140,9 +140,9 @@ if (global.Appmetrics) {
 
 
   /*
-     * Patch the module require function to run the probe attach function
-     * for any matching module. This loads the monitoring probes into the modules
-     */
+ * Patch the module require function to run the probe attach function
+ * for any matching module. This loads the monitoring probes into the modules
+ */
   var data = {};
 
   /* eslint no-proto:0 */
@@ -174,11 +174,11 @@ if (global.Appmetrics) {
   }
 
   /*
-     * Provide API to enable data collection for a given data type.
-     * Profiling is done via a control message to the core monitoring agent.
-     * Requests require asking all probes to enable request events
-     * Other requests are passed to any probe matching the name
-     */
+ * Provide API to enable data collection for a given data type.
+ * Profiling is done via a control message to the core monitoring agent.
+ * Requests require asking all probes to enable request events
+ * Other requests are passed to any probe matching the name
+ */
   module.exports.enable = function(data, config) {
     switch (data) {
       case 'profiling':
@@ -212,11 +212,11 @@ if (global.Appmetrics) {
   };
 
   /*
-     * Provide API to disable data collection for a given data type.
-     * Profiling is done via a control message to the core monitoring agent.
-     * Requests require asking all probes to disable request events
-     * Other requests are passed to any probe matching the name
-     */
+ * Provide API to disable data collection for a given data type.
+ * Profiling is done via a control message to the core monitoring agent.
+ * Requests require asking all probes to disable request events
+ * Other requests are passed to any probe matching the name
+ */
   module.exports.disable = function(data) {
     switch (data) {
       case 'profiling':
@@ -243,10 +243,10 @@ if (global.Appmetrics) {
   };
 
   /*
-     * Set the config for a type of data. These are passed through to the relevant
-     * probes except in the case of 'requests'. Here we check for any excludeModules config,
-     * and if present use that to control the relevant probes directly.
-     */
+ * Set the config for a type of data. These are passed through to the relevant
+ * probes except in the case of 'requests'. Here we check for any excludeModules config,
+ * and if present use that to control the relevant probes directly.
+ */
   module.exports.setConfig = function(data, config) {
     switch (data) {
       case 'requests':
@@ -278,7 +278,7 @@ if (global.Appmetrics) {
   // Export emit() API for JS data providers
   module.exports.emit = function(topic, data) {
     if (typeof this.api !== 'undefined') {
-      // We have a listener, so fast path the notification to them
+    // We have a listener, so fast path the notification to them
       this.api.raiseLocalEvent(topic, data);
     }
     // Publish data that can be visualised in Health Center
@@ -358,7 +358,7 @@ if (global.Appmetrics) {
     var am = this;
     agent.start();
     process.on('exit', function() {
-      // take the event loop latency methods off the loop
+    // take the event loop latency methods off the loop
       if (latencyRunning === true) {
         clearInterval(latencyCheckLoop);
         clearInterval(latencyReportLoop);
