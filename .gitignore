@@ -8,4 +8,7 @@ node_modules
 /agentcore.dll
 /heapdump.node
 headlesstestoutput*
+.nyc_output/
+nodejs_*.log
+plugins/
 
