@@ -25,8 +25,8 @@ var util = require('util');
 var semver = require('semver');
 
 var methods;
-// In Node.js < v8.9.0 'get' calls 'request' so we only instrument 'request'
-if (semver.lt(process.version, '8.9.0')) {
+// In Node.js < v9.0.0 'get' calls 'request' so we only instrument 'request'
+if (semver.lt(process.version, '9.0.0')) {
   methods = ['request'];
 } else {
   methods = ['request', 'get'];
