@@ -128,7 +128,7 @@ function formatURL(httpsOptions) {
   } else {
     url += 'localhost';
   }
-  if (httpsOptions.port && !url.includes(httpsOptions.port)) {
+  if (httpsOptions.port && !url.includes(':' + httpsOptions.port)) {
     url += ':' + httpsOptions.port;
   }
   if (httpsOptions.path) {
