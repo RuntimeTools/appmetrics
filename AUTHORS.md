@@ -17,4 +17,5 @@ Authors ordered by first contribution:
  - Luca Bigon (https://github.com/bigluck)
  - Gibson Fahnestock (https://github.com/gibfahn)
  - ? (https://github.com/nqvst)
-    
+ - Vladislav Botvin (https://github.com/darky)
+ - John Barboza (https://github.com/jbarz)

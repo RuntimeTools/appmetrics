@@ -34,6 +34,14 @@
 #define NODEZMEMPLUGIN_DECL
 #define MEMORY_INTERVAL 2000
 
+#define PSA_PTR           0x00
+/* Pointer to the home (current) ASCB. */
+#define PSAAOLD           0x224
+/* Pointer to lda extension. */
+#define ASCBLDA           0x30
+/* Size of user V=V private memory. */
+#define LDAELOAL          0xF0
+
 namespace plugin {
 	agentCoreFunctions api;
 	uint32 provid = 0;
@@ -121,13 +129,26 @@ static int64 getTotalPhysicalMemorySize() {
 }
 
 static int64 getProcessPhysicalMemorySize() {
-  //TODO: see if we can improve this on z/OS
-  return -1;
+  size_t size;
+
+  plugin::api.logMessage(loggingLevel::debug, "[memory_node] >>getProcessPhysicalMemorySize()");
+  if(uv_resident_set_memory(&size)) {
+    plugin::api.logMessage(loggingLevel::debug, "[memory_node] error in getProcessPhysicalMemorySize()");
+    return -1;
+  }
+  return size;
 }
 
 static int64 getProcessPrivateMemorySize() {
-  //TODO: see if we can improve this on z/OS
-  return -1;
+  char* psa;
+  char* ascb;
+  char* lda;
+
+  plugin::api.logMessage(loggingLevel::debug, "[memory_node] >>getProcessPrivateMemorySize()");
+  psa = PSA_PTR;
+  ascb  = *(char* __ptr32 *)(psa + PSAAOLD);
+  lda = *(char* __ptr32 *)(ascb + ASCBLDA);
+  return *(unsigned int*)(lda + LDAELOAL);
 }
 
 static int64 getProcessVirtualMemorySize() {
