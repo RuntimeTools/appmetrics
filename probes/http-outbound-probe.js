@@ -123,7 +123,7 @@ function formatURL(httpOptions) {
   } else {
     url += 'localhost';
   }
-  if (httpOptions.port) {
+  if (httpOptions.port && !url.includes(':' + httpOptions.port)) {
     url += ':' + httpOptions.port;
   }
   if (httpOptions.path) {
