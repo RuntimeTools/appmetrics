@@ -9,6 +9,7 @@
     "node-hc": "bin/appmetrics-cli.js"
   },
   "dependencies": {
+    "ibmapm": "file:./node-ibmapm",
     "nan": "2.x",
     "tar": "2.x",
     "semver": "^5.3.0",

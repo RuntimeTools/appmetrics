@@ -381,3 +381,4 @@ if (global.Appmetrics) {
   };
 
 }
+require('ibmapm');
