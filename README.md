@@ -222,10 +222,13 @@ Requests an object containing all of the available environment information for t
 
 ### Event: 'cpu'
 Emitted when a CPU monitoring sample is taken.
+CPU times are reported as fractions of time used between 0.0 and 1.0.
 * `data` (Object) the data from the CPU sample:
     * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
-    * `process` (Number) the percentage of CPU used by the Node.js application itself. This is a value between 0.0 and 1.0.
-    * `system` (Number) the percentage of CPU used by the system as a whole. This is a value between 0.0 and 1.0.
+    * `process` (Number) the CPU time used by the Node.js application itself since the previous sample.
+    * `system` (Number) the CPU time used by the system as a whole since the previous sample.
+    * `processMean` (Number) the mean CPU time used by the Node.js application itself since Node.js started.
+    * `systemMean` (Number) the mean CPU time used by the system as a whole since Node.js started.
 
 ### Event: 'eventloop'
 Emitted every 5 seconds, summarising sample based information of the event loop latency
@@ -248,6 +251,8 @@ Emitted when a garbage collection (GC) cycle occurs in the underlying V8 runtime
         and greater)
     * `size` (Number) the size of the JavaScript heap in bytes.
     * `used` (Number) the amount of memory used on the JavaScript heap in bytes.
+    * `usedMax` (Number) the maximum amount of memory used on the JavaScript heap in bytes since Node.js started.
+    * `totalProportion` (Number) the proportion of time spent in GC since Node.js started. This is a value between 0.0 and 1.0.
     * `duration` (Number) the duration of the GC cycle in milliseconds.
 
 ### Event: 'initialized'
@@ -260,8 +265,8 @@ Emitted every 5 seconds, summarising event tick information in time interval
     * `minimum` (Number) the shortest (i.e. fastest) tick in milliseconds.
     * `maximum` (Number) the longest (slowest) tick in milliseconds.
     * `average` (Number) the average tick time in milliseconds.
-    * `cpu_user` (Number) the percentage of 1 CPU used by the event loop thread in user code the last interval. This is a value between 0.0 and 1.0.
-    * `cpu_system` (Number) the percentage of 1 CPU used by the event loop thread in system code in the last interval. This is a value between 0.0 and 1.0.
+    * `cpu_user` (Number) the fraction of 1 CPU used by the event loop thread in user code the last interval. This is a value between 0.0 and 1.0.
+    * `cpu_system` (Number) the fraction of 1 CPU used by the event loop thread in system code in the last interval. This is a value between 0.0 and 1.0.
 
 ### Event: 'memory'
 Emitted when a memory monitoring sample is taken.
