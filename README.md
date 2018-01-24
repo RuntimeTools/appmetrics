@@ -40,7 +40,8 @@ Node Application Metrics provides the following built-in data collection sources
  Redis              | Redis commands issued by the application
  Riak               | Riak methods called by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
- Function trace     | Tracing of application function calls that occur during a request (disabled by default)
+ Function trace     | Tracing of application function calls that occur during a request (disabled by default)  
+
 ## Performance overhead
 
 Our testing has shown that the performance overhead in terms of processing is minimal, adding less than 0.5 % to the CPU usage of your application. The additional memory required is around 20 MB to gather information about your system and application.
@@ -56,38 +57,6 @@ You can get Node Application Metrics from 3 different places:
   * npmjs.org (install by running `npm install appmetrics`. Native libraries are prebuilt)
   * Github ([install from source](https://github.com/RuntimeTools/appmetrics/wiki/Install-direct-from-github-source) by cloning the git repository. Requires a compiler)
   * [IBM SDK for Node.js](https://developer.ibm.com/node/sdk/) (packaged with the SDK, native libraries are prebuilt)
-
-Using **npm** you can install Node Application Metrics either locally or globally.
-
-**When installed locally** you can access monitoring data via both the API and the Health Center client by modifying your application to use appmetrics (see *[Modifying your application to use the local installation](#modifying-your-application-to-use-the-local-installation)*).
-
-To perform a local install:
-```sh
-$ npm install appmetrics
-```
-A local install will put the module inside "*`./node_modules` of the current package root*" (see the [npm documentation][4] for more information); usually this is the current directory and in that case the module installation directory will be `./node_modules/appmetrics`.
-
-**When installed globally** you can access monitoring data via the Health Center client (but not the API) by using the `node-hc` command-line utility (see *[The `node-hc` command](#the-node-hc-command)*).
-
-To perform a global install:
-```sh
-$ npm install -g appmetrics
-```
-A global install will put the module inside a directory tied to your Node.js SDK.
-
-* On Windows, either:
-  * `<UserDirectory>\AppData\Roaming\npm\node_modules`
-  * or: `<NodeInstallDirectory>\node_modules`
-* On other platforms:
-  * `<node_install_directory>/lib/node_modules`
-
-It also adds the `node-hc` command to another directory tied to your Node.js SDK, one that was added to your executable search path by the Node.js SDK installer.
-
-* On Windows, either:
-  * `<UserDirectory>\AppData\Roaming\npm`
-  * or: `<NodeInstallDirectory>`
-* On other platforms:
-  * `<node_install_directory>/bin`
 
 ### Configuring Node Application Metrics
 
@@ -112,16 +81,19 @@ The following options are specific to appmetrics:
 
 ## Running Node Application Metrics
 
-### The `node-hc` command
-If you [globally installed](#installation) this module with npm, you can use the `node-hc` command to run your application instead of the `node` command. This will run your application as it would normally under node (including any node options) but additionally load and start `appmetrics`.
+### Preloading appmetrics
+In previous versions appmetrics came with an executable, `node-hc`, which could be used instead of the `node` command to run your application and load and start appmetrics. This has been removed in version 4.0.0, instead you can use:
 
 ```sh
-$ node-hc app.js
+$ node --require appmetrics/start app.js
+```
+to preload and start appmetrics, or in Node.js from versions 8.0.0 and 6.12.0 onwards, use the NODE_OPTIONS environment variable:
+
+```sh
+$ export NODE_OPTIONS="--require appmetrics/start"
 ```
 
-The purpose of this mode of operation is to provide monitoring of the application without requiring any changes to the application code. The data is sent to the Health Center Eclipse IDE client.
-
-### Modifying your application to use the local installation
+### Modifying your application to use appmetrics
 If you [locally install](#installation) this module with npm then you will additionally have access to the monitoring data via the `appmetrics` API (see *[API Documentation](#api-documentation)*).
 
 To load `appmetrics` and get the monitoring API object, add the following to the start-up code for your application:
@@ -133,9 +105,7 @@ The call to `appmetrics.monitor()` starts the data collection agent, making the 
 
 You should start your application using the `node` command as usual (**not** `node-hc`).
 
-You must call `require('appmetrics');` *before* the require statements for any npm modules you want to monitor. Appmetrics must be initialized first so that it can instrument modules for monitoring as they are loaded. If this is a problem due to the structure of your application you can require the module on the node command line with -r to make sure it is pre-loaded:
-
-`> node -r appmetrics myapp.js`
+You must call `require('appmetrics');` *before* the require statements for any npm modules you want to monitor. Appmetrics must be initialized first so that it can instrument modules for monitoring as they are loaded. If this is a problem due to the structure of your application you can require the module on the node command line by using -r or --require or by setting NODE_OPTIONS as described above to make sure it is pre-loaded.
 
 Once you have loaded appmetrics you can then use the monitoring object to register callbacks and request information about the application:
 ```js
@@ -466,11 +436,6 @@ By default, a message similar to the following will be written to console output
 
 `[Fri Aug 21 09:36:58 2015] com.ibm.diagnostics.healthcenter.loader INFO: Node Application Metrics 1.0.1-201508210934 (Agent Core 3.0.5.201508210934)`
 
-### Error "Conflicting appmetrics module was already loaded by node-hc. Try running with node instead." when using `node-hc`
-This error indicates you are using `node-hc` to run an application that uses the Node Application Metrics monitoring API (see *[Modifying your application to use the local installation](#modifying-your-application-to-use-the-local-installation)*). Resolve this by using `node` to run the application instead. **Alternatively**, you could remove (or disable temporarily) the use of the Node Application Metrics monitoring API in your application.
-
-This error was added to prevent the scenario where 2 instances of the agent can be accidentally created and started in parallel -- the globally installed one created by `node-hc` and the locally installed one created by the `require('appmetrics');` call in an application modified to use the Node Application Metrics monitoring API.
-
 ### Error "The specified module could not be found ... appmetrics.node"
 This error indicates there was a problem while loading the native part of the module or one of its dependent libraries. On Windows, `appmetrics.node` depends on a particular version of the C runtime library and if it cannot be found this error is the likely result.
 
@@ -510,9 +475,10 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
 ## Version
-3.1.3
+4.0.0
 
 ## Release History
+`4.0.0` - Remove node-hc and add support for preloading.  
 `3.1.3` - Packaging fix.  
 `3.1.2` - Bug fixes.  
 `3.1.1` - Node v6 on z/OS support.  
