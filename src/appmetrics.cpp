@@ -759,7 +759,7 @@ void init(Local<Object> exports, Local<Object> module) {
      * Log startup message with version information
      */
     std::stringstream msg;
-    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << nativeString(loaderApi->getAgentVersion()) << ")";
+    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << loaderApi->getAgentVersion() << ")";
     loaderApi->logMessage(info, msg.str().c_str());
 }
 
