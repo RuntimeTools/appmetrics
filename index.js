@@ -32,7 +32,6 @@ if (global.Appmetrics) {
   exports = module.exports = global.Appmetrics;
 } else {
   // This instance is the global, do all the setup here
-  global.Appmetrics = module.exports;
   module.exports.VERSION = VERSION;
 
   var path = require('path');
@@ -380,4 +379,7 @@ if (global.Appmetrics) {
     return this;
   };
 
+  // Expose global instance when appmetrics is fully initialised.
+  global.Appmetrics = module.exports;
+  require('ibmapm');
 }
