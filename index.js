@@ -379,5 +379,6 @@ if (global.Appmetrics) {
 
     return this;
   };
-
+  //Require the Node.js DC, when appmetrics is fully initialised.
+  require('ibmapm-embed');
 }
