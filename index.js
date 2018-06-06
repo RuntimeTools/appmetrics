@@ -384,6 +384,5 @@ if (global.Appmetrics) {
     require('ibmapm-embed');
   } catch (err) {
     console.log("Error initializing APM");
-    console.error(err);
   }
 }
