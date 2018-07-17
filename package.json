@@ -41,5 +41,13 @@
     "url": "git://github.com/RuntimeTools/appmetrics.git"
   },
   "author": "",
-  "license": "Apache-2.0"
+  "license": "Apache-2.0",
+  "nyc": {
+    "exclude": [
+      "lib/*",
+      "probes/*",
+      "headless_zip.js",
+      "tests/*"
+    ]
+  }
 }
