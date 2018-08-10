@@ -20,8 +20,10 @@ var util = require('util');
 var path = require('path');
 var zlib = require('zlib');
 var tar = require('tar');
+var os = require('os');
 
-var OS = process.platform; // e.g. linux
+var OS = os.type();
+OS !== 'OS400' ? OS = process.platform : OS = OS;
 var ARCH = process.arch; // e.g. ia32
 var ENDIANNESS = process.config.variables.node_byteorder; // e.g. 'little'
 var INSTALL_DIR = process.cwd();

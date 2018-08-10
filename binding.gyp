@@ -35,8 +35,18 @@
     ],
     "conditions": [
       ['OS=="aix"', {
-        "defines": [ "_AIX", "AIX" ],
-        "libraries": [ "-Wl,-bexpall,-brtllib,-G,-bernotok,-brtl,-L.,-bnoipath" ],
+        'variables': {
+            'os_name': '<!(uname -s)',
+          },
+          'conditions': [
+            [ '"<(os_name)"=="OS400"', {
+              'ldflags': ['-Wl,-brtl,-bnoquiet,-bnoipath,-blibpath:/QOpenSys/pkgs/lib:/QOpenSys/usr/lib']
+            }],
+            [ '"<(os_name)"=="AIX"', {
+                "defines": [ "_AIX", "AIX" ],
+                "libraries": [ "-Wl,-bexpall,-brtllib,-G,-bernotok,-brtl,-L.,-bnoipath" ]
+            }]
+          ]
       }],
       ['OS=="mac"', {
         "defines": [ "__MACH__", "__APPLE__",  ],
