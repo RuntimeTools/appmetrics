@@ -5,6 +5,7 @@ before_install:
 node_js:
   - "6"
   - "8"
+  - "node"
 os:
   - linux
 script: npm run-script travis
