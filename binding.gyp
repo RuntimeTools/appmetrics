@@ -9,6 +9,9 @@
       ['OS=="aix"', {
         "SHARED_LIB_SUFFIX": ".a",
       }],
+      ['OS in "os390 zos"', {
+        "SHARED_LIB_SUFFIX": ".so",
+      }],
     ],
   },
 
@@ -24,7 +27,9 @@
         "conditions": [
           ['OS=="aix"', {
             'product_extension': 'a',
-          },{
+          }],
+          ['OS in "os390 zos"', {
+            'product_extension': 'so',
           }],
         ],
       }],
