@@ -347,8 +347,16 @@ function runNodeEnvTests(nodeEnvData, t) {
       'max.old.space.size is an integer (value was: ' + nodeEnvData['max.old.space.size'] + ')'
     );
     t.ok(parseInt(nodeEnvData['max.old.space.size']) > 0, 'max.old.space.size is positive');
-
-    if (semver.gt(process.version, '6.5.0')) {
+    if (semver.gt(process.version, '10.0.0')) {
+      // heap size limit is now scaled by a factor - see
+      // https://github.com/nodejs/node/blob/v10.x/deps/v8/src/heap/heap.cc#L250
+      var maxHeapGuess = 2 * parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']);
+      var actualHeapSizeLimit = parseInt(nodeEnvData['heap.size.limit']);
+      t.ok(actualHeapSizeLimit >= maxHeapGuess,
+        'Values for max.old.space.size and max.semi.space.size approximately match heap.size.limit');
+      t.ok(actualHeapSizeLimit < (maxHeapGuess * 1.05),
+        'Values for max.old.space.size and max.semi.space.size approximately match heap.size.limit (2)');
+    } else if (semver.gt(process.version, '6.5.0')) {
       // issue 283
       t.ok(
         2 * parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']) ===

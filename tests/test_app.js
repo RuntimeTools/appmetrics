@@ -57,7 +57,7 @@ module.exports.start = function start() {
 
 // Write a string to memory on timer
 var ih = setInterval(function() {
-  var dummy = new Buffer(1024 * 1024);
+  var dummy = Buffer.allocUnsafe(1024 * 1024);
   dummy.write('hello');
   dummy.toString()[0];
 }, 100);
