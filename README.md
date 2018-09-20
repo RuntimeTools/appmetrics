@@ -428,6 +428,7 @@ The Node Application Metrics agent supports the following runtime environments w
   * 64-bit Windows (x64)
   * 64-bit Linux (x64, ppc64, ppc64le, s390x)
   * 64-bit AIX (ppc64)
+  * 64-bit IBM i (ppc64) - Functionality for Memory and Cpu stats not fully implemented, currently under construction.
   * 64-bit macOS (x64)
 
 ## Troubleshooting

@@ -2,10 +2,11 @@ appmetrics.node
 build
 install.log
 libagentcore.so
+libagentcore.a
 licenses
 node_modules
 .project
 /agentcore.dll
 /heapdump.node
 headlesstestoutput*
-
+/plugins
