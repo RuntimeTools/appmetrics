@@ -383,6 +383,6 @@ if (global.Appmetrics) {
   try {
     require('ibmapm-embed');
   } catch (err) {
-    console.log("Error initializing APM");
+    console.log('Error initializing APM');
   }
 }
