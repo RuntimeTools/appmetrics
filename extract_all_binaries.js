@@ -146,7 +146,7 @@ function zipAndExtract(targetDir, relativeFilepath, destDir) {
       console.log('ERROR: Failed to gunzip ' + relativeFilepath + ': ' + err.message);
       fail();
     })
-    .pipe(tar.Extract({ path: destDir }))
+    .pipe(tar.extract({ cwd: destDir }))
     .on('error', function(err) {
       console.log('ERROR: Failed to untar ' + relativeFilepath + ': ' + err.message);
       fail();
