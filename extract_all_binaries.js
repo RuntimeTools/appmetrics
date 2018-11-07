@@ -109,7 +109,7 @@ var getSupportedNodeVersionOrExit = function() {
 };
 
 var getAgentCorePlatformVersionDownloadURL = function() {
-  return ['agentcore', AGENTCORE_VERSION, getPlatform()].join('-') + '.tgz';
+  return [getSupportedNodeVersionOrExit() + '/agentcore', AGENTCORE_VERSION, getPlatform()].join('-') + '.tgz';
 };
 
 var getAppMetricsPlatformVersionDownloadURL = function() {
