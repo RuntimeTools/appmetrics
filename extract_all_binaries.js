@@ -43,8 +43,8 @@ var AGENTCORE_PLATFORMS = [
   'win32-x64',
   'os390-s390x',
 ];
-var AGENTCORE_VERSION = '3.2.8';
-var APPMETRICS_VERSION = '4.0.2';
+var AGENTCORE_VERSION = '3.2.9';
+var APPMETRICS_VERSION = '4.0.1';
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
