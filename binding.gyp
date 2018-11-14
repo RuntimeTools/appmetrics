@@ -86,6 +86,7 @@
   "targets": [
     {
       "target_name": "omr-agentcore",
+      "win_delay_load_hook": "false",
       "type": "none",
       "dependencies": [
         "<(agentcoredir)/binding.gyp:external",
@@ -104,6 +105,7 @@
     },
     {
       "target_name": "appmetrics",
+      "win_delay_load_hook": "false",
       "sources": [
         "<(INTERMEDIATE_DIR)/appmetrics.cpp",
         "<(srcdir)/headlessutils.cpp",
@@ -129,6 +131,7 @@
     },
     {
       "target_name": "nodeenvplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/env/nodeenvplugin.cpp",
@@ -136,6 +139,7 @@
     },
     {
       "target_name": "nodeheapplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/heap/nodeheapplugin.cpp",
@@ -143,6 +147,7 @@
     },
     {
       "target_name": "nodeprofplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/prof/nodeprofplugin.cpp",
@@ -150,6 +155,7 @@
     },
     {
       "target_name": "nodeloopplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/loop/nodeloopplugin.cpp",
@@ -157,6 +163,7 @@
     },
     {
       "target_name": "nodegcplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/gc/nodegcplugin.cpp",
@@ -164,6 +171,7 @@
     },
     {
       "target_name": "install",
+      "win_delay_load_hook": "false",
       "type": "none",
       "dependencies": [
         "omr-agentcore",

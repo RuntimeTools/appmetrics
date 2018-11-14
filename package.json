@@ -1,8 +1,8 @@
 {
   "name": "appmetrics",
-  "version": "4.0.2",
+  "version": "4.0.1",
   "engines": {
-    "node": ">=4"
+    "node": ">=6"
   },
   "description": "Node Application Metrics",
   "dependencies": {
