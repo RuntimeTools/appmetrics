@@ -491,7 +491,7 @@ This module adopts the [Module Long Term Support (LTS)](http://github.com/CloudN
 4.0.1
 
 ## Release History
-`4.0.1` - Bug fix release.  
+`4.0.1` - Bug fix release including adding Node 10 support on Windows (Unix already working).  
 `4.0.0` - Remove node-hc and add support for preloading.  
 `3.1.3` - Packaging fix.  
 `3.1.2` - Bug fixes.  
