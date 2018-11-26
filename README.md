@@ -9,6 +9,8 @@ Node Application Metrics monitoring and profiling agent
 [![Homepage](https://img.shields.io/badge/homepage-Node%20Application%20Metrics-blue.svg)](https://developer.ibm.com/node/monitoring-post-mortem/application-metrics-node-js/)
 [![Module LTS Adopted'](https://img.shields.io/badge/Module%20LTS-Adopted-brightgreen.svg?style=flat)](http://github.com/CloudNativeJS/ModuleLTS)
 [![IBM Support](https://img.shields.io/badge/Support-IBM%20Runtimes-brightgreen.svg?style=flat)](http://ibm.biz/node-support)
+[![Code Quality: Javascript](https://img.shields.io/lgtm/grade/javascript/g/RuntimeTools/appmetrics.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RuntimeTools/appmetrics/context:javascript)
+[![Total Alerts](https://img.shields.io/lgtm/alerts/g/RuntimeTools/appmetrics.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/RuntimeTools/appmetrics/alerts)
 
 Node Application Metrics instruments the Node.js runtime for performance monitoring, providing the monitoring data via an API.
 Additionally the data can be visualized by using the [Node Application Metrics Dashboard](https://github.com/RuntimeTools/appmetrics-dash).
