@@ -20,8 +20,10 @@ var util = require('util');
 var path = require('path');
 var zlib = require('zlib');
 var tar = require('tar');
+var os = require('os');
 
-var OS = process.platform; // e.g. linux
+var OS = os.type();
+OS !== 'OS400' ? OS = process.platform : OS = OS;
 var ARCH = process.arch; // e.g. ia32
 var ENDIANNESS = process.config.variables.node_byteorder; // e.g. 'little'
 var INSTALL_DIR = process.cwd();
@@ -41,8 +43,8 @@ var AGENTCORE_PLATFORMS = [
   'win32-x64',
   'os390-s390x',
 ];
-var AGENTCORE_VERSION = '3.2.6';
-var APPMETRICS_VERSION = '4.0.0';
+var AGENTCORE_VERSION = '3.2.9';
+var APPMETRICS_VERSION = '4.0.1';
 
 var LOG_FILE = path.join(INSTALL_DIR, 'install.log');
 var logFileStream = fs.createWriteStream(LOG_FILE, { flags: 'a' });
@@ -107,7 +109,7 @@ var getSupportedNodeVersionOrExit = function() {
 };
 
 var getAgentCorePlatformVersionDownloadURL = function() {
-  return ['agentcore', AGENTCORE_VERSION, getPlatform()].join('-') + '.tgz';
+  return [getSupportedNodeVersionOrExit() + '/agentcore', AGENTCORE_VERSION, getPlatform()].join('-') + '.tgz';
 };
 
 var getAppMetricsPlatformVersionDownloadURL = function() {
@@ -144,7 +146,7 @@ function zipAndExtract(targetDir, relativeFilepath, destDir) {
       console.log('ERROR: Failed to gunzip ' + relativeFilepath + ': ' + err.message);
       fail();
     })
-    .pipe(tar.Extract({ path: destDir }))
+    .pipe(tar.extract({ cwd: destDir }))
     .on('error', function(err) {
       console.log('ERROR: Failed to untar ' + relativeFilepath + ': ' + err.message);
       fail();

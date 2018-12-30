@@ -7,6 +7,8 @@ Node Application Metrics monitoring and profiling agent
 [![codecov.io](https://codecov.io/github/RuntimeTools/appmetrics/coverage.svg?branch=master)](https://codecov.io/github/RuntimeTools/appmetrics?branch=master)
 ![Apache 2](https://img.shields.io/badge/license-Apache2-blue.svg?style=flat)
 [![Homepage](https://img.shields.io/badge/homepage-Node%20Application%20Metrics-blue.svg)](https://developer.ibm.com/node/monitoring-post-mortem/application-metrics-node-js/)
+[![Module LTS Adopted'](https://img.shields.io/badge/Module%20LTS-Adopted-brightgreen.svg?style=flat)](http://github.com/CloudNativeJS/ModuleLTS)
+[![IBM Support](https://img.shields.io/badge/Support-IBM%20Runtimes-brightgreen.svg?style=flat)](http://ibm.biz/node-support)
 
 Node Application Metrics instruments the Node.js runtime for performance monitoring, providing the monitoring data via an API.
 Additionally the data can be visualized by using the [Node Application Metrics Dashboard](https://github.com/RuntimeTools/appmetrics-dash).
@@ -426,6 +428,9 @@ The Node Application Metrics agent supports the following runtime environments w
   * 64-bit Windows (x64)
   * 64-bit Linux (x64, ppc64, ppc64le, s390x)
   * 64-bit AIX (ppc64)
+  * 64-bit IBM i (ppc64) 
+    * Before running `npm install appmetrics`, ensure the environment variable `CC=gcc` is set.
+    * Functionality for Memory and CPU stats not fully implemented, currently under construction.
   * 64-bit macOS (x64)
 
 ## Troubleshooting
@@ -474,10 +479,19 @@ The npm package for this project uses a semver-parsable X.0.Z version number for
 ### Development versions
 Non-release versions of this project (for example on github.com/RuntimeTools/appmetrics) will use semver-parsable X.0.Z-dev.B version numbers, where X.0.Z is the last release with Z incremented and B is an integer. For further information on the development process go to the  [appmetrics wiki][3]: [Developing](https://github.com/RuntimeTools/appmetrics/wiki/Developing).
 
+## Module Long Term Support Policy
+
+This module adopts the [Module Long Term Support (LTS)](http://github.com/CloudNativeJS/ModuleLTS) policy, with the following End Of Life (EOL) dates:
+
+| Module Version   | Release Date | Minimum EOL | EOL With     | Status  |
+|------------------|--------------|-------------|--------------|---------|
+| V4.x.x	         | Jan 2018     | Dec 2019    |              | Current |
+
 ## Version
-4.0.0
+4.0.1
 
 ## Release History
+`4.0.1` - Bug fix release including adding Node 10 support on Windows (Unix already working).  
 `4.0.0` - Remove node-hc and add support for preloading.  
 `3.1.3` - Packaging fix.  
 `3.1.2` - Bug fixes.  

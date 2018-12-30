@@ -9,6 +9,9 @@
       ['OS=="aix"', {
         "SHARED_LIB_SUFFIX": ".a",
       }],
+      ['OS in "os390 zos"', {
+        "SHARED_LIB_SUFFIX": ".so",
+      }],
     ],
   },
 
@@ -24,7 +27,9 @@
         "conditions": [
           ['OS=="aix"', {
             'product_extension': 'a',
-          },{
+          }],
+          ['OS in "os390 zos"', {
+            'product_extension': 'so',
           }],
         ],
       }],
@@ -35,8 +40,18 @@
     ],
     "conditions": [
       ['OS=="aix"', {
-        "defines": [ "_AIX", "AIX" ],
-        "libraries": [ "-Wl,-bexpall,-brtllib,-G,-bernotok,-brtl,-L.,-bnoipath" ],
+        'variables': {
+            'os_name': '<!(uname -s)',
+          },
+          'conditions': [
+            [ '"<(os_name)"=="OS400"', {
+              'ldflags': ['-Wl,-brtl,-bnoquiet,-bnoipath,-blibpath:/QOpenSys/pkgs/lib:/QOpenSys/usr/lib']
+            }],
+            [ '"<(os_name)"=="AIX"', {
+                "defines": [ "_AIX", "AIX" ],
+                "libraries": [ "-Wl,-bexpall,-brtllib,-G,-bernotok,-brtl,-L.,-bnoipath" ]
+            }]
+          ]
       }],
       ['OS=="mac"', {
         "defines": [ "__MACH__", "__APPLE__",  ],
@@ -71,6 +86,7 @@
   "targets": [
     {
       "target_name": "omr-agentcore",
+      "win_delay_load_hook": "false",
       "type": "none",
       "dependencies": [
         "<(agentcoredir)/binding.gyp:external",
@@ -89,6 +105,7 @@
     },
     {
       "target_name": "appmetrics",
+      "win_delay_load_hook": "false",
       "sources": [
         "<(INTERMEDIATE_DIR)/appmetrics.cpp",
         "<(srcdir)/headlessutils.cpp",
@@ -114,6 +131,7 @@
     },
     {
       "target_name": "nodeenvplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/env/nodeenvplugin.cpp",
@@ -121,6 +139,7 @@
     },
     {
       "target_name": "nodeheapplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/heap/nodeheapplugin.cpp",
@@ -128,6 +147,7 @@
     },
     {
       "target_name": "nodeprofplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/prof/nodeprofplugin.cpp",
@@ -135,6 +155,7 @@
     },
     {
       "target_name": "nodeloopplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/loop/nodeloopplugin.cpp",
@@ -142,6 +163,7 @@
     },
     {
       "target_name": "nodegcplugin",
+      "win_delay_load_hook": "false",
       "type": "shared_library",
       "sources": [
         "<(srcdir)/plugins/node/gc/nodegcplugin.cpp",
@@ -149,6 +171,7 @@
     },
     {
       "target_name": "install",
+      "win_delay_load_hook": "false",
       "type": "none",
       "dependencies": [
         "omr-agentcore",

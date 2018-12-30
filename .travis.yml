@@ -4,8 +4,8 @@ before_install:
   - git submodule update --init --recursive
 node_js:
   - "6"
-  - "4"
-  - "node"
+  - "8"
+  - "10"
 os:
   - linux
 script: npm run-script travis
