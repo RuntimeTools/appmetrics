@@ -193,6 +193,7 @@ Creates a Node Application Metrics agent client instance. This can subsequently 
 Requests an object containing all of the available environment information for the running application. This will not contain all possible environment information until an 'initialized' event has been received.
 
 ### Event: 'cpu'
+**_Not supported on z/OS_**
 Emitted when a CPU monitoring sample is taken.
 * `data` (Object) the data from the CPU sample:
     * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
@@ -428,7 +429,7 @@ The Node Application Metrics agent supports the following runtime environments w
   * 64-bit Windows (x64)
   * 64-bit Linux (x64, ppc64, ppc64le, s390x)
   * 64-bit AIX (ppc64)
-  * 64-bit IBM i (ppc64) 
+  * 64-bit IBM i (ppc64)
     * Before running `npm install appmetrics`, ensure the environment variable `CC=gcc` is set.
     * Functionality for Memory and CPU stats not fully implemented, currently under construction.
   * 64-bit macOS (x64)
