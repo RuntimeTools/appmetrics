@@ -89,8 +89,9 @@ function monitorQuery(serverFun, that) {
 PostgresPromiseProbe.prototype.metricsEnd = function (probeData, method, methodArgs) {
     if (probeData && probeData.timer) {
         probeData.timer.stop();
-        let method = methodArgs[0], table = methodArgs[0];
-        if(methodArgs[0] && methodArgs[0].text) {
+        let method = methodArgs[0],
+            table = methodArgs[0];
+        if (methodArgs[0] && methodArgs[0].text) {
             method = methodArgs[0].text.split(" ")[0];
             table = methodArgs[0].text.match("/.*FROM (.*?) WHERE.*/i");
         }
