@@ -87,7 +87,12 @@ namespace monitorApi {
 
 static std::string toStdString(Local<String> s) {
     char *buf = new char[s->Length() + 1];
-    s->WriteUtf8(buf);
+    #if NODE_VERSION_AT_LEAST(10, 0, 0)
+        Isolate* isolate = v8::Isolate::GetCurrent();
+        s->WriteUtf8(isolate, buf);
+	#else
+        s->WriteUtf8(buf);
+	#endif
 #if defined(_ZOS)
     __atoe(buf);
 #endif
@@ -184,18 +189,24 @@ static std::string fileJoin(const std::string& path, const std::string& filename
 }
 
 static std::string* getModuleDir(Local<Object> module) {
-    std::string moduleFilename(toStdString(module->Get(Nan::New<String>(asciiString("filename")).ToLocalChecked())->ToString()));
+    Local<String> filenameKey = Nan::New<String>(asciiString("filename")).ToLocalChecked();
+    Local<String> filename = Nan::To<String>(module->Get(filenameKey)).ToLocalChecked();
+    std::string moduleFilename(toStdString(filename));
     return new std::string(portDirname(moduleFilename));
 }
 
 static Local<Object> getProcessObject() {
-    return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject();
+    Local<String> process = Nan::New<String>(asciiString("process")).ToLocalChecked();
+    return Nan::To<Object>(
+        Nan::GetCurrentContext()->Global()->Get(process)
+    ).ToLocalChecked();
 }
 
 static std::string* findApplicationDir() {
-    Local<Value> mainModule = getProcessObject()->Get(Nan::New<String>(asciiString("mainModule")).ToLocalChecked());
+    Local<String> mainModuleString = Nan::New<String>(asciiString("mainModule")).ToLocalChecked();
+    Local<Value> mainModule = getProcessObject()->Get(mainModuleString);
     if (!mainModule->IsUndefined()) {
-        return getModuleDir(mainModule->ToObject());
+        return getModuleDir(Nan::To<Object>(mainModule).ToLocalChecked());
     }
     return NULL;
 }
@@ -330,9 +341,9 @@ static bool initLoaderApi() {
 // set the property to given value (called from index.js)
 NAN_METHOD(setOption) {
   if (info.Length() > 1) {
-		Local<String> value = info[0]->ToString();
-    Local<String> value1 = info[1]->ToString();
-    loaderApi->setProperty(toStdString(value).c_str(),toStdString(value1).c_str());
+    Local<String> value0 = Nan::To<String>(info[0]).ToLocalChecked();
+    Local<String> value1 = Nan::To<String>(info[1]).ToLocalChecked();
+    loaderApi->setProperty(toStdString(value0).c_str(),toStdString(value1).c_str());
     } else {
         loaderApi->logMessage(warning, "Incorrect number of parameters passed to setOption");
     }
@@ -341,7 +352,7 @@ NAN_METHOD(setOption) {
 // get property
 NAN_METHOD(getOption) {
 	if (info.Length() > 0) {
-		Local<String> value = info[0]->ToString();
+		Local<String> value = Nan::To<String>(info[0]).ToLocalChecked();
     std::string property = loaderApi->getProperty(toStdString(value).c_str());
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 		v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str());
@@ -380,7 +391,7 @@ NAN_METHOD(stop) {
 }
 
 NAN_METHOD(spath) {
-  Local<String> value = info[0]->ToString();
+  Local<String> value = Nan::To<String>(info[0]).ToLocalChecked();
   loaderApi->setProperty("com.ibm.diagnostics.healthcenter.plugin.path", toStdString(value).c_str());
 }
 
@@ -492,7 +503,8 @@ NAN_METHOD(nativeEmit) {
 
     std::stringstream contentss;
     if (info[0]->IsString()) {
-        String::Utf8Value str(info[0]->ToString());
+        Isolate* isolate = v8::Isolate::GetCurrent();
+        String::Utf8Value str(isolate, Nan::To<String>(info[0]).ToLocalChecked());
         char *c_arg = *str;
         contentss << c_arg << ":";
     } else {
@@ -502,7 +514,8 @@ NAN_METHOD(nativeEmit) {
         return Nan::ThrowError(asciiString("First argument must a event name string").c_str());
     }
     if (info[1]->IsString()) {
-        String::Utf8Value str(info[1]->ToString());
+        Isolate* isolate = v8::Isolate::GetCurrent();
+        String::Utf8Value str(isolate, Nan::To<String>(info[1]).ToLocalChecked());
         char *c_arg = *str;
         contentss << c_arg;
 
@@ -528,8 +541,9 @@ NAN_METHOD(sendControlCommand) {
     }
 
     if (info[0]->IsString() && info[1]->IsString()) {
-        String::Utf8Value topicArg(info[0]->ToString());
-        String::Utf8Value commandArg(info[1]->ToString());
+        Isolate* isolate = v8::Isolate::GetCurrent();
+        String::Utf8Value topicArg(isolate, Nan::To<String>(info[0]).ToLocalChecked());
+        String::Utf8Value commandArg(isolate, Nan::To<String>(info[1]).ToLocalChecked());
         std::string topic = std::string(*topicArg);
         std::string command = std::string(*commandArg);
         unsigned int length = command.length();
@@ -657,13 +671,19 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 
 static bool isGlobalAgent(Local<Object> module) {
     Nan::HandleScope scope;
-    Local<Value> parent = module->Get(Nan::New<String>(asciiString("parent")).ToLocalChecked());
+    Local<String> parentString = Nan::New<String>(asciiString("parent")).ToLocalChecked();
+    Local<Value> parent = module->Get(parentString);
     if (parent->IsObject()) {
-        Local<Value> filename = parent->ToObject()->Get(Nan::New<String>(asciiString("filename")).ToLocalChecked());
-        if (filename->IsString() && isAppMetricsFile("index.js", toStdString(filename->ToString()))) {
-            Local<Value> grandparent = parent->ToObject()->Get(Nan::New<String>(asciiString("parent")).ToLocalChecked());
-            Local<Value> gpfilename = grandparent->ToObject()->Get(Nan::New<String>(asciiString("filename")).ToLocalChecked());
-            if (gpfilename->IsString() && isAppMetricsFile("launcher.js", toStdString(gpfilename->ToString()))) {
+        Local<String> filenameString = Nan::New<String>(asciiString("filename")).ToLocalChecked();
+        Local<Object> parentObj = Nan::To<Object>(parent).ToLocalChecked();
+        Local<Value> filename = parentObj->Get(filenameString);
+        if (
+            filename->IsString()
+            && isAppMetricsFile("index.js", toStdString(Nan::To<String>(filename).ToLocalChecked()))
+        ) {
+            Local<Value> grandparent = Nan::To<Object>(parent).ToLocalChecked()->Get(parentString);
+            Local<Value> gpfilename = Nan::To<Object>(grandparent).ToLocalChecked()->Get(filenameString);
+            if (gpfilename->IsString() && isAppMetricsFile("launcher.js", toStdString(Nan::To<String>(gpfilename).ToLocalChecked()))) {
                 return true;
             }
         }
@@ -677,11 +697,13 @@ static bool isGlobalAgent(Local<Object> module) {
 static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     Nan::HandleScope scope;
     Local<Object> cache = getRequireCache(module);
-    Local<Array> props = cache->GetOwnPropertyNames();
+    Local<Context> context = Nan::GetCurrentContext();
+    Local<Array> props = cache->GetOwnPropertyNames(context).ToLocalChecked();
     if (props->Length() > 0) {
         for (uint32_t i=0; i<props->Length(); i++) {
             Local<Value> entry = props->Get(i);
-            if (entry->IsString() && isAppMetricsFile("launcher.js", toStdString(entry->ToString()))) {
+            Local<String> entryString = Nan::To<String>(entry).ToLocalChecked();
+            if (entry->IsString() && isAppMetricsFile("launcher.js", toStdString(entryString))) {
                 return true;
             }
         }
@@ -714,22 +736,64 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Set exported functions
      */
-    exports->Set(Nan::New<String>(asciiString("getOption")).ToLocalChecked(), Nan::New<FunctionTemplate>(getOption)->GetFunction());
-    exports->Set(Nan::New<String>(asciiString("setOption")).ToLocalChecked(), Nan::New<FunctionTemplate>(setOption)->GetFunction());
-    exports->Set(Nan::New<String>(asciiString("start")).ToLocalChecked(), Nan::New<FunctionTemplate>(start)->GetFunction());
-    exports->Set(Nan::New<String>(asciiString("spath")).ToLocalChecked(), Nan::New<FunctionTemplate>(spath)->GetFunction());
-    exports->Set(Nan::New<String>(asciiString("stop")).ToLocalChecked(), Nan::New<FunctionTemplate>(stop)->GetFunction());
-    exports->Set(Nan::New<String>(asciiString("localConnect")).ToLocalChecked(), Nan::New<FunctionTemplate>(localConnect)->GetFunction());
-    exports->Set(Nan::New<String>(asciiString("nativeEmit")).ToLocalChecked(), Nan::New<FunctionTemplate>(nativeEmit)->GetFunction());
-    exports->Set(Nan::New<String>(asciiString("sendControlCommand")).ToLocalChecked(), Nan::New<FunctionTemplate>(sendControlCommand)->GetFunction());
+    Isolate* isolate = v8::Isolate::GetCurrent();
+    Local<Context> context = Nan::GetCurrentContext();
+    exports->Set(
+        Nan::New<String>(asciiString("getOption")).ToLocalChecked(),
+        Nan::New<FunctionTemplate>(getOption)
+            ->GetFunction(context).ToLocalChecked()
+	);
+    exports->Set(
+		Nan::New<String>(asciiString("setOption")).ToLocalChecked(),
+		Nan::New<FunctionTemplate>(setOption)
+			->GetFunction(context).ToLocalChecked()
+	);
+    exports->Set(
+		Nan::New<String>(asciiString("start")).ToLocalChecked(),
+		Nan::New<FunctionTemplate>(start)
+			->GetFunction(context).ToLocalChecked()
+	);
+    exports->Set(
+		Nan::New<String>(asciiString("spath")).ToLocalChecked(),
+		Nan::New<FunctionTemplate>(spath)
+			->GetFunction(context).ToLocalChecked()
+	);
+    exports->Set(
+		Nan::New<String>(asciiString("stop")).ToLocalChecked(),
+		Nan::New<FunctionTemplate>(stop)
+			->GetFunction(context).ToLocalChecked()
+	);
+    exports->Set(
+		Nan::New<String>(asciiString("localConnect")).ToLocalChecked(),
+		Nan::New<FunctionTemplate>(localConnect)
+			->GetFunction(context).ToLocalChecked()
+	);
+    exports->Set(
+		Nan::New<String>(asciiString("nativeEmit")).ToLocalChecked(),
+		Nan::New<FunctionTemplate>(nativeEmit)
+			->GetFunction(context).ToLocalChecked()
+	);
+    exports->Set(
+		Nan::New<String>(asciiString("sendControlCommand")).ToLocalChecked(),
+		Nan::New<FunctionTemplate>(sendControlCommand)
+			->GetFunction(context).ToLocalChecked()
+	);
 #if !defined(_ZOS)
-    exports->Set(Nan::New<String>(asciiString("setHeadlessZipFunction")).ToLocalChecked(), Nan::New<FunctionTemplate>(setHeadlessZipFunction)->GetFunction());
+    exports->Set(
+		Nan::New<String>(asciiString("setHeadlessZipFunction")).ToLocalChecked(),
+		Nan::New<FunctionTemplate>(setHeadlessZipFunction)
+			->GetFunction(context).ToLocalChecked()
+	);
 #endif
 #if defined(_LINUX)
     exports->Set(Nan::New<String>("lrtime").ToLocalChecked(), Nan::New<FunctionTemplate>(lrtime)->GetFunction());
 #endif
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-    exports->Set(Nan::New<String>(asciiString("getObjectHistogram")).ToLocalChecked(), Nan::New<FunctionTemplate>(getObjectHistogram)->GetFunction());
+    exports->Set(
+		Nan::New<String>(asciiString("getObjectHistogram")).ToLocalChecked(),
+		Nan::New<FunctionTemplate>(getObjectHistogram)
+			->GetFunction(context).ToLocalChecked()
+	);
 #endif
     /*
      * Initialize healthcenter core library
@@ -752,7 +816,6 @@ void init(Local<Object> exports, Local<Object> module) {
     loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
     /* Initialize watchdog directly so that bindings can be created */
-    Isolate* isolate = v8::Isolate::GetCurrent();
     watchdog::Initialize(isolate, exports);
 
     /*

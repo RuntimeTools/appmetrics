@@ -81,7 +81,13 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 
 static std::string ToStdString(Local<String> s) {
 	char *buf = new char[s->Length() + 1];
-	s->WriteUtf8(buf);
+	#if NODE_VERSION_AT_LEAST(10, 0, 0)
+        Isolate* isolate = v8::Isolate::GetCurrent();
+        s->WriteUtf8(isolate, buf);
+	#else
+        s->WriteUtf8(buf);
+	#endif
+
 #if defined(_ZOS)
   __atoe(buf);
 #endif
@@ -117,35 +123,60 @@ static std::string nativeString(std::string s) {
 }
 
 static Local<Object> GetProcessObject() {
-	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject();
+	Local<String> process = Nan::New<String>(asciiString("process")).ToLocalChecked();
+	return Nan::To<Object>(
+		Nan::GetCurrentContext()
+			->Global()
+			->Get(process)
+	).ToLocalChecked();
 }
 
 static Local<Object> GetProcessConfigObject() {
-	return Nan::GetCurrentContext()->Global()->Get(Nan::New<String>(asciiString("process")).ToLocalChecked())->ToObject()->Get(Nan::New<String>(asciiString("config")).ToLocalChecked())->ToObject();
-
+	Local<Object> process = GetProcessObject();
+	Local<String> configString = Nan::New<String>(asciiString("config")).ToLocalChecked();
+	return Nan::To<Object>(process->Get(configString)).ToLocalChecked();
 }
 
 static std::string GetNodeVersion() {
-	Local<String> version = GetProcessObject()->Get(Nan::New<String>(asciiString("version")).ToLocalChecked())->ToString();
+	Local<String> versionString = Nan::New<String>(asciiString("version")).ToLocalChecked();
+	Local<String> version = Nan::To<String>(
+		 GetProcessObject()->Get(versionString)
+	).ToLocalChecked();
 	return ToStdString(version);
 }
 
 static std::string GetNodeTag() {
-	Local<String> tag = GetProcessConfigObject()->Get(Nan::New<String>(asciiString("variables")).ToLocalChecked())->ToObject()->Get(Nan::New<String>(asciiString("node_tag")).ToLocalChecked())->ToString();
+	Local<String> variables = Nan::New<String>(asciiString("variables")).ToLocalChecked();
+	Local<String> nodeTagString = Nan::New<String>(asciiString("node_tag")).ToLocalChecked();
+	Local<Object> processConfigVars = Nan::To<Object>(
+		GetProcessConfigObject()->Get(variables)
+	).ToLocalChecked();
+	Local<String> tag = Nan::To<String>(
+		processConfigVars->Get(nodeTagString)
+	).ToLocalChecked();
 	return ToStdString(tag);
 }
 
 static std::string GetNodeArguments(const std::string separator="@@@") {
 	std::stringstream ss;
 	Local<Object> process = GetProcessObject();
-	Local<Object> nodeArgv = process->Get(Nan::New<String>(asciiString("execArgv")).ToLocalChecked())->ToObject();
-	int64 nodeArgc = nodeArgv->Get(Nan::New<String>(asciiString("length")).ToLocalChecked())->ToInteger()->Value();
+	Local<String> execArgv = Nan::New<String>(asciiString("execArgv")).ToLocalChecked();
+	Local<Object> nodeArgv = Nan::To<Object>(
+		process->Get(execArgv)
+	).ToLocalChecked();
+
+	Local<String> length = Nan::New<String>(asciiString("length")).ToLocalChecked();
+	int64 nodeArgc = nodeArgv
+		->Get(length)
+		->ToInteger(Nan::GetCurrentContext()).ToLocalChecked()
+		->Value();
 
 	int written = 0;
 	if (nodeArgc > 0) {
 		for (int i = 0; i < nodeArgc; i++) {
 			if (written++ > 0) ss << separator;
-			ss << ToStdString(nodeArgv->Get(i)->ToString());
+			Local<String> nodeArg = Nan::To<String>(nodeArgv->Get(i)).ToLocalChecked();
+			ss << ToStdString(nodeArg);
 		}
 	}
 
@@ -160,11 +191,19 @@ size_t GuessSpaceSizeFromArgs(std::string argName) {
 	size_t result = 0;
 
 	Local<Object> process = GetProcessObject();
-	Local<Object> nodeArgv = process->Get(Nan::New<String>(asciiString("execArgv")).ToLocalChecked())->ToObject();
-	int64 nodeArgc = nodeArgv->Get(Nan::New<String>(asciiString("length")).ToLocalChecked())->ToInteger()->Value();
+	Local<String> execArgv = Nan::New<String>(asciiString("execArgv")).ToLocalChecked();
+	Local<Object> nodeArgv = Nan::To<Object>(
+		process->Get(execArgv)
+	).ToLocalChecked();
+	Local<String> length = Nan::New<String>(asciiString("length")).ToLocalChecked();
+	int64 nodeArgc = nodeArgv
+		->Get(length)
+		->ToInteger(Nan::GetCurrentContext()).ToLocalChecked()
+		->Value();
 
 	for (int i = 0; i < nodeArgc; i++) {
-		std::string arg = ToStdString(nodeArgv->Get(i)->ToString());
+		Local<String> nodeArg = Nan::To<String>(nodeArgv->Get(i)).ToLocalChecked();
+		std::string arg = ToStdString(nodeArg);
 		if (arg.length() > argName.length()) {
 			if (arg[0] == '-' && arg[1] == '-') {
 				unsigned int idx;
@@ -186,11 +225,19 @@ size_t GuessSpaceSizeFromArgs(std::string argName) {
 }
 
 static size_t GuessDefaultMaxOldSpaceSize() {
-	return Megabytes(700ul * (v8::internal::kApiPointerSize / 4));
+	#if NODE_VERSION_AT_LEAST(12, 0, 0)
+		return Megabytes(700ul * (v8::internal::kApiSystemPointerSize / 4));
+	#else
+		return Megabytes(700ul * (v8::internal::kApiPointerSize / 4));
+	#endif
 }
 
 static size_t GuessDefaultMaxSemiSpaceSize() {
-	return Megabytes(8ul * (v8::internal::kApiPointerSize / 4));
+	#if NODE_VERSION_AT_LEAST(12, 0, 0)
+		return Megabytes(8ul * (v8::internal::kApiSystemPointerSize / 4));
+	#else
+		return Megabytes(8ul * (v8::internal::kApiPointerSize / 4));
+	#endif
 }
 
 static size_t Align(size_t value, int alignment) {

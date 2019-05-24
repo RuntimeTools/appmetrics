@@ -37,7 +37,7 @@ NAN_METHOD(getObjectHistogram) {
 
 	HeapProfiler *heapProfiler = isolate->GetHeapProfiler();
 
-#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v0.11+
+#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v4.00+
 	// Title field removed in Node 4.x
 #else
 	Local<String> snapshotName = String::NewFromUtf8(isolate, "snapshot");
@@ -51,7 +51,7 @@ NAN_METHOD(getObjectHistogram) {
 #else
 	const HeapSnapshot* snapshot = heapProfiler->TakeSnapshot(snapshotName);
 #endif
-#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v0.11+
+#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v4.00+
 	// Title field removed in Node 4.x
 #else
 	snapshotName
@@ -100,7 +100,7 @@ NAN_METHOD(getObjectHistogram) {
 		int64_t ncount = 0;
 		int64_t nsize = 0;
 		if( !(tupleval->IsNull() || tupleval->IsUndefined()) ) {
-			tuple = tupleval->ToObject();
+			tuple = Nan::To<Object>(tupleval).ToLocalChecked();
 
 			/* Nothing else can access the tuple or histogram objects,
 			 * if we've found an entry for "name" then it will have these
@@ -108,9 +108,9 @@ NAN_METHOD(getObjectHistogram) {
 			 * from Get.
 			 */
 			Local<Value> count = tuple->Get(countName);
-			ncount = count->IntegerValue();
+			ncount = count->IntegerValue(Nan::GetCurrentContext()).FromJust();
 			Local<Value> size = tuple->Get(sizeName);
-			nsize = size->IntegerValue();
+			nsize = size->IntegerValue(Nan::GetCurrentContext()).FromJust();
 
 		} else {
 			/* Create a new tuple and add it to the histogram.
