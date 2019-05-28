@@ -4,11 +4,11 @@ before_install:
   - git submodule update --init --recursive
 node_js:
   - "8"
-  - "10"
+  - "10.15.1"
   - "12"
 os:
   - osx
-  - linux
-  - windows
+  # - linux
+  # - windows
 script: npm run-script travis
 
