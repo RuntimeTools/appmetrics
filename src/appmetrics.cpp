@@ -190,9 +190,8 @@ static std::string fileJoin(const std::string& path, const std::string& filename
 
 static std::string* getModuleDir(Local<Object> module) {
     Local<String> filenameKey = Nan::New<String>(asciiString("filename")).ToLocalChecked();
-    // Local<String> filename = Nan::To<String>(module->Get(filenameKey)).ToLocalChecked();
     Local<Value> filenameValue = Nan::Get(module, filenameKey).ToLocalChecked();
-    Local<String> filenameString = Nan::To<String>(filename).ToLocalChecked();
+    Local<String> filenameString = Nan::To<String>(filenameValue).ToLocalChecked();
     std::string moduleFilename(toStdString(filenameString));
     return new std::string(portDirname(moduleFilename));
 }
@@ -207,9 +206,8 @@ static Local<Object> getProcessObject() {
 static std::string* findApplicationDir() {
     Local<String> mainModuleString = Nan::New<String>(asciiString("mainModule")).ToLocalChecked();
     Local<Value> mainModuleValue = Nan::Get(getProcessObject(), mainModuleString).ToLocalChecked();
-    // Local<Value> mainModule = getProcessObject()->Get(mainModuleString);
-    if (!mainModule->IsUndefined()) {
-        return getModuleDir(Nan::To<Object>(mainModule).ToLocalChecked());
+    if (!mainModuleValue->IsUndefined()) {
+        return getModuleDir(Nan::To<Object>(mainModuleValue).ToLocalChecked());
     }
     return NULL;
 }
@@ -679,18 +677,16 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 static bool isGlobalAgent(Local<Object> module) {
     Nan::HandleScope scope;
     Local<String> parentString = Nan::New<String>(asciiString("parent")).ToLocalChecked();
-    // Local<Value> parent = module->Get(parentString);
     Local<Value> parentValue = Nan::Get(module, parentString).ToLocalChecked();
-    if (parent->IsObject()) {
+    if (parentValue->IsObject()) {
         Local<String> filenameString = Nan::New<String>(asciiString("filename")).ToLocalChecked();
-        Local<Object> parentObj = Nan::To<Object>(parent).ToLocalChecked();
-        // Local<Value> filename = parentObj->Get(filenameString);
+        Local<Object> parentObj = Nan::To<Object>(parentValue).ToLocalChecked();
         Local<Value> filenameValue = Nan::Get(parentObj, filenameString).ToLocalChecked();
         if (
-            filename->IsString()
-            && isAppMetricsFile("index.js", toStdString(Nan::To<String>(filename).ToLocalChecked()))
+            filenameValue->IsString()
+            && isAppMetricsFile("index.js", toStdString(Nan::To<String>(filenameValue).ToLocalChecked()))
         ) {
-            Local<Value> grandparent = Nan::To<Object>(parent).ToLocalChecked()->Get(parentString);
+            Local<Value> grandparent = Nan::To<Object>(parentValue).ToLocalChecked()->Get(parentString);
             Local<Value> gpfilename = Nan::To<Object>(grandparent).ToLocalChecked()->Get(filenameString);
             if (gpfilename->IsString() && isAppMetricsFile("launcher.js", toStdString(Nan::To<String>(gpfilename).ToLocalChecked()))) {
                 return true;
