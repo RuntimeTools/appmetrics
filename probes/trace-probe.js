@@ -27,7 +27,7 @@ function TraceProbe() {
 }
 util.inherits(TraceProbe, Probe);
 
-TraceProbe.prototype.attach = function(moduleName, target) {
+TraceProbe.prototype.attach = function rw1(moduleName, target) {
   if (
     moduleName.slice(0, 1) != '.' ||
     stopList[moduleName] ||
@@ -46,7 +46,7 @@ TraceProbe.prototype.attach = function(moduleName, target) {
     instrumentMethods(moduleName, target.prototype);
     ret = target;
     if (target && target.prototype && Object.keys(target.prototype).length == 0 && Object.keys(target).length == 0) {
-      ret = function() {
+      ret = function rw0() {
         var rc = target.apply(this, arguments);
         instrumentMethods(moduleName, rc);
         return rc;
@@ -54,7 +54,7 @@ TraceProbe.prototype.attach = function(moduleName, target) {
     }
   }
 
-  ret.__ddProbeAttached__ = function() {
+  ret.__ddProbeAttached__ = function rw2() {
     return true;
   };
   return ret;
@@ -71,43 +71,43 @@ function instrument(target, name, method, fullName) {
   function generateF(expectedArgCount, fn) {
     switch (expectedArgCount) {
       case 0:
-        return function() {
+        return function rw3() {
           return fn.apply(this, arguments);
         };
       case 1:
-        return function(a) {
+        return function rw4(a) {
           return fn.apply(this, arguments);
         };
       case 2:
-        return function(a, b) {
+        return function rw5(a, b) {
           return fn.apply(this, arguments);
         };
       case 3:
-        return function(a, b, c) {
+        return function rw6(a, b, c) {
           return fn.apply(this, arguments);
         };
       case 4:
-        return function(a, b, c, d) {
+        return function rw7(a, b, c, d) {
           return fn.apply(this, arguments);
         };
       case 5:
-        return function(a, b, c, d, e) {
+        return function rw8(a, b, c, d, e) {
           return fn.apply(this, arguments);
         };
       case 6:
-        return function(a, b, c, d, e, f) {
+        return function rw9(a, b, c, d, e, f) {
           return fn.apply(this, arguments);
         };
       case 7:
-        return function(a, b, c, d, e, f, g) {
+        return function rw10(a, b, c, d, e, f, g) {
           return fn.apply(this, arguments);
         };
       case 8:
-        return function(a, b, c, d, e, f, g, h) {
+        return function rw11(a, b, c, d, e, f, g, h) {
           return fn.apply(this, arguments);
         };
       case 9:
-        return function(a, b, c, d, e, f, g, h, i) {
+        return function rw12(a, b, c, d, e, f, g, h, i) {
           return fn.apply(this, arguments);
         };
 
@@ -120,7 +120,7 @@ function instrument(target, name, method, fullName) {
           ident = incrementIdentifier(ident);
         }
         /* eslint no-eval: 0 */
-        return eval('x = function(' + argumentList.join(',') + ') {return fn.apply(this,arguments);};');
+        return eval('x = function rw13(' + argumentList.join(',') + ') {return fn.apply(this,arguments);};');
     }
 
     function incrementIdentifier(identifier) {
@@ -135,11 +135,11 @@ function instrument(target, name, method, fullName) {
     }
   }
 
-  var f = function() {
+  var f = function rw14() {
     var req = request.startMethod(fullName);
     var args = arguments;
 
-    var cxtFunc = function() {
+    var cxtFunc = function rw15() {
       var cxt = {};
       for (var i = 0; i < args.length; ++i) {
         var arg = args[i];
@@ -189,19 +189,19 @@ function instrument(target, name, method, fullName) {
       if (isResponseMethod(arguments)) {
         var resArg = arguments[arguments.length - 2];
         var sendCb = resArg.send;
-        resArg.send = function() {
+        resArg.send = function rw16() {
           req.stop(cxtFunc());
           return sendCb.apply(resArg, arguments);
         };
 
         var renderCb = resArg.render;
-        resArg.render = function() {
+        resArg.render = function rw17() {
           req.stop(cxtFunc());
           return renderCb.apply(resArg, arguments);
         };
       } else {
         var cb = arguments[arguments.length - 1];
-        arguments[arguments.length - 1] = function() {
+        arguments[arguments.length - 1] = function rw18() {
           req.stop(cxtFunc());
           return cb.apply(this, arguments);
         };
@@ -280,7 +280,7 @@ function instrumentMethods(moduleName, target) {
   }
 }
 
-TraceProbe.prototype.enable = function() {};
-TraceProbe.prototype.enableRequests = function() {};
+TraceProbe.prototype.enable = function rw19() {};
+TraceProbe.prototype.enableRequests = function rw20() {};
 
 module.exports = TraceProbe;
