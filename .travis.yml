@@ -8,5 +8,7 @@ node_js:
   - "12"
 os:
   - osx
+  - linux
+  - windows
 script: npm run-script travis
 
