@@ -190,8 +190,10 @@ static std::string fileJoin(const std::string& path, const std::string& filename
 
 static std::string* getModuleDir(Local<Object> module) {
     Local<String> filenameKey = Nan::New<String>(asciiString("filename")).ToLocalChecked();
-    Local<String> filename = Nan::To<String>(module->Get(filenameKey)).ToLocalChecked();
-    std::string moduleFilename(toStdString(filename));
+    // Local<String> filename = Nan::To<String>(module->Get(filenameKey)).ToLocalChecked();
+    Local<Value> filenameValue = Nan::Get(module, filenameKey).ToLocalChecked();
+    Local<String> filenameString = Nan::To<String>(filename).ToLocalChecked();
+    std::string moduleFilename(toStdString(filenameString));
     return new std::string(portDirname(moduleFilename));
 }
 
@@ -204,7 +206,8 @@ static Local<Object> getProcessObject() {
 
 static std::string* findApplicationDir() {
     Local<String> mainModuleString = Nan::New<String>(asciiString("mainModule")).ToLocalChecked();
-    Local<Value> mainModule = getProcessObject()->Get(mainModuleString);
+    Local<Value> mainModuleValue = Nan::Get(getProcessObject(), mainModuleString).ToLocalChecked();
+    // Local<Value> mainModule = getProcessObject()->Get(mainModuleString);
     if (!mainModule->IsUndefined()) {
         return getModuleDir(Nan::To<Object>(mainModule).ToLocalChecked());
     }
@@ -504,7 +507,8 @@ NAN_METHOD(nativeEmit) {
     std::stringstream contentss;
     if (info[0]->IsString()) {
         Isolate* isolate = v8::Isolate::GetCurrent();
-        String::Utf8Value str(isolate, Nan::To<String>(info[0]).ToLocalChecked());
+        // String::Utf8Value str(isolate, Nan::To<String>(info[0]).ToLocalChecked());
+        Nan::Utf8String str(info[0]); // https://github.com/nodejs/nan/blob/master/doc/v8_misc.md#nanutf8string
         char *c_arg = *str;
         contentss << c_arg << ":";
     } else {
@@ -515,7 +519,8 @@ NAN_METHOD(nativeEmit) {
     }
     if (info[1]->IsString()) {
         Isolate* isolate = v8::Isolate::GetCurrent();
-        String::Utf8Value str(isolate, Nan::To<String>(info[1]).ToLocalChecked());
+        // String::Utf8Value str(isolate, Nan::To<String>(info[1]).ToLocalChecked());
+        Nan::Utf8String str(info[1]);
         char *c_arg = *str;
         contentss << c_arg;
 
@@ -542,8 +547,10 @@ NAN_METHOD(sendControlCommand) {
 
     if (info[0]->IsString() && info[1]->IsString()) {
         Isolate* isolate = v8::Isolate::GetCurrent();
-        String::Utf8Value topicArg(isolate, Nan::To<String>(info[0]).ToLocalChecked());
-        String::Utf8Value commandArg(isolate, Nan::To<String>(info[1]).ToLocalChecked());
+        // String::Utf8Value topicArg(isolate, Nan::To<String>(info[0]).ToLocalChecked());
+        Nan::Utf8String topicArg(info[0]);
+        // String::Utf8Value commandArg(isolate, Nan::To<String>(info[1]).ToLocalChecked());
+        Nan::Utf8String commandArg(info[1]);
         std::string topic = std::string(*topicArg);
         std::string command = std::string(*commandArg);
         unsigned int length = command.length();
@@ -672,11 +679,13 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 static bool isGlobalAgent(Local<Object> module) {
     Nan::HandleScope scope;
     Local<String> parentString = Nan::New<String>(asciiString("parent")).ToLocalChecked();
-    Local<Value> parent = module->Get(parentString);
+    // Local<Value> parent = module->Get(parentString);
+    Local<Value> parentValue = Nan::Get(module, parentString).ToLocalChecked();
     if (parent->IsObject()) {
         Local<String> filenameString = Nan::New<String>(asciiString("filename")).ToLocalChecked();
         Local<Object> parentObj = Nan::To<Object>(parent).ToLocalChecked();
-        Local<Value> filename = parentObj->Get(filenameString);
+        // Local<Value> filename = parentObj->Get(filenameString);
+        Local<Value> filenameValue = Nan::Get(parentObj, filenameString).ToLocalChecked();
         if (
             filename->IsString()
             && isAppMetricsFile("index.js", toStdString(Nan::To<String>(filename).ToLocalChecked()))
@@ -786,7 +795,11 @@ void init(Local<Object> exports, Local<Object> module) {
 	);
 #endif
 #if defined(_LINUX)
-    exports->Set(Nan::New<String>("lrtime").ToLocalChecked(), Nan::New<FunctionTemplate>(lrtime)->GetFunction());
+    exports->Set(
+        Nan::New<String>("lrtime").ToLocalChecked(),
+        Nan::New<FunctionTemplate>(lrtime)
+            ->GetFunction(context).ToLocalChecked()
+    );
 #endif
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
     exports->Set(
