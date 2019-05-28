@@ -3,9 +3,9 @@ language: node_js
 before_install:
   - git submodule update --init --recursive
 node_js:
-  - "6"
   - "8"
   - "10"
+  - "12"
 os:
   - linux
 script: npm run-script travis
