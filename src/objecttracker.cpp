@@ -94,7 +94,7 @@ NAN_METHOD(getObjectHistogram) {
 			continue;
 		}
 
-		Local<Value> tupleval = histogram->Get(name);
+		Local<Value> tupleval = Nan::Get(histogram, name).ToLocalChecked();
 		Local<Object> tuple;
 
 		int64_t ncount = 0;
@@ -107,9 +107,9 @@ NAN_METHOD(getObjectHistogram) {
 			 * fields set. There's no need to check for null/undefined
 			 * from Get.
 			 */
-			Local<Value> count = tuple->Get(countName);
+			Local<Value> count = Nan::Get(tuple, countName).ToLocalChecked();
 			ncount = count->IntegerValue(Nan::GetCurrentContext()).FromJust();
-			Local<Value> size = tuple->Get(sizeName);
+			Local<Value> size = Nan::Get(tuple, sizeName).ToLocalChecked();
 			nsize = size->IntegerValue(Nan::GetCurrentContext()).FromJust();
 
 		} else {

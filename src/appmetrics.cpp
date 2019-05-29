@@ -196,10 +196,14 @@ static std::string* getModuleDir(Local<Object> module) {
     return new std::string(portDirname(moduleFilename));
 }
 
+static Local<Object> getSubObject(Local<Object> parentObj, Local<String> subObjectName) {
+  Local<Value> subObjectValue = Nan::Get(parentObj, subObjectName).ToLocalChecked();
+  return Nan::To<Object>(subObjectValue).ToLocalChecked();
+}
+
 static Local<Object> getProcessObject() {
     Local<String> processString = Nan::New<String>(asciiString("process")).ToLocalChecked();
-    Local<Value> processValue = Nan::Get(Nan::GetCurrentContext()->Global(), processString).ToLocalChecked();
-    Local<Object> processObj = Nan::To<Object>(processValue).ToLocalChecked();
+    Local<Object> processObj = getSubObject(Nan::GetCurrentContext()->Global(), processString);
     return processObj;
 }
 
@@ -672,15 +676,14 @@ static bool isGlobalAgent(Local<Object> module) {
     Local<String> parentString = Nan::New<String>(asciiString("parent")).ToLocalChecked();
     Local<Value> parentValue = Nan::Get(module, parentString).ToLocalChecked();
     if (parentValue->IsObject()) {
-        Local<String> filenameString = Nan::New<String>(asciiString("filename")).ToLocalChecked();
         Local<Object> parentObj = Nan::To<Object>(parentValue).ToLocalChecked();
+        Local<String> filenameString = Nan::New<String>(asciiString("filename")).ToLocalChecked();
         Local<Value> filenameValue = Nan::Get(parentObj, filenameString).ToLocalChecked();
         if (
             filenameValue->IsString()
             && isAppMetricsFile("index.js", toStdString(Nan::To<String>(filenameValue).ToLocalChecked()))
         ) {
-            Local<Value> grandparentValue = Nan::Get(parentObj, parentString).ToLocalChecked();
-            Local<Object> grandparentObj = Nan::To<Object>(grandparentValue).ToLocalChecked();
+            Local<Object> grandparentObj = getSubObject(parentObj, parentString);
             Local<Value> gpfilenameValue = Nan::Get(grandparentObj, filenameString).ToLocalChecked();
             Local<String> gpfilenameString = Nan::To<String>(gpfilenameValue).ToLocalChecked();
             if (gpfilenameValue->IsString() && isAppMetricsFile("launcher.js", toStdString(gpfilenameString))) {

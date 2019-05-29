@@ -132,47 +132,58 @@ static Local<Object> GetProcessObject() {
 static Local<Object> GetProcessConfigObject() {
 	Local<Object> process = GetProcessObject();
 	Local<String> configString = Nan::New<String>(asciiString("config")).ToLocalChecked();
-	return Nan::To<Object>(process->Get(configString)).ToLocalChecked();
+	Local<Value> configValue = Nan::Get(process, configString).ToLocalChecked();
+	Local<Object> configObj = Nan::To<Object>(configValue).ToLocalChecked();
+	return configObj;
 }
 
 static std::string GetNodeVersion() {
 	Local<String> versionString = Nan::New<String>(asciiString("version")).ToLocalChecked();
-	Local<String> version = Nan::To<String>(
-		 GetProcessObject()->Get(versionString)
-	).ToLocalChecked();
+	Local<Value> versionValue = Nan::Get(GetProcessObject(), versionString).ToLocalChecked();
+	Local<String> version = Nan::To<String>(versionValue).ToLocalChecked();
 	return ToStdString(version);
 }
 
 static std::string GetNodeTag() {
-	Local<String> variables = Nan::New<String>(asciiString("variables")).ToLocalChecked();
+	Local<String> variablesString = Nan::New<String>(asciiString("variables")).ToLocalChecked();
 	Local<String> nodeTagString = Nan::New<String>(asciiString("node_tag")).ToLocalChecked();
-	Local<Object> processConfigVars = Nan::To<Object>(
-		GetProcessConfigObject()->Get(variables)
-	).ToLocalChecked();
-	Local<String> tag = Nan::To<String>(
-		processConfigVars->Get(nodeTagString)
-	).ToLocalChecked();
-	return ToStdString(tag);
+	Local<Value> processConfigVarsValue = Nan::Get(GetProcessConfigObject(), variablesString).ToLocalChecked();
+	Local<Object> processConfigVars = Nan::To<Object>(processConfigVarsValue).ToLocalChecked();
+	Local<Value> tagValue = Nan::Get(processConfigVars, nodeTagString).ToLocalChecked();
+	Local<String> tagString = Nan::To<String>(tagValue).ToLocalChecked();
+	return ToStdString(tagString);
+}
+
+static Local<Object> getNodeArgv() {
+	Local<Object> process = GetProcessObject();
+	Local<String> execArgvString = Nan::New<String>(asciiString("execArgv")).ToLocalChecked();
+	Local<Value> execArgvValue = Nan::Get(process, execArgvString).ToLocalChecked();
+	Local<Object> nodeArgv = Nan::To<Object>(execArgvValue).ToLocalChecked();
+	return nodeArgv;
+}
+
+static int64 getNodeArgc(Local<Object> nodeArgv) {
+	Local<String> lengthString = Nan::New<String>(asciiString("length")).ToLocalChecked();
+	Local<Value> lengthValue = Nan::Get(nodeArgv, lengthString).ToLocalChecked();
+	int64 nodeArgc = lengthValue
+		->ToInteger(Nan::GetCurrentContext()).ToLocalChecked()
+		->Value();
+	return nodeArgc;
 }
 
 static std::string GetNodeArguments(const std::string separator="@@@") {
 	std::stringstream ss;
-	Local<Object> process = GetProcessObject();
-	Local<String> execArgv = Nan::New<String>(asciiString("execArgv")).ToLocalChecked();
-	Local<Object> nodeArgv = Nan::To<Object>(process->Get(execArgv)).ToLocalChecked();
-
-	Local<String> length = Nan::New<String>(asciiString("length")).ToLocalChecked();
-	int64 nodeArgc = nodeArgv
-		->Get(length)
-		->ToInteger(Nan::GetCurrentContext()).ToLocalChecked()
-		->Value();
+	Local<Object> nodeArgv = getNodeArgv();
+	int64 nodeArgc = getNodeArgc(nodeArgv);
 
 	int written = 0;
 	if (nodeArgc > 0) {
 		for (int i = 0; i < nodeArgc; i++) {
 			if (written++ > 0) ss << separator;
-			Local<String> nodeArg = Nan::To<String>(nodeArgv->Get(i)).ToLocalChecked();
-			ss << ToStdString(nodeArg);
+			Local<Value> nodeArgValue = Nan::Get(nodeArgv, i).ToLocalChecked();
+			Local<String> nodeArgString = Nan::To<String>(nodeArgValue).ToLocalChecked();
+			std::string arg = ToStdString(nodeArgString);
+			ss << arg;
 		}
 	}
 
@@ -186,18 +197,13 @@ static void cleanupHandle(uv_handle_t *handle) {
 size_t GuessSpaceSizeFromArgs(std::string argName) {
 	size_t result = 0;
 
-	Local<Object> process = GetProcessObject();
-	Local<String> execArgv = Nan::New<String>(asciiString("execArgv")).ToLocalChecked();
-	Local<Object> nodeArgv = Nan::To<Object>(process->Get(execArgv)).ToLocalChecked();
-	Local<String> length = Nan::New<String>(asciiString("length")).ToLocalChecked();
-	int64 nodeArgc = nodeArgv
-		->Get(length)
-		->ToInteger(Nan::GetCurrentContext()).ToLocalChecked()
-		->Value();
+	Local<Object> nodeArgv = getNodeArgv();
+	int64 nodeArgc = getNodeArgc(nodeArgv);
 
 	for (int i = 0; i < nodeArgc; i++) {
-		Local<String> nodeArg = Nan::To<String>(nodeArgv->Get(i)).ToLocalChecked();
-		std::string arg = ToStdString(nodeArg);
+		Local<Value> nodeArgValue = Nan::Get(nodeArgv, i).ToLocalChecked();
+		Local<String> nodeArgString = Nan::To<String>(nodeArgValue).ToLocalChecked();
+		std::string arg = ToStdString(nodeArgString);
 		if (arg.length() > argName.length()) {
 			if (arg[0] == '-' && arg[1] == '-') {
 				unsigned int idx;
