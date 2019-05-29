@@ -740,66 +740,22 @@ void init(Local<Object> exports, Local<Object> module) {
      */
     Isolate* isolate = v8::Isolate::GetCurrent();
     Local<Context> context = Nan::GetCurrentContext();
-    exports->Set(
-        Nan::New<String>(asciiString("getOption")).ToLocalChecked(),
-        Nan::New<FunctionTemplate>(getOption)
-            ->GetFunction(context).ToLocalChecked()
-	);
-    exports->Set(
-		Nan::New<String>(asciiString("setOption")).ToLocalChecked(),
-		Nan::New<FunctionTemplate>(setOption)
-			->GetFunction(context).ToLocalChecked()
-	);
-    exports->Set(
-		Nan::New<String>(asciiString("start")).ToLocalChecked(),
-		Nan::New<FunctionTemplate>(start)
-			->GetFunction(context).ToLocalChecked()
-	);
-    exports->Set(
-		Nan::New<String>(asciiString("spath")).ToLocalChecked(),
-		Nan::New<FunctionTemplate>(spath)
-			->GetFunction(context).ToLocalChecked()
-	);
-    exports->Set(
-		Nan::New<String>(asciiString("stop")).ToLocalChecked(),
-		Nan::New<FunctionTemplate>(stop)
-			->GetFunction(context).ToLocalChecked()
-	);
-    exports->Set(
-		Nan::New<String>(asciiString("localConnect")).ToLocalChecked(),
-		Nan::New<FunctionTemplate>(localConnect)
-			->GetFunction(context).ToLocalChecked()
-	);
-    exports->Set(
-		Nan::New<String>(asciiString("nativeEmit")).ToLocalChecked(),
-		Nan::New<FunctionTemplate>(nativeEmit)
-			->GetFunction(context).ToLocalChecked()
-	);
-    exports->Set(
-		Nan::New<String>(asciiString("sendControlCommand")).ToLocalChecked(),
-		Nan::New<FunctionTemplate>(sendControlCommand)
-			->GetFunction(context).ToLocalChecked()
-	);
+    Nan::SetMethod(exports, asciiString("getOption").c_str(), getOption);
+    Nan::SetMethod(exports, asciiString("setOption").c_str(), setOption);
+    Nan::SetMethod(exports, asciiString("start").c_str(), start);
+    Nan::SetMethod(exports, asciiString("spath").c_str(), spath);
+    Nan::SetMethod(exports, asciiString("stop").c_str(), stop);
+    Nan::SetMethod(exports, asciiString("localConnect").c_str(), localConnect);
+    Nan::SetMethod(exports, asciiString("nativeEmit").c_str(), nativeEmit);
+    Nan::SetMethod(exports, asciiString("sendControlCommand").c_str(), sendControlCommand);
 #if !defined(_ZOS)
-    exports->Set(
-		Nan::New<String>(asciiString("setHeadlessZipFunction")).ToLocalChecked(),
-		Nan::New<FunctionTemplate>(setHeadlessZipFunction)
-			->GetFunction(context).ToLocalChecked()
-	);
+    Nan::SetMethod(exports, asciiString("setHeadlessZipFunction").c_str(), setHeadlessZipFunction);
 #endif
 #if defined(_LINUX)
-    exports->Set(
-        Nan::New<String>("lrtime").ToLocalChecked(),
-        Nan::New<FunctionTemplate>(lrtime)
-            ->GetFunction(context).ToLocalChecked()
-    );
+    Nan::SetMethod(exports, asciiString("lrtime").c_str(), lrtime);
 #endif
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-    exports->Set(
-		Nan::New<String>(asciiString("getObjectHistogram")).ToLocalChecked(),
-		Nan::New<FunctionTemplate>(getObjectHistogram)
-			->GetFunction(context).ToLocalChecked()
-	);
+    Nan::SetMethod(exports, asciiString("getObjectHistogram").c_str(), getObjectHistogram);
 #endif
     /*
      * Initialize healthcenter core library
