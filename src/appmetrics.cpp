@@ -197,10 +197,10 @@ static std::string* getModuleDir(Local<Object> module) {
 }
 
 static Local<Object> getProcessObject() {
-    Local<String> process = Nan::New<String>(asciiString("process")).ToLocalChecked();
-    return Nan::To<Object>(
-        Nan::GetCurrentContext()->Global()->Get(process)
-    ).ToLocalChecked();
+    Local<String> processString = Nan::New<String>(asciiString("process")).ToLocalChecked();
+    Local<Value> processValue = Nan::Get(Nan::GetCurrentContext()->Global(), processString).ToLocalChecked();
+    Local<Object> processObj = Nan::To<Object>(processValue).ToLocalChecked();
+    return processObj;
 }
 
 static std::string* findApplicationDir() {
@@ -686,9 +686,11 @@ static bool isGlobalAgent(Local<Object> module) {
             filenameValue->IsString()
             && isAppMetricsFile("index.js", toStdString(Nan::To<String>(filenameValue).ToLocalChecked()))
         ) {
-            Local<Value> grandparent = Nan::To<Object>(parentValue).ToLocalChecked()->Get(parentString);
-            Local<Value> gpfilename = Nan::To<Object>(grandparent).ToLocalChecked()->Get(filenameString);
-            if (gpfilename->IsString() && isAppMetricsFile("launcher.js", toStdString(Nan::To<String>(gpfilename).ToLocalChecked()))) {
+            Local<Value> grandparentValue = Nan::Get(parentObj, parentString).ToLocalChecked();
+            Local<Object> grandparentObj = Nan::To<Object>(grandparentValue).ToLocalChecked();
+            Local<Value> gpfilenameValue = Nan::Get(grandparentObj, filenameString).ToLocalChecked();
+            Local<String> gpfilenameString = Nan::To<String>(gpfilenameValue).ToLocalChecked();
+            if (gpfilenameValue->IsString() && isAppMetricsFile("launcher.js", toStdString(gpfilenameString))) {
                 return true;
             }
         }
@@ -703,10 +705,10 @@ static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     Nan::HandleScope scope;
     Local<Object> cache = getRequireCache(module);
     Local<Context> context = Nan::GetCurrentContext();
-    Local<Array> props = cache->GetOwnPropertyNames(context).ToLocalChecked();
+    Local<Array> props = Nan::GetOwnPropertyNames(cache).ToLocalChecked();
     if (props->Length() > 0) {
         for (uint32_t i=0; i<props->Length(); i++) {
-            Local<Value> entry = props->Get(i);
+            Local<Value> entry = Nan::Get(props, i).ToLocalChecked();
             Local<String> entryString = Nan::To<String>(entry).ToLocalChecked();
             if (entry->IsString() && isAppMetricsFile("launcher.js", toStdString(entryString))) {
                 return true;
