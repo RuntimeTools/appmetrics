@@ -297,7 +297,7 @@ void Initialize(v8::Isolate* isolate, v8::Local<v8::Object> binding) {
   v8::Local<v8::FunctionTemplate> watchdog_activation_count_template =
       C::FunctionTemplate::New(isolate, WatchdogActivationCount);
 
-  v8::Local<Context> context = Nan::GetCurrentContext();
+  v8::Local<v8::Context> context = Nan::GetCurrentContext();
   binding->Set(
       C::String::NewFromUtf8(isolate, "watchdogActivationCount"),
       watchdog_activation_count_template
