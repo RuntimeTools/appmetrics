@@ -28,8 +28,7 @@
     "fix-eslint": "eslint --fix {bin,lib,probes,tests}/**/*.js *.js",
     "pretest": "eslint .",
     "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http*test.js tests/headless_test.js",
-    "travis": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http*test.js tests/headless_test.js --coverage",
-    "posttravis": "./get_code_cov.sh && tap --coverage-report=lcov && codecov --disable=gcov",
+    "travis": "npm test",
     "install": "node extract_all_binaries.js || node-gyp rebuild"
   },
   "directories": {
