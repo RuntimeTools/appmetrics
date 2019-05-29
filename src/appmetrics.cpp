@@ -504,9 +504,7 @@ NAN_METHOD(nativeEmit) {
 
     std::stringstream contentss;
     if (info[0]->IsString()) {
-        Isolate* isolate = v8::Isolate::GetCurrent();
-        // String::Utf8Value str(isolate, Nan::To<String>(info[0]).ToLocalChecked());
-        Nan::Utf8String str(info[0]); // https://github.com/nodejs/nan/blob/master/doc/v8_misc.md#nanutf8string
+        Nan::Utf8String str(info[0]);
         char *c_arg = *str;
         contentss << c_arg << ":";
     } else {
@@ -516,8 +514,6 @@ NAN_METHOD(nativeEmit) {
         return Nan::ThrowError(asciiString("First argument must a event name string").c_str());
     }
     if (info[1]->IsString()) {
-        Isolate* isolate = v8::Isolate::GetCurrent();
-        // String::Utf8Value str(isolate, Nan::To<String>(info[1]).ToLocalChecked());
         Nan::Utf8String str(info[1]);
         char *c_arg = *str;
         contentss << c_arg;
@@ -544,10 +540,7 @@ NAN_METHOD(sendControlCommand) {
     }
 
     if (info[0]->IsString() && info[1]->IsString()) {
-        Isolate* isolate = v8::Isolate::GetCurrent();
-        // String::Utf8Value topicArg(isolate, Nan::To<String>(info[0]).ToLocalChecked());
         Nan::Utf8String topicArg(info[0]);
-        // String::Utf8Value commandArg(isolate, Nan::To<String>(info[1]).ToLocalChecked());
         Nan::Utf8String commandArg(info[1]);
         std::string topic = std::string(*topicArg);
         std::string command = std::string(*commandArg);
@@ -704,7 +697,6 @@ static bool isGlobalAgent(Local<Object> module) {
 static bool isGlobalAgentAlreadyLoaded(Local<Object> module) {
     Nan::HandleScope scope;
     Local<Object> cache = getRequireCache(module);
-    Local<Context> context = Nan::GetCurrentContext();
     Local<Array> props = Nan::GetOwnPropertyNames(cache).ToLocalChecked();
     if (props->Length() > 0) {
         for (uint32_t i=0; i<props->Length(); i++) {

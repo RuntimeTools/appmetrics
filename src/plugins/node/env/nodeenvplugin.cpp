@@ -123,12 +123,10 @@ static std::string nativeString(std::string s) {
 }
 
 static Local<Object> GetProcessObject() {
-	Local<String> process = Nan::New<String>(asciiString("process")).ToLocalChecked();
-	return Nan::To<Object>(
-		Nan::GetCurrentContext()
-			->Global()
-			->Get(process)
-	).ToLocalChecked();
+	Local<String> processString = Nan::New<String>(asciiString("process")).ToLocalChecked();
+	Local<Value> processValue = Nan::Get(Nan::GetCurrentContext()->Global(), processString).ToLocalChecked();
+	Local<Object> processObj = Nan::To<Object>(processValue).ToLocalChecked();
+	return processObj;
 }
 
 static Local<Object> GetProcessConfigObject() {
@@ -161,9 +159,7 @@ static std::string GetNodeArguments(const std::string separator="@@@") {
 	std::stringstream ss;
 	Local<Object> process = GetProcessObject();
 	Local<String> execArgv = Nan::New<String>(asciiString("execArgv")).ToLocalChecked();
-	Local<Object> nodeArgv = Nan::To<Object>(
-		process->Get(execArgv)
-	).ToLocalChecked();
+	Local<Object> nodeArgv = Nan::To<Object>(process->Get(execArgv)).ToLocalChecked();
 
 	Local<String> length = Nan::New<String>(asciiString("length")).ToLocalChecked();
 	int64 nodeArgc = nodeArgv
@@ -192,9 +188,7 @@ size_t GuessSpaceSizeFromArgs(std::string argName) {
 
 	Local<Object> process = GetProcessObject();
 	Local<String> execArgv = Nan::New<String>(asciiString("execArgv")).ToLocalChecked();
-	Local<Object> nodeArgv = Nan::To<Object>(
-		process->Get(execArgv)
-	).ToLocalChecked();
+	Local<Object> nodeArgv = Nan::To<Object>(process->Get(execArgv)).ToLocalChecked();
 	Local<String> length = Nan::New<String>(asciiString("length")).ToLocalChecked();
 	int64 nodeArgc = nodeArgv
 		->Get(length)
