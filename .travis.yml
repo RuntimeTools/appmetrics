@@ -11,6 +11,13 @@ os:
   - linux
 
 matrix:
+  include:
+    - os: windows
+      node_js: "8"
+    - os: windows
+      node_js: "10"
+    - os: windows
+      node_js: "12"
   allow_failures:
     - os: windows
       node_js: "8"
