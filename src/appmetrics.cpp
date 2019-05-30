@@ -738,8 +738,6 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Set exported functions
      */
-    Isolate* isolate = v8::Isolate::GetCurrent();
-    Local<Context> context = Nan::GetCurrentContext();
     Nan::SetMethod(exports, asciiString("getOption").c_str(), getOption);
     Nan::SetMethod(exports, asciiString("setOption").c_str(), setOption);
     Nan::SetMethod(exports, asciiString("start").c_str(), start);
@@ -778,6 +776,7 @@ void init(Local<Object> exports, Local<Object> module) {
     loaderApi->setProperty("appmetrics.version", APPMETRICS_VERSION);
 
     /* Initialize watchdog directly so that bindings can be created */
+    Isolate* isolate = v8::Isolate::GetCurrent();
     watchdog::Initialize(isolate, exports);
 
     /*
