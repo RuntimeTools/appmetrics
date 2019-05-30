@@ -87,12 +87,12 @@ namespace monitorApi {
 
 static std::string toStdString(Local<String> s) {
     char *buf = new char[s->Length() + 1];
-    #if NODE_VERSION_AT_LEAST(10, 0, 0)
-        Isolate* isolate = v8::Isolate::GetCurrent();
-        s->WriteUtf8(isolate, buf);
-	#else
-        s->WriteUtf8(buf);
-	#endif
+#if NODE_VERSION_AT_LEAST(10, 0, 0)
+    Isolate* isolate = v8::Isolate::GetCurrent();
+    s->WriteUtf8(isolate, buf);
+#else
+    s->WriteUtf8(buf);
+#endif
 #if defined(_ZOS)
     __atoe(buf);
 #endif
@@ -358,7 +358,7 @@ NAN_METHOD(setOption) {
 NAN_METHOD(getOption) {
 	if (info.Length() > 0) {
 		Local<String> value = Nan::To<String>(info[0]).ToLocalChecked();
-    std::string property = loaderApi->getProperty(toStdString(value).c_str());
+        std::string property = loaderApi->getProperty(toStdString(value).c_str());
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 		v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str());
 #else

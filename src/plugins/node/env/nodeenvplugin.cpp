@@ -225,19 +225,19 @@ size_t GuessSpaceSizeFromArgs(std::string argName) {
 }
 
 static size_t GuessDefaultMaxOldSpaceSize() {
-	#if NODE_VERSION_AT_LEAST(12, 0, 0)
-		return Megabytes(700ul * (v8::internal::kApiSystemPointerSize / 4));
-	#else
-		return Megabytes(700ul * (v8::internal::kApiPointerSize / 4));
-	#endif
+#if NODE_VERSION_AT_LEAST(12, 0, 0)
+	return Megabytes(700ul * (v8::internal::kApiSystemPointerSize / 4));
+#else
+	return Megabytes(700ul * (v8::internal::kApiPointerSize / 4));
+#endif
 }
 
 static size_t GuessDefaultMaxSemiSpaceSize() {
-	#if NODE_VERSION_AT_LEAST(12, 0, 0)
-		return Megabytes(8ul * (v8::internal::kApiSystemPointerSize / 4));
-	#else
-		return Megabytes(8ul * (v8::internal::kApiPointerSize / 4));
-	#endif
+#if NODE_VERSION_AT_LEAST(12, 0, 0)
+	return Megabytes(8ul * (v8::internal::kApiSystemPointerSize / 4));
+#else
+	return Megabytes(8ul * (v8::internal::kApiPointerSize / 4));
+#endif
 }
 
 static size_t Align(size_t value, int alignment) {

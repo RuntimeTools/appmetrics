@@ -105,12 +105,12 @@ static char* NewCString(const std::string& s) {
 static bool ExtractV8String(const Local<String> v8string, char **cstring) {
 	*cstring = new char[v8string->Length() + 1];
 	if (*cstring == NULL) return false;
-	#if NODE_VERSION_AT_LEAST(10, 0, 0)
-        Isolate* isolate = v8::Isolate::GetCurrent();
-    	v8string->WriteUtf8(isolate, *cstring);
-	#else
-		v8string->WriteUtf8(*cstring);
-	#endif
+#if NODE_VERSION_AT_LEAST(10, 0, 0)
+	Isolate* isolate = v8::Isolate::GetCurrent();
+	v8string->WriteUtf8(isolate, *cstring);
+#else
+	v8string->WriteUtf8(*cstring);
+#endif
 	return true;
 }
 

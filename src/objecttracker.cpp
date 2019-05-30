@@ -51,7 +51,7 @@ NAN_METHOD(getObjectHistogram) {
 #else
 	const HeapSnapshot* snapshot = heapProfiler->TakeSnapshot(snapshotName);
 #endif
-#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v4.00+
+#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v0.11+
 	// Title field removed in Node 4.x
 #else
 	snapshotName
