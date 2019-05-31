@@ -37,7 +37,7 @@ NAN_METHOD(getObjectHistogram) {
 
 	HeapProfiler *heapProfiler = isolate->GetHeapProfiler();
 
-#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v0.11+
+#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v4.00+
 	// Title field removed in Node 4.x
 #else
 	Local<String> snapshotName = String::NewFromUtf8(isolate, "snapshot");
@@ -94,23 +94,23 @@ NAN_METHOD(getObjectHistogram) {
 			continue;
 		}
 
-		Local<Value> tupleval = histogram->Get(name);
+		Local<Value> tupleval = Nan::Get(histogram, name).ToLocalChecked();
 		Local<Object> tuple;
 
 		int64_t ncount = 0;
 		int64_t nsize = 0;
 		if( !(tupleval->IsNull() || tupleval->IsUndefined()) ) {
-			tuple = tupleval->ToObject();
+			tuple = Nan::To<Object>(tupleval).ToLocalChecked();
 
 			/* Nothing else can access the tuple or histogram objects,
 			 * if we've found an entry for "name" then it will have these
 			 * fields set. There's no need to check for null/undefined
 			 * from Get.
 			 */
-			Local<Value> count = tuple->Get(countName);
-			ncount = count->IntegerValue();
-			Local<Value> size = tuple->Get(sizeName);
-			nsize = size->IntegerValue();
+			Local<Value> count = Nan::Get(tuple, countName).ToLocalChecked();
+			ncount = count->IntegerValue(Nan::GetCurrentContext()).FromJust();
+			Local<Value> size = Nan::Get(tuple, sizeName).ToLocalChecked();
+			nsize = size->IntegerValue(Nan::GetCurrentContext()).FromJust();
 
 		} else {
 			/* Create a new tuple and add it to the histogram.
