@@ -42,7 +42,7 @@ Node Application Metrics provides the following built-in data collection sources
  Redis              | Redis commands issued by the application
  Riak               | Riak methods called by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
- Function trace     | Tracing of application function calls that occur during a request (disabled by default)  
+ Function trace     | Tracing of application function calls that occur during a request (disabled by default)
 
 ## Performance overhead
 
@@ -140,7 +140,7 @@ Sets various properties on the appmetrics monitoring agent. If the agent has alr
 
 Property name        | Property value type      | Property description
 :--------------------|:-------------------------|:-----------------------------
- `applicationID`     | `string`                 | Specifies a unique identifier for the mqtt connection             
+ `applicationID`     | `string`                 | Specifies a unique identifier for the mqtt connection
  `mqtt`              | `string['off'\|'on']`    | Specifies whether the monitoring agent sends data to the mqtt broker. The default value is `'on'`
  `mqttHost`          | `string`                 | Specifies the host name of the mqtt broker
  `mqttPort`          | `string['[0-9]*']`       | Specifies the port number of the mqtt broker
@@ -418,14 +418,7 @@ Requests are a special type of event emitted by appmetrics.  All the probes name
 
 The Node Application Metrics agent supports the following runtime environments where a Node.js runtime is available:
 
-* **Node.js v4** on:
-  * 64-bit or 32-bit Windows (x64 or x86)
-  * 64-bit or 32-bit Linux (x64, x86, ppc64, ppc64le, s390, s390x)
-  * 64-bit AIX (ppc64)
-  * 64-bit macOS (x64)
-* **Node.js v6** on all of the above, plus:
-  * 64-bit runtime on z/OS (os390)
-* **Node.js v8** on:
+* **Node.js v8, 10, 12** on:
   * 64-bit Windows (x64)
   * 64-bit Linux (x64, ppc64, ppc64le, s390x)
   * 64-bit AIX (ppc64)
@@ -472,7 +465,7 @@ If a task uses the Node.js thread exclusively then shuts down the Node.js runtim
 The source code for Node Application Metrics is available in the [appmetrics project][6]. Information on working with the source code -- installing from source, developing, contributing -- is available on the [appmetrics wiki][3].
 
 ## License
-This project is released under an Apache 2.0 open source license.  
+This project is released under an Apache 2.0 open source license.
 
 ## Versioning scheme
 The npm package for this project uses a semver-parsable X.0.Z version number for releases, where X is incremented for breaking changes to the public API described in this document and Z is incremented for bug fixes **and** for non-breaking changes to the public API that provide new function.
@@ -484,41 +477,43 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 
 This module adopts the [Module Long Term Support (LTS)](http://github.com/CloudNativeJS/ModuleLTS) policy, with the following End Of Life (EOL) dates:
 
-| Module Version   | Release Date | Minimum EOL | EOL With     | Status  |
-|------------------|--------------|-------------|--------------|---------|
-| V4.x.x	         | Jan 2018     | Dec 2019    |              | Current |
+| Module Version   | Release Date | Minimum EOL | EOL With     | Status      |
+|------------------|--------------|-------------|--------------|-------------|
+| V4.x.x           | Jan 2018     | Dec 2019    |              | Maintenance |
+| V5.x.x           | May 2019     | Dec 2020    |              | Current     |
 
 ## Version
-4.0.1
+5.0.0
 
 ## Release History
-`4.0.1` - Bug fix release including adding Node 10 support on Windows (Unix already working).  
-`4.0.0` - Remove node-hc and add support for preloading.  
-`3.1.3` - Packaging fix.  
-`3.1.2` - Bug fixes.  
-`3.1.1` - Node v6 on z/OS support.  
-`3.1.0` - HTTPS probe added. Remove support for Node v7.    
-`3.0.2` - Probe defect for Node 8 support.  
-`3.0.1` - Packaging bug fix to allow build from source if binary not present.  
-`3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.  
-`2.0.1` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.  
-`1.2.0` - Add file data collection capability and option configuration via api.  
-`1.1.2` - Update agent core to 3.0.10, support Node.js v7.  
-`1.1.1` - Fix node-gyp rebuild failure and don't force MQTT broker to on  
-`1.1.0` - Bug fixes, improved MongoDB data, updated dependencies, CPU watchdog feature  
-`1.0.13` - Express probe, strong-supervisor integration  
-`1.0.12` - Appmetrics now fully open sourced under Apache 2.0 license  
-`1.0.11` - Bug fixes    
-`1.0.10` - Bug fixes  
-`1.0.9` - Loopback and Riak support, bug fixes and update to agent core 3.0.9.  
-`1.0.8` - Oracle support, bug fixes and api tests runnable using 'npm test'.  
-`1.0.7` - StrongOracle support, support for installing with a proxy, expose MongoDB, MQLight and MySQL events to connectors.  
-`1.0.6` - OracleDB support and bug fixes.  
-`1.0.5` - Expose HTTP events to connectors (including MQTT).  
-`1.0.4` - Redis, Leveldown, Postgresql, Memcached, MQLight and MQTT support, higher precision timings, and improved performance.  
-`1.0.3` - Node.js v4 support.  
-`1.0.2` - HTTP, MySQL, MongoDB, request tracking and function tracing support.  
-`1.0.1` - Mac OS X support, io.js v2 support.  
+`5.0.0` - Add Node 12 support, remove Node 6 support.
+`4.0.1` - Bug fix release including adding Node 10 support on Windows (Unix already working).
+`4.0.0` - Remove node-hc and add support for preloading.
+`3.1.3` - Packaging fix.
+`3.1.2` - Bug fixes.
+`3.1.1` - Node v6 on z/OS support.
+`3.1.0` - HTTPS probe added. Remove support for Node v7.
+`3.0.2` - Probe defect for Node 8 support.
+`3.0.1` - Packaging bug fix to allow build from source if binary not present.
+`3.0.0` - Remove express probe. Additional data available in http and request events. Code improvements.
+`2.0.1` - Remove support for Node.js 0.10, 0.12, 5.  Add heapdump api call.
+`1.2.0` - Add file data collection capability and option configuration via api.
+`1.1.2` - Update agent core to 3.0.10, support Node.js v7.
+`1.1.1` - Fix node-gyp rebuild failure and don't force MQTT broker to on
+`1.1.0` - Bug fixes, improved MongoDB data, updated dependencies, CPU watchdog feature
+`1.0.13` - Express probe, strong-supervisor integration
+`1.0.12` - Appmetrics now fully open sourced under Apache 2.0 license
+`1.0.11` - Bug fixes
+`1.0.10` - Bug fixes
+`1.0.9` - Loopback and Riak support, bug fixes and update to agent core 3.0.9.
+`1.0.8` - Oracle support, bug fixes and api tests runnable using 'npm test'.
+`1.0.7` - StrongOracle support, support for installing with a proxy, expose MongoDB, MQLight and MySQL events to connectors.
+`1.0.6` - OracleDB support and bug fixes.
+`1.0.5` - Expose HTTP events to connectors (including MQTT).
+`1.0.4` - Redis, Leveldown, Postgresql, Memcached, MQLight and MQTT support, higher precision timings, and improved performance.
+`1.0.3` - Node.js v4 support.
+`1.0.2` - HTTP, MySQL, MongoDB, request tracking and function tracing support.
+`1.0.1` - Mac OS X support, io.js v2 support.
 `1.0.0` - First release.
 
 [1]:https://marketplace.eclipse.org/content/ibm-monitoring-and-diagnostic-tools-health-center
