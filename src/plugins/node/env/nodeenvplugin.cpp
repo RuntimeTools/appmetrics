@@ -81,12 +81,12 @@ pushsource* createPushSource(uint32 srcid, const char* name) {
 
 static std::string ToStdString(Local<String> s) {
 	char *buf = new char[s->Length() + 1];
-	#if NODE_VERSION_AT_LEAST(10, 0, 0)
-        Isolate* isolate = v8::Isolate::GetCurrent();
-        s->WriteUtf8(isolate, buf);
-	#else
-        s->WriteUtf8(buf);
-	#endif
+#if NODE_VERSION_AT_LEAST(10, 0, 0)
+	Isolate* isolate = v8::Isolate::GetCurrent();
+	s->WriteUtf8(isolate, buf);
+#else
+	s->WriteUtf8(buf);
+#endif
 
 #if defined(_ZOS)
   __atoe(buf);
