@@ -29,7 +29,7 @@
     "pretest": "eslint .",
     "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http*test.js tests/headless_test.js",
     "travis": "npm test",
-    "install": "node extract_all_binaries.js || node-gyp rebuild"
+    "install": "node showBuildInfo.js && node-gyp rebuild"
   },
   "directories": {
     "lib": "lib",
