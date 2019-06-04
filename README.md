@@ -52,6 +52,10 @@ We gathered this information by monitoring the sample application [Acme Air][3].
 
 ## Getting Started
 
+### Pre-requisites:
+
+Appmetrics uses `node-gyp` to compile and build local binary libraries to enhance execution performance. If the following compilation and build logs contain errors, make sure you have the node-gyp pre-requisites installed \(https://github.com/nodejs/node-gyp#installation). If you have them and the build still had errors, see if there are any related issues at https://github.com/RuntimeTools/appmetrics/issues). If there aren\'t, feel free to open a new issue to report the bug.
+
 ### Installation
 
 You can get Node Application Metrics from 3 different places:
