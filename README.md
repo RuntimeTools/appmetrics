@@ -404,7 +404,7 @@ Emitted when a query is executed using the `strong-oracle` module.
 ## API: Requests
 
 ### Event: 'request'
-Requests are a special type of event emitted by appmetrics.  All the probes named above can also create request events if requests are enabled.  Howver requests are nested within a root incoming request (usually http). Request events are disabled by default.
+Requests are a special type of event emitted by appmetrics.  All the probes named above can also create request events if requests are enabled.  However requests are nested within a root incoming request (usually http). Request events are disabled by default.
 * `data` (Object) the data from the request:
     * `time` (Number) the milliseconds when the request occurred. This can be converted to a Date using `new Date(data.time)`.
     * `type` (String) The type of the request event. This is the name of the probe that sent the request data, e.g. `http`, `socketio` etc.
