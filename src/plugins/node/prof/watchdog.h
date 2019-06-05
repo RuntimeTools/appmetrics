@@ -20,7 +20,7 @@
 #include "compat.h"
 #include "compat-inl.h"
 
-#if defined(__linux__) && (defined(__i386) || defined(__x86_64__))
+#if defined(__linux__) && (defined(__i386) || defined(__x86_64__)) || defined(sigev_notify_thread_id)
 
 #include "util.h"
 
@@ -247,8 +247,7 @@ const char* StartCpuProfiling(v8::Isolate* isolate, uint64_t timeout_in_ms) {
   CHECK_EQ(0, ::syscall(SYS_tgkill, ::getpid(), profiler_tid, kSuspendSignal));
   // Arm timer that unblocks the profiler thread on expiry.
   sigevent ev;
-  // Can't use ev.sigev_notify_thread_id because of broken glibc headers.
-  ev._sigev_un._tid = profiler_tid;
+  ev.sigev_notify_thread_id = profiler_tid;
   ev.sigev_notify = SIGEV_THREAD_ID;
   ev.sigev_signo = kResumeSignal;
   CHECK_EQ(0, ::timer_create(CLOCK_MONOTONIC, &ev, &timer_id));
@@ -307,7 +306,7 @@ void Initialize(v8::Isolate* isolate, v8::Local<v8::Object> binding) {
 
 }  // namespace watchdog
 
-#else  // defined(__linux__) && (defined(__i386) || defined(__x86_64__))
+#else  // defined(__linux__) && (defined(__i386) || defined(__x86_64__)) && defined(sigev_notify_thread_id)
 
 namespace watchdog {
 
@@ -329,6 +328,6 @@ const v8::CpuProfile* StopCpuProfiling(v8::Isolate* isolate) {
 
 }  // namespace watchdog
 
-#endif  // defined(__linux__) && (defined(__i386) || defined(__x86_64__))
+#endif  // defined(__linux__) && (defined(__i386) || defined(__x86_64__)) && defined(sigev_notify_thread_id)
 
 #endif  // AGENT_SRC_WATCHDOG_H_
