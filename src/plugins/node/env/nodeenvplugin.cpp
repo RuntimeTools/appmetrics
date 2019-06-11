@@ -87,43 +87,13 @@ static std::string ToStdString(Local<String> s) {
 #else
 	s->WriteUtf8(buf);
 #endif
-
-#if defined(_ZOS)
-  __atoe(buf);
-#endif
 	std::string result(buf);
 	delete[] buf;
 	return result;
 }
 
-static std::string asciiString(std::string s) {
-#if defined(_ZOS)
-    char* cp = new char[s.length() + 1];
-    std::strcpy(cp, s.c_str());
-    __etoa(cp);
-    std::string returnString (cp);
-    delete[] cp;
-    return returnString;
-#else
-    return s;
-#endif
-}
-
-static std::string nativeString(std::string s) {
-#if defined(_ZOS)
-    char* cp = new char[s.length() + 1];
-    std::strcpy(cp, s.c_str());
-    __atoe(cp);
-    std::string returnString (cp);
-    delete[] cp;
-    return returnString;
-#else
-    return s;
-#endif
-}
-
 static Local<Object> GetProcessObject() {
-	Local<String> processString = Nan::New<String>(asciiString("process")).ToLocalChecked();
+	Local<String> processString = Nan::New<String>("process").ToLocalChecked();
 	Local<Value> processValue = Nan::Get(Nan::GetCurrentContext()->Global(), processString).ToLocalChecked();
 	Local<Object> processObj = Nan::To<Object>(processValue).ToLocalChecked();
 	return processObj;
@@ -131,22 +101,22 @@ static Local<Object> GetProcessObject() {
 
 static Local<Object> GetProcessConfigObject() {
 	Local<Object> process = GetProcessObject();
-	Local<String> configString = Nan::New<String>(asciiString("config")).ToLocalChecked();
+	Local<String> configString = Nan::New<String>("config").ToLocalChecked();
 	Local<Value> configValue = Nan::Get(process, configString).ToLocalChecked();
 	Local<Object> configObj = Nan::To<Object>(configValue).ToLocalChecked();
 	return configObj;
 }
 
 static std::string GetNodeVersion() {
-	Local<String> versionString = Nan::New<String>(asciiString("version")).ToLocalChecked();
+	Local<String> versionString = Nan::New<String>("version").ToLocalChecked();
 	Local<Value> versionValue = Nan::Get(GetProcessObject(), versionString).ToLocalChecked();
 	Local<String> version = Nan::To<String>(versionValue).ToLocalChecked();
 	return ToStdString(version);
 }
 
 static std::string GetNodeTag() {
-	Local<String> variablesString = Nan::New<String>(asciiString("variables")).ToLocalChecked();
-	Local<String> nodeTagString = Nan::New<String>(asciiString("node_tag")).ToLocalChecked();
+	Local<String> variablesString = Nan::New<String>("variables").ToLocalChecked();
+	Local<String> nodeTagString = Nan::New<String>("node_tag").ToLocalChecked();
 	Local<Value> processConfigVarsValue = Nan::Get(GetProcessConfigObject(), variablesString).ToLocalChecked();
 	Local<Object> processConfigVars = Nan::To<Object>(processConfigVarsValue).ToLocalChecked();
 	Local<Value> tagValue = Nan::Get(processConfigVars, nodeTagString).ToLocalChecked();
@@ -156,14 +126,14 @@ static std::string GetNodeTag() {
 
 static Local<Object> getNodeArgv() {
 	Local<Object> process = GetProcessObject();
-	Local<String> execArgvString = Nan::New<String>(asciiString("execArgv")).ToLocalChecked();
+	Local<String> execArgvString = Nan::New<String>("execArgv").ToLocalChecked();
 	Local<Value> execArgvValue = Nan::Get(process, execArgvString).ToLocalChecked();
 	Local<Object> nodeArgv = Nan::To<Object>(execArgvValue).ToLocalChecked();
 	return nodeArgv;
 }
 
 static int64 getNodeArgc(Local<Object> nodeArgv) {
-	Local<String> lengthString = Nan::New<String>(asciiString("length")).ToLocalChecked();
+	Local<String> lengthString = Nan::New<String>("length").ToLocalChecked();
 	Local<Value> lengthValue = Nan::Get(nodeArgv, lengthString).ToLocalChecked();
 	int64 nodeArgc = lengthValue
 		->ToInteger(Nan::GetCurrentContext()).ToLocalChecked()
@@ -322,8 +292,8 @@ static void GetNodeInformation(uv_async_t *async, int status) {
 		}
 		contentss << '\n';
 
-		contentss << "appmetrics.version=" << nativeString(std::string(plugin::api.getProperty("appmetrics.version"))) << '\n'; // eg "1.0.4"
-		contentss << "agentcore.version=" << nativeString(std::string(plugin::api.getProperty("agent.version"))) << '\n'; // eg "3.0.7"
+		contentss << "appmetrics.version=" << std::string(plugin::api.getProperty("appmetrics.version")) << '\n'; // eg "1.0.4"
+		contentss << "agentcore.version=" << std::string(plugin::api.getProperty("agent.version")) << '\n'; // eg "3.0.7"
 
 		if (plugin::nodeVendor != "") {
 			contentss << "runtime.vendor=" << plugin::nodeVendor << '\n';

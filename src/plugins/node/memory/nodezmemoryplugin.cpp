@@ -63,29 +63,11 @@ const std::string FREE_PHYSICAL_MEMORY = "freephysicalmemory";
 const std::string TOTAL_PHYSICAL_MEMORY = "totalphysicalmemory";
 
 static std::string asciiString(std::string s) {
-#if defined(_ZOS)
-    char* cp = new char[s.length() + 1];
-    std::strcpy(cp, s.c_str());
-    __etoa(cp);
-    std::string returnString (cp);
-    delete[] cp;
-    return returnString;
-#else
     return s;
-#endif
 }
 
 static std::string nativeString(std::string s) {
-#if defined(_ZOS)
-    char* cp = new char[s.length() + 1];
-    std::strcpy(cp, s.c_str());
-    __atoe(cp);
-    std::string returnString (cp);
-    delete[] cp;
-    return returnString;
-#else
     return s;
-#endif
 }
 
 static char* NewCString(const std::string& s) {
