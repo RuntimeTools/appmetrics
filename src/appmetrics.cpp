@@ -93,38 +93,9 @@ static std::string toStdString(Local<String> s) {
 #else
     s->WriteUtf8(buf);
 #endif
-#if defined(_ZOS)
-    __atoe(buf);
-#endif
     std::string result(buf);
     delete[] buf;
     return result;
-}
-
-static std::string asciiString(std::string s) {
-#if defined(_ZOS)
-    char* cp = new char[s.length() + 1];
-    std::strcpy(cp, s.c_str());
-    __etoa(cp);
-    std::string returnString (cp);
-    delete[] cp;
-    return returnString;
-#else
-    return s;
-#endif
-}
-
-static std::string nativeString(std::string s) {
-#if defined(_ZOS)
-    char* cp = new char[s.length() + 1];
-    std::strcpy(cp, s.c_str());
-    __atoe(cp);
-    std::string returnString (cp);
-    delete[] cp;
-    return returnString;
-#else
-    return s;
-#endif
 }
 
 #if defined(_WINDOWS)
@@ -189,7 +160,7 @@ static std::string fileJoin(const std::string& path, const std::string& filename
 }
 
 static std::string* getModuleDir(Local<Object> module) {
-    Local<String> filenameKey = Nan::New<String>(asciiString("filename")).ToLocalChecked();
+    Local<String> filenameKey = Nan::New<String>("filename").ToLocalChecked();
     Local<Value> filenameValue = Nan::Get(module, filenameKey).ToLocalChecked();
     Local<String> filenameString = Nan::To<String>(filenameValue).ToLocalChecked();
     std::string moduleFilename(toStdString(filenameString));
@@ -202,13 +173,13 @@ static Local<Object> getSubObject(Local<Object> parentObj, Local<String> subObje
 }
 
 static Local<Object> getProcessObject() {
-    Local<String> processString = Nan::New<String>(asciiString("process")).ToLocalChecked();
+    Local<String> processString = Nan::New<String>("process").ToLocalChecked();
     Local<Object> processObj = getSubObject(Nan::GetCurrentContext()->Global(), processString);
     return processObj;
 }
 
 static std::string* findApplicationDir() {
-    Local<String> mainModuleString = Nan::New<String>(asciiString("mainModule")).ToLocalChecked();
+    Local<String> mainModuleString = Nan::New<String>("mainModule").ToLocalChecked();
     Local<Value> mainModuleValue = Nan::Get(getProcessObject(), mainModuleString).ToLocalChecked();
     if (!mainModuleValue->IsUndefined()) {
         return getModuleDir(Nan::To<Object>(mainModuleValue).ToLocalChecked());
@@ -314,7 +285,7 @@ static bool isMonitorApiValid() {
 }
 
 static bool initMonitorApi() {
-    std::string pluginPath = nativeString(loaderApi->getProperty("com.ibm.diagnostics.healthcenter.plugin.path"));
+    std::string pluginPath = loaderApi->getProperty("com.ibm.diagnostics.healthcenter.plugin.path");
 
     monitorApi::pushData = (void (*)(const char*)) getMonitorApiFunction(pluginPath, std::string("apiPushData"));
     monitorApi::sendControl = (void (*)(const char*, unsigned int, void*)) getMonitorApiFunction(pluginPath, std::string("sendControl"));
@@ -444,7 +415,7 @@ static void emitMessage(uv_async_t *handle, int status) {
         Local<Value> argv[argc];
         const char * source = (*currentMessage->source).c_str();
 
-        Local<Object> buffer = Nan::CopyBuffer(asciiString(std::string((char*)currentMessage->data)).c_str(), currentMessage->size).ToLocalChecked();
+        Local<Object> buffer = Nan::CopyBuffer(std::string((char*)currentMessage->data).c_str(), currentMessage->size).ToLocalChecked();
         argv[0] = Nan::New<String>(source).ToLocalChecked();
         argv[1] = buffer;
 
@@ -502,7 +473,7 @@ static void sendData(const char* sourceId, unsigned int size, void *data) {
 NAN_METHOD(nativeEmit) {
 
     if (!isMonitorApiValid()) {
-        Nan::ThrowError(asciiString("Monitoring API is not initialized").c_str());
+        Nan::ThrowError("Monitoring API is not initialized");
         //NanReturnUndefined();
     }
 
@@ -515,7 +486,7 @@ NAN_METHOD(nativeEmit) {
         /*
          *  Error handling as we don't have a valid parameter
          */
-        return Nan::ThrowError(asciiString("First argument must a event name string").c_str());
+        return Nan::ThrowError("First argument must a event name string");
     }
     if (info[1]->IsString()) {
         Nan::Utf8String str(info[1]);
@@ -526,7 +497,7 @@ NAN_METHOD(nativeEmit) {
         /*
          *  Error handling as we don't have a valid parameter
          */
-        Nan::ThrowError(asciiString("Second argument must be a JSON string or a comma separated list of key value pairs").c_str());
+        Nan::ThrowError("Second argument must be a JSON string or a comma separated list of key value pairs");
         return;
     }
     contentss << '\n';
@@ -539,7 +510,7 @@ NAN_METHOD(nativeEmit) {
 NAN_METHOD(sendControlCommand) {
 
     if (!isMonitorApiValid()) {
-        Nan::ThrowError(asciiString("Monitoring API is not initialized").c_str());
+        Nan::ThrowError("Monitoring API is not initialized");
         return;
     }
 
@@ -551,7 +522,7 @@ NAN_METHOD(sendControlCommand) {
         unsigned int length = command.length();
         monitorApi::sendControl(topic.c_str(), length, (void*)command.c_str());
     } else {
-        return Nan::ThrowError(asciiString("Arguments must be strings containing the plugin name and control command").c_str());
+        return Nan::ThrowError("Arguments must be strings containing the plugin name and control command");
     }
 
     return;
@@ -570,12 +541,12 @@ NAN_METHOD(setHeadlessZipFunction) {
 
 NAN_METHOD(localConnect) {
     if (!isMonitorApiValid()) {
-        Nan::ThrowError(asciiString("Monitoring API is not initialized").c_str());
+        Nan::ThrowError("Monitoring API is not initialized");
         return;
     }
 
     if (!info[0]->IsFunction()) {
-        return Nan::ThrowError(asciiString("First argument must be a callback function").c_str());
+        return Nan::ThrowError("First argument must be a callback function");
     }
     Nan::Callback *callback = new Nan::Callback(info[0].As<Function>());
 
@@ -637,14 +608,14 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
 // executing require('module')._cache)
 static Local<Object> getRequireCache(Local<Object> module) {
     Nan::EscapableHandleScope scope;
-    Local<Value> args[] = { Nan::New<String>(asciiString("module")).ToLocalChecked() };
-    Local<String> require_string = Nan::New<String>(asciiString("require")).ToLocalChecked();
+    Local<Value> args[] = { Nan::New<String>("module").ToLocalChecked() };
+    Local<String> require_string = Nan::New<String>("require").ToLocalChecked();
     Local<Value> require_v = Nan::Get(module, require_string).ToLocalChecked();
     Local<Object> require_obj = Nan::To<Object>(require_v).ToLocalChecked();
     Local<Object> global_obj = Nan::GetCurrentContext()->Global();
     Local<Value> module_v = Nan::CallAsFunction(require_obj, global_obj, 1, args).ToLocalChecked();
     Local<Object> module_obj = Nan::To<Object>(module_v).ToLocalChecked();
-    Local<String> cache_string = Nan::New<String>(asciiString("_cache")).ToLocalChecked();
+    Local<String> cache_string = Nan::New<String>("_cache").ToLocalChecked();
     Local<Value> cache_v = Nan::Get(module_obj, cache_string).ToLocalChecked();
     Local<Object> cache_obj = Nan::To<Object>(cache_v).ToLocalChecked();
     return scope.Escape(cache_obj);
@@ -673,11 +644,11 @@ static bool isAppMetricsFile(std::string expected, std::string potentialMatch) {
 
 static bool isGlobalAgent(Local<Object> module) {
     Nan::HandleScope scope;
-    Local<String> parentString = Nan::New<String>(asciiString("parent")).ToLocalChecked();
+    Local<String> parentString = Nan::New<String>("parent").ToLocalChecked();
     Local<Value> parentValue = Nan::Get(module, parentString).ToLocalChecked();
     if (parentValue->IsObject()) {
         Local<Object> parentObj = Nan::To<Object>(parentValue).ToLocalChecked();
-        Local<String> filenameString = Nan::New<String>(asciiString("filename")).ToLocalChecked();
+        Local<String> filenameString = Nan::New<String>("filename").ToLocalChecked();
         Local<Value> filenameValue = Nan::Get(parentObj, filenameString).ToLocalChecked();
         if (
             filenameValue->IsString()
@@ -725,7 +696,7 @@ void init(Local<Object> exports, Local<Object> module) {
      */
     Nan::HandleScope scope;
     if (!isGlobalAgent(module) && isGlobalAgentAlreadyLoaded(module)) {
-        Nan::ThrowError(asciiString("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.").c_str());
+        Nan::ThrowError("Conflicting appmetrics module was already loaded by node-hc. Try running with node instead.");
         return;
     }
     // Setup global data mutex
@@ -738,22 +709,22 @@ void init(Local<Object> exports, Local<Object> module) {
     /*
      * Set exported functions
      */
-    Nan::SetMethod(exports, asciiString("getOption").c_str(), getOption);
-    Nan::SetMethod(exports, asciiString("setOption").c_str(), setOption);
-    Nan::SetMethod(exports, asciiString("start").c_str(), start);
-    Nan::SetMethod(exports, asciiString("spath").c_str(), spath);
-    Nan::SetMethod(exports, asciiString("stop").c_str(), stop);
-    Nan::SetMethod(exports, asciiString("localConnect").c_str(), localConnect);
-    Nan::SetMethod(exports, asciiString("nativeEmit").c_str(), nativeEmit);
-    Nan::SetMethod(exports, asciiString("sendControlCommand").c_str(), sendControlCommand);
+    Nan::SetMethod(exports, "getOption", getOption);
+    Nan::SetMethod(exports, "setOption", setOption);
+    Nan::SetMethod(exports, "start", start);
+    Nan::SetMethod(exports, "spath", spath);
+    Nan::SetMethod(exports, "stop", stop);
+    Nan::SetMethod(exports, "localConnect", localConnect);
+    Nan::SetMethod(exports, "nativeEmit", nativeEmit);
+    Nan::SetMethod(exports, "sendControlCommand", sendControlCommand);
 #if !defined(_ZOS)
-    Nan::SetMethod(exports, asciiString("setHeadlessZipFunction").c_str(), setHeadlessZipFunction);
+    Nan::SetMethod(exports, "setHeadlessZipFunction", setHeadlessZipFunction);
 #endif
 #if defined(_LINUX)
-    Nan::SetMethod(exports, asciiString("lrtime").c_str(), lrtime);
+    Nan::SetMethod(exports, "lrtime", lrtime);
 #endif
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-    Nan::SetMethod(exports, asciiString("getObjectHistogram").c_str(), getObjectHistogram);
+    Nan::SetMethod(exports, "getObjectHistogram", getObjectHistogram);
 #endif
     /*
      * Initialize healthcenter core library
@@ -761,7 +732,7 @@ void init(Local<Object> exports, Local<Object> module) {
     applicationDir = findApplicationDir();
     appmetricsDir = getModuleDir(module);
     if (!initLoaderApi()) {
-        Nan::ThrowError(asciiString("Failed to initialize Agent Core library").c_str());
+        Nan::ThrowError("Failed to initialize Agent Core library");
         return;
     }
     if (!loadProperties()) {
@@ -783,7 +754,7 @@ void init(Local<Object> exports, Local<Object> module) {
      * Log startup message with version information
      */
     std::stringstream msg;
-    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << nativeString(loaderApi->getAgentVersion()) << ")";
+    msg << "Node Application Metrics " << APPMETRICS_VERSION << " (Agent Core " << loaderApi->getAgentVersion() << ")";
     loaderApi->logMessage(info, msg.str().c_str());
 }
 
