@@ -487,10 +487,11 @@ This module adopts the [Module Long Term Support (LTS)](http://github.com/CloudN
 | V5.x.x           | May 2019     | Dec 2020    |              | Current     |
 
 ## Version
-5.0.1
+5.0.2
 
 ## Release History
-`5.0.1` - Bump level of omr-agentcore.
+`5.0.2` - Bump level of omr-agentcore.
+`5.0.1` - Bug fix for incorrect timings on http requests.
 `5.0.0` - Add Node 12 support, remove Node 6 support.
 `4.0.1` - Bug fix release including adding Node 10 support on Windows (Unix already working).
 `4.0.0` - Remove node-hc and add support for preloading.
