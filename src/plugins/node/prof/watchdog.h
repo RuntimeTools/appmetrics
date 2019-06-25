@@ -20,7 +20,7 @@
 #include "compat.h"
 #include "compat-inl.h"
 
-#if defined(__linux__) && (defined(__i386) || defined(__x86_64__))
+#if defined(__linux__) && (defined(__i386) || defined(__x86_64__)) || defined(sigev_notify_thread_id)
 
 #include "util.h"
 
@@ -307,7 +307,7 @@ void Initialize(v8::Isolate* isolate, v8::Local<v8::Object> binding) {
 
 }  // namespace watchdog
 
-#else  // defined(__linux__) && (defined(__i386) || defined(__x86_64__))
+#else  // defined(__linux__) && (defined(__i386) || defined(__x86_64__)) && defined(sigev_notify_thread_id)
 
 namespace watchdog {
 
@@ -329,6 +329,6 @@ const v8::CpuProfile* StopCpuProfiling(v8::Isolate* isolate) {
 
 }  // namespace watchdog
 
-#endif  // defined(__linux__) && (defined(__i386) || defined(__x86_64__))
+#endif  // defined(__linux__) && (defined(__i386) || defined(__x86_64__)) && defined(sigev_notify_thread_id)
 
 #endif  // AGENT_SRC_WATCHDOG_H_

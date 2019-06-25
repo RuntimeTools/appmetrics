@@ -47,9 +47,11 @@ HttpsProbe.prototype.attach = function(name, target) {
         // Filter out urls where filter.to is ''
         var traceUrl = that.filterUrl(httpsReq);
         if (traceUrl !== '') {
-          that.metricsProbeStart(probeData, httpsReq.method, traceUrl);
-          that.requestProbeStart(probeData, httpsReq.method, traceUrl);
-          aspect.after(res, 'end', probeData, function(obj, methodName, args, probeData, ret) {
+          // Issue #590 - need to keep the probedata context separate from other requests
+          var context = {};
+          that.metricsProbeStart(context, httpsReq.method, traceUrl);
+          that.requestProbeStart(context, httpsReq.method, traceUrl);
+          aspect.after(res, 'end', context, function(obj, methodName, args, probeData, ret) {
             that.metricsProbeEnd(probeData, httpsReq.method, traceUrl, res, httpsReq);
             that.requestProbeEnd(probeData, httpsReq.method, traceUrl, res, httpsReq);
           });
