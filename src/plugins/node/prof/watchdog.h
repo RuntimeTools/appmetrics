@@ -20,7 +20,7 @@
 #include "compat.h"
 #include "compat-inl.h"
 
-#if defined(__linux__) && (defined(__i386) || defined(__x86_64__)) || defined(sigev_notify_thread_id)
+#if defined(__linux__) && (defined(__i386) || defined(__x86_64__)) && defined(sigev_notify_thread_id)
 
 #include "util.h"
 
