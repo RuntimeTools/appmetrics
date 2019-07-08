@@ -110,8 +110,21 @@ function instrument(target, name, method, fullName) {
         return function(a, b, c, d, e, f, g, h, i) {
           return fn.apply(this, arguments);
         };
+      case 10:
+        return function(a, b, c, d, e, f, g, h, i, j) {
+          return fn.apply(this, arguments);
+        };
+      case 11:
+        return function(a, b, c, d, e, f, g, h, i, j, k) {
+          return fn.apply(this, arguments);
+        };
+      case 12:
+        return function(a, b, c, d, e, f, g, h, i, j, k, l) {
+          return fn.apply(this, arguments);
+        };
 
-      // Slow case for functions with > 10 args
+      // Slow case for functions with > 12 args
+      // Caution: strongly suggest not to write a function with more than 12 args.
       default:
         var ident = 'a';
         var argumentList = [];
