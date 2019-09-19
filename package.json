@@ -1,6 +1,6 @@
 {
   "name": "appmetrics",
-  "version": "5.0.4",
+  "version": "5.0.5",
   "engines": {
     "node": ">=6"
   },
