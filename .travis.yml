@@ -30,8 +30,7 @@ matrix:
     - os: windows
       node_js: "12"
     - os: windows
-      node_js: "13"
-      env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
+      node_js: "nightly/13"
   allow_failures:
     - os: linux
       node_js: "13"
@@ -46,8 +45,7 @@ matrix:
     - os: windows
       node_js: "12"
     - os: windows
-      node_js: "13"
-      env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
+      node_js: "nightly/13"
   fast_finish: true
 
 
