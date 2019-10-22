@@ -586,8 +586,13 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
     timespec ts = {0, 0};
     clock_gettime(clock_id, &ts);
-
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+#if NODE_VERSION_AT_LEAST(13, 0, 0) // > v13.0+
+    v8::Isolate* isolate = info.GetIsolate();
+    v8::Local<v8::Context> context = isolate -> GetCurrentContext();
+    v8::Local<v8::Array> result = v8::Array::New(isolate, 2);
+    result->Set(context, 0, v8::Number::New(isolate, ts.tv_sec));
+    result->Set(context, 1, v8::Integer::NewFromUnsigned(isolate, ts.tv_nsec));
+#elif NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
     v8::Isolate* isolate = info.GetIsolate();
     v8::Local<v8::Array> result = v8::Array::New(isolate, 2);
     result->Set(0, v8::Number::New(isolate, ts.tv_sec));
