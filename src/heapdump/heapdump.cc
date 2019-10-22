@@ -160,6 +160,18 @@ inline C::ReturnType Configure(const C::ArgumentType& args) {
 inline void Initialize(Local<Object> binding) {
   Isolate* const isolate = Isolate::GetCurrent();
   Local<Context> context = Nan::GetCurrentContext();
+#if NODE_VERSION_AT_LEAST(13, 0, 0)
+  binding->Set(context, C::String::NewFromUtf8(isolate, "kForkFlag"),
+               C::Integer::New(isolate, kForkFlag));
+  binding->Set(context, C::String::NewFromUtf8(isolate, "kSignalFlag"),
+               C::Integer::New(isolate, kSignalFlag));
+  binding->Set(context, C::String::NewFromUtf8(isolate, "configure"),
+               C::FunctionTemplate::New(isolate, Configure)
+                ->GetFunction(context).ToLocalChecked());
+  binding->Set(context, C::String::NewFromUtf8(isolate, "writeSnapshot"),
+               C::FunctionTemplate::New(isolate, WriteSnapshot)
+                ->GetFunction(context).ToLocalChecked());
+#else
   binding->Set(C::String::NewFromUtf8(isolate, "kForkFlag"),
                C::Integer::New(isolate, kForkFlag));
   binding->Set(C::String::NewFromUtf8(isolate, "kSignalFlag"),
@@ -170,6 +182,7 @@ inline void Initialize(Local<Object> binding) {
   binding->Set(C::String::NewFromUtf8(isolate, "writeSnapshot"),
                C::FunctionTemplate::New(isolate, WriteSnapshot)
                 ->GetFunction(context).ToLocalChecked());
+#endif
 }
 
 NODE_MODULE(addon, Initialize)

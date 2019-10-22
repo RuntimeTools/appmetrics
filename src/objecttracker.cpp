@@ -36,6 +36,7 @@ NAN_METHOD(getObjectHistogram) {
 	}
 
 	HeapProfiler *heapProfiler = isolate->GetHeapProfiler();
+	Local<Context> currentContext = isolate->GetCurrentContext();
 
 #if NODE_VERSION_AT_LEAST(4, 0, 0) // > v4.00+
 	// Title field removed in Node 4.x
@@ -51,7 +52,7 @@ NAN_METHOD(getObjectHistogram) {
 #else
 	const HeapSnapshot* snapshot = heapProfiler->TakeSnapshot(snapshotName);
 #endif
-#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v0.11+
+#if NODE_VERSION_AT_LEAST(4, 0, 0) // > v4.0+
 	// Title field removed in Node 4.x
 #else
 	snapshotName
@@ -60,10 +61,11 @@ NAN_METHOD(getObjectHistogram) {
 
 	/* Build a simple histogram from the heap snapshot. */
 	Local<Object> histogram = Object::New(isolate);
+#if NODE_VERSION_AT_LEAST(13, 0, 0) // > v13.0+
 
 	/* Declare our tuple keys outside the loop. */
-	Local<String> countName = String::NewFromUtf8(isolate, "count");
-	Local<String> sizeName = String::NewFromUtf8(isolate, "size");
+	Local<String> countName = String::NewFromUtf8(isolate, "count").ToLocalChecked();
+	Local<String> sizeName = String::NewFromUtf8(isolate, "size").ToLocalChecked();
 
 	/* v8-profiler.h says that kObject is "A JS object (except for arrays and strings)."
 	 * so we should include strings and arrays as objects in the histogram as they are
@@ -71,8 +73,14 @@ NAN_METHOD(getObjectHistogram) {
 	 * When you take a heap dump in Chrome dev tools and then view it the
 	 * names "(string)" and "(array)" are used for these, so that's what we'll show the user.
 	 */
+	Local<String> stringName = String::NewFromUtf8(isolate, "(string)").ToLocalChecked();
+	Local<String> arrayName = String::NewFromUtf8(isolate, "(array)").ToLocalChecked();
+#else
+	Local<String> countName = String::NewFromUtf8(isolate, "count");
+	Local<String> sizeName = String::NewFromUtf8(isolate, "size");
 	Local<String> stringName = String::NewFromUtf8(isolate, "(string)");
 	Local<String> arrayName = String::NewFromUtf8(isolate, "(array)");
+#endif
 
 	/* Walk every node by index (not id) */
 	for(int i = 0; i < snapshot->GetNodesCount(); i++ ) {
@@ -119,15 +127,25 @@ NAN_METHOD(getObjectHistogram) {
 			 * values for count and size.
 			 */
 			tuple = Object::New(isolate);
-			histogram->Set(name, tuple);
+#if NODE_VERSION_AT_LEAST(13, 0, 0) // > v13.0+
+			histogram->Set(currentContext, name, tuple);
 		}
 
 		/* Update the values in the existing (or new) tuple */
 		Local<Value> newcount = Number::New(isolate, ++ncount);
-		tuple->Set(countName, newcount);
+		tuple->Set(currentContext, countName, newcount);
 		Local<Value> newsize = Number::New(isolate, nsize+node->GetShallowSize());
-		tuple->Set(sizeName, newsize);
+		tuple->Set(currentContext,sizeName, newsize);
+#else
+            histogram->Set(currentContext, name, tuple);
+		}
 
+		/* Update the values in the existing (or new) tuple */
+		Local<Value> newcount = Number::New(isolate, ++ncount);
+		tuple->Set(currentContext, countName, newcount);
+		Local<Value> newsize = Number::New(isolate, nsize+node->GetShallowSize());
+		tuple->Set(currentContext,sizeName, newsize);
+#endif
 	}
 
 	// Delete the snapshot as soon as we are done with it.
