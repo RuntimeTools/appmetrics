@@ -350,7 +350,11 @@ v8::Local<v8::String> String::NewFromUtf8(v8::Isolate* isolate,
                                           const char* data, NewStringType type,
                                           int length) {
   return v8::String::NewFromUtf8(
+#if NODE_VERSION_AT_LEAST(13, 0, 0)
+      isolate, data, static_cast<v8::NewStringType>(type), length).ToLocalChecked();
+#else
       isolate, data, static_cast<v8::String::NewStringType>(type), length);
+#endif
 }
 
 HandleScope::HandleScope(v8::Isolate* isolate) : handle_scope_(isolate) {}

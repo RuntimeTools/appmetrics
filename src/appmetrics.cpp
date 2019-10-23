@@ -330,7 +330,9 @@ NAN_METHOD(getOption) {
     if (info.Length() > 0) {
         Local<String> value = Nan::To<String>(info[0]).ToLocalChecked();
         std::string property = loaderApi->getProperty(toStdString(value).c_str());
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+#if NODE_VERSION_AT_LEAST(13, 0, 0) // > v13.0+
+        v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str()).ToLocalChecked();
+#elif NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
         v8::Local<v8::String> v8str = v8::String::NewFromUtf8(v8::Isolate::GetCurrent(), property.c_str());
 #else
         v8::Local<v8::String> v8str = v8::String::New(property.c_str(), strlen(property.c_str()));
@@ -584,8 +586,13 @@ void lrtime(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     }
     timespec ts = {0, 0};
     clock_gettime(clock_id, &ts);
-
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+#if NODE_VERSION_AT_LEAST(13, 0, 0) // > v13.0+
+    v8::Isolate* isolate = info.GetIsolate();
+    v8::Local<v8::Context> context = isolate -> GetCurrentContext();
+    v8::Local<v8::Array> result = v8::Array::New(isolate, 2);
+    result->Set(context, 0, v8::Number::New(isolate, ts.tv_sec));
+    result->Set(context, 1, v8::Integer::NewFromUnsigned(isolate, ts.tv_nsec));
+#elif NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
     v8::Isolate* isolate = info.GetIsolate();
     v8::Local<v8::Array> result = v8::Array::New(isolate, 2);
     result->Set(0, v8::Number::New(isolate, ts.tv_sec));
