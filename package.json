@@ -12,9 +12,6 @@
     "jszip": "2.5.x",
     "ibmapm-embed": ">=19.9.0"
   },
-  "bundleDependencies": [
-    "tar"
-  ],
   "devDependencies": {
     "codecov": "^3.1.0",
     "eslint": "^4.0.0",
