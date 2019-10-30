@@ -7,6 +7,7 @@
   "description": "Node Application Metrics",
   "dependencies": {
     "nan": "2.x",
+    "node-gyp": "5.x",
     "tar": "4.x",
     "semver": "^5.3.0",
     "jszip": "2.5.x",
@@ -19,7 +20,6 @@
     "codecov": "^3.1.0",
     "eslint": "^4.0.0",
     "eslint-config-strongloop": "^2.1.0",
-    "node-gyp": "5.x",
     "prettier": "^1.4.4",
     "tap": "^12.0.1"
   },
