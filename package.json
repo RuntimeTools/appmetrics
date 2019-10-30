@@ -16,19 +16,20 @@
     "tar"
   ],
   "devDependencies": {
-    "codecov": "^3.1.0",
+    "codecov": "^3.6.0",
     "eslint": "^4.0.0",
     "eslint-config-strongloop": "^2.1.0",
     "node-gyp": "4.x",
     "prettier": "^1.4.4",
-    "tap": "^12.0.1"
+    "tap": "^14.0.1"
   },
   "scripts": {
     "fix-prettier": "prettier --single-quote --trailing-comma es5 --print-width 120 --write {bin,lib,probes,tests}/**/*.js *.js",
     "fix-eslint": "eslint --fix {bin,lib,probes,tests}/**/*.js *.js",
     "pretest": "eslint .",
     "test": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http*test.js tests/headless_test.js",
-    "travis": "npm test",
+    "travis": "tap --reporter tap --timeout=120 tests/*tests.js tests/probes/http*test.js tests/headless_test.js --coverage",
+    "posttravis": "./get_code_cov.sh && tap --coverage-report=lcov && ./node_modules/.bin/codecov --disable=gcov",
     "install": "node showBuildInfo.js && node-gyp rebuild"
   },
   "directories": {
