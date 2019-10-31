@@ -487,10 +487,10 @@ This module adopts the [Module Long Term Support (LTS)](http://github.com/CloudN
 | V5.x.x           | May 2019     | Dec 2020    |              | Current     |
 
 ## Version
-5.1.0
+5.1.1
 
 ## Release History
-`5.1.0` - Node13 support, bump dependency versions and a trace probe fix.  
+`5.1.1` - Node13 support, bump dependency versions and a trace probe fix.  
 `5.0.5` - zAppmetrics fixes, and bump agentcore for Alpine support.  
 `5.0.3` - Bug fix.  
 `5.0.2` - Bump level of omragentcore.  
