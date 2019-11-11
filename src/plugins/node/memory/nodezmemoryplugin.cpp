@@ -89,9 +89,12 @@ static int64 getTime() {
 static int64 getTotalPhysicalMemorySize() {
   plugin::api.logMessage(loggingLevel::debug, "[memory_node] >>getTotalPhysicalMemorySize()");
   Nan::HandleScope scope;
-  Local<Object> global = Nan::GetCurrentContext()->Global();
-  Local<Object> appmetObject = global->Get(Nan::New<String>(asciiString("Appmetrics")).ToLocalChecked())->ToObject();
-  Local<Value> totalMemValue = appmetObject->Get(Nan::New<String>(asciiString("getTotalPhysicalMemorySize")).ToLocalChecked());
+  Local<String> appmstr = Nan::New<String>("Appmetrics").ToLocalChecked();
+  Local<Value> appmval = Nan::Get(Nan::GetCurrentContext()->Global(), appmstr).ToLocalChecked();
+  Local<Object> appmobj = Nan::To<Object>(appmval).ToLocalChecked();
+
+  Local<String> fstr = Nan::New<String>("getTotalPhysicalMemorySize").ToLocalChecked();
+  Local<Value> totalMemValue = Nan::Get(appmobj, fstr).ToLocalChecked();
   if (totalMemValue->IsFunction()) {
     plugin::api.logMessage(loggingLevel::debug, "[memory_node] getTotalPhysicalMemorySize is a function");
   } else {
@@ -99,11 +102,12 @@ static int64 getTotalPhysicalMemorySize() {
     return -1;
   }
   Local<Function> totalMemFunc = Local<Function>::Cast(totalMemValue);
-  Local<Value> args[0];
-  Local<Value> result = totalMemFunc->Call(global, 0, args);
+
+  Nan::Callback cb(totalMemFunc);
+  Local<Value> result = Nan::Call(cb, 0, 0).ToLocalChecked();
   if (result->IsNumber()) {
     plugin::api.logMessage(loggingLevel::debug, "[memory_node] result of calling getTotalPhysicalMemorySize is a number");
-    return result->IntegerValue();
+    return result->IntegerValue(Nan::GetCurrentContext()).ToChecked();
   } else {
     plugin::api.logMessage(loggingLevel::debug, "[memory_node] result of calling getTotalPhysicalMemorySize is NOT a number");
     return -1;
