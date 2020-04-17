@@ -2,6 +2,7 @@ dist: trusty
 language: node_js
 before_install:
   - git submodule update --init --recursive
+  - nvs remote add nightly https://nodejs.org/download/nightly/
 
 matrix:
   include:
