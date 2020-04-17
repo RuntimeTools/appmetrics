@@ -3,51 +3,50 @@ language: node_js
 before_install:
   - git submodule update --init --recursive
 
-  matrix:
-    include:
-      - os: linux
-        node_js: "13"
-      - os: linux
-        node_js: "10"
-      - os: linux
-        node_js: "12"
-      - os: linux
-        node_js: "14"
-        env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
-      - os: osx
-        node_js: "13"
-      - os: osx
-        node_js: "10"
-      - os: osx
-        node_js: "12"
-      - os: osx
-        node_js: "14"
-        env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
-      - os: windows
-        node_js: "13"
-      - os: windows
-        node_js: "10"
-      - os: windows
-        node_js: "12"
-      - os: windows
-        node_js: "nightly/14"
-    allow_failures:
-      - os: linux
-        node_js: "14"
-        env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
-      - os: osx
-        node_js: "14"
-        env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
-      - os: windows
-        node_js: "13"
-      - os: windows
-        node_js: "10"
-      - os: windows
-        node_js: "12"
-      - os: windows
-        node_js: "nightly/14"
-    fast_finish: true
-
+matrix:
+  include:
+    - os: linux
+      node_js: "13"
+    - os: linux
+      node_js: "10"
+    - os: linux
+      node_js: "12"
+    - os: linux
+      node_js: "14"
+      env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
+    - os: osx
+      node_js: "13"
+    - os: osx
+      node_js: "10"
+    - os: osx
+      node_js: "12"
+    - os: osx
+      node_js: "14"
+      env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
+    - os: windows
+      node_js: "13"
+    - os: windows
+      node_js: "10"
+    - os: windows
+      node_js: "12"
+    - os: windows
+      node_js: "nightly/14"
+  allow_failures:
+    - os: linux
+      node_js: "14"
+      env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
+    - os: osx
+      node_js: "14"
+      env: NVM_NODEJS_ORG_MIRROR=https://nodejs.org/download/nightly
+    - os: windows
+      node_js: "13"
+    - os: windows
+      node_js: "10"
+    - os: windows
+      node_js: "12"
+    - os: windows
+      node_js: "nightly/14"
+  fast_finish: true
 
 script: npm run-script travis
 
