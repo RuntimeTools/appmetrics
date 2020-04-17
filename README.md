@@ -422,7 +422,7 @@ Requests are a special type of event emitted by appmetrics.  All the probes name
 
 The Node Application Metrics agent supports the following runtime environments where a Node.js runtime is available:
 
-* **Node.js v8, 10, 12** on:
+* **Node.js v10, 12, 13** on:
   * 64-bit Windows (x64)
   * 64-bit Linux (x64, ppc64, ppc64le, s390x)
   * 64-bit AIX (ppc64)
