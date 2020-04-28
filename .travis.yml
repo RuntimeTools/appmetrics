@@ -3,10 +3,10 @@ language: node_js
 before_install:
   - git submodule update --init --recursive
 node_js:
-  - "8"
   - "10"
   - "12"
   - "13"
+  - "14"
 os:
   - osx
   - linux
@@ -14,7 +14,7 @@ os:
 matrix:
   include:
     - os: windows
-      node_js: "8"
+      node_js: "14"
     - os: windows
       node_js: "10"
     - os: windows
@@ -23,7 +23,7 @@ matrix:
       node_js: "13"
   allow_failures:
     - os: windows
-      node_js: "8"
+      node_js: "14"
     - os: windows
       node_js: "10"
     - os: windows
