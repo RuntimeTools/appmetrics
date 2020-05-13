@@ -60,9 +60,9 @@ Appmetrics uses `node-gyp` to compile and build local binary libraries to enhanc
 
 You can get Node Application Metrics from 3 different places:
 
-  * npmjs.org (install by running `npm install appmetrics`. Native libraries are prebuilt)
-  * Github ([install from source](https://github.com/RuntimeTools/appmetrics/wiki/Install-direct-from-github-source) by cloning the git repository. Requires a compiler)
-  * [IBM SDK for Node.js](https://developer.ibm.com/node/sdk/) (packaged with the SDK, native libraries are prebuilt)
+  * npmjs.org (install by running `npm install appmetrics`. [Requires a compiler](#pre-requisites))
+  * Github ([install from source](https://github.com/RuntimeTools/appmetrics/wiki/Install-direct-from-github-source) by cloning the git repository. [Requires a compiler](#pre-requisites))
+  * [IBM SDK for Node.js](https://developer.ibm.com/node/sdk/) (packaged with the SDK, native libraries are prebuilt. Nodejs v10 or earlier)
 
 ### Configuring Node Application Metrics
 
