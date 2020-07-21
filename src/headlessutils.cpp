@@ -41,7 +41,9 @@ void asyncfunc(uv_async_t* handle, int status) {
 #endif
 	Nan::HandleScope scope;
  	v8::Isolate* isolate = v8::Isolate::GetCurrent();
-#if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
+#if NODE_VERSION_AT_LEAST(13, 0, 0) // > v13.0+
+	v8::Local<v8::Value> argv[] = { v8::String::NewFromUtf8(isolate, outputDir.c_str()).ToLocalChecked() };
+#elif NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
 	v8::Local<v8::Value> argv[] = { v8::String::NewFromUtf8(isolate, outputDir.c_str()) };
 #else
 	v8::Local<v8::Value> argv[] = { v8::String::New(outputDir.c_str(),  strlen(outputDir.c_str())) };

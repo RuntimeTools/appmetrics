@@ -68,73 +68,6 @@ function instrument(target, name, method, fullName) {
   var lastMethodArg = methodargs[methodargs.length - 1].replace(/ /g, '');
   if (lastMethodArg == '') lastMethodArg = 'undefined';
 
-  function generateF(expectedArgCount, fn) {
-    switch (expectedArgCount) {
-      case 0:
-        return function() {
-          return fn.apply(this, arguments);
-        };
-      case 1:
-        return function(a) {
-          return fn.apply(this, arguments);
-        };
-      case 2:
-        return function(a, b) {
-          return fn.apply(this, arguments);
-        };
-      case 3:
-        return function(a, b, c) {
-          return fn.apply(this, arguments);
-        };
-      case 4:
-        return function(a, b, c, d) {
-          return fn.apply(this, arguments);
-        };
-      case 5:
-        return function(a, b, c, d, e) {
-          return fn.apply(this, arguments);
-        };
-      case 6:
-        return function(a, b, c, d, e, f) {
-          return fn.apply(this, arguments);
-        };
-      case 7:
-        return function(a, b, c, d, e, f, g) {
-          return fn.apply(this, arguments);
-        };
-      case 8:
-        return function(a, b, c, d, e, f, g, h) {
-          return fn.apply(this, arguments);
-        };
-      case 9:
-        return function(a, b, c, d, e, f, g, h, i) {
-          return fn.apply(this, arguments);
-        };
-
-      // Slow case for functions with > 10 args
-      default:
-        var ident = 'a';
-        var argumentList = [];
-        for (var i = 0; i < expectedArgCount; i++) {
-          argumentList[i] = ident;
-          ident = incrementIdentifier(ident);
-        }
-        /* eslint no-eval: 0 */
-        return eval('x = function(' + argumentList.join(',') + ') {return fn.apply(this,arguments);};');
-    }
-
-    function incrementIdentifier(identifier) {
-      var charArr = identifier.split('');
-      var lastChar = charArr[charArr.length - 1];
-      if (lastChar == 'z') {
-        return identifier + 'a';
-      } else {
-        var chopped = identifier.substring(0, identifier.length - 1);
-        return chopped + String.fromCharCode(lastChar.charCodeAt(0) + 1);
-      }
-    }
-  }
-
   var f = function() {
     var req = request.startMethod(fullName);
     var args = arguments;
@@ -216,8 +149,9 @@ function instrument(target, name, method, fullName) {
     return res;
   };
   // use a function replace to call our 'f' function.
-  // we ned to use 'generateF' to call f with the correct number of arguments
-  target[name] = generateF(method.length, f);
+  target[name] = function() {
+    return f.apply(this, arguments);
+  };
   target[name].prototype = method.prototype;
 }
 
@@ -263,7 +197,7 @@ function isAppInnerRequire() {
   var trace = {};
   Error.captureStackTrace(trace);
   var callerLine = trace.stack.split('\n'); // This line contains 'node_modules' reference for generic libs
-  return callerLine[6].indexOf('node_modules') == -1;
+  return callerLine[6].indexOf('node_modules') == -1 && callerLine[6].indexOf('ibmapm') == -1;
 }
 
 function instrumentMethods(moduleName, target) {

@@ -347,7 +347,10 @@ function runNodeEnvTests(nodeEnvData, t) {
       'max.old.space.size is an integer (value was: ' + nodeEnvData['max.old.space.size'] + ')'
     );
     t.ok(parseInt(nodeEnvData['max.old.space.size']) > 0, 'max.old.space.size is positive');
-    if (semver.gt(process.version, '10.0.0')) {
+
+    if (semver.gt(process.version, '12.0.0')) {
+      t.skip();
+    } else if (semver.gt(process.version, '10.0.0')) {
       // heap size limit is now scaled by a factor - see
       // https://github.com/nodejs/node/blob/v10.x/deps/v8/src/heap/heap.cc#L250
       var maxHeapGuess = 2 * parseInt(nodeEnvData['max.semi.space.size']) + parseInt(nodeEnvData['max.old.space.size']);

@@ -42,7 +42,7 @@ Node Application Metrics provides the following built-in data collection sources
  Redis              | Redis commands issued by the application
  Riak               | Riak methods called by the application
  Request tracking   | A tree of application requests, events and optionally trace (disabled by default)
- Function trace     | Tracing of application function calls that occur during a request (disabled by default)  
+ Function trace     | Tracing of application function calls that occur during a request (disabled by default)
 
 ## Performance overhead
 
@@ -52,13 +52,17 @@ We gathered this information by monitoring the sample application [Acme Air][3].
 
 ## Getting Started
 
+### Pre-requisites:
+
+Appmetrics uses `node-gyp` to compile and build local binary libraries to enhance execution performance. If the following compilation and build logs contain errors, make sure you have the node-gyp pre-requisites installed \(https://github.com/nodejs/node-gyp#installation). If you have them and the build still had errors, see if there are any related issues at https://github.com/RuntimeTools/appmetrics/issues). If there aren\'t, feel free to open a new issue to report the bug.
+
 ### Installation
 
 You can get Node Application Metrics from 3 different places:
 
-  * npmjs.org (install by running `npm install appmetrics`. Native libraries are prebuilt)
-  * Github ([install from source](https://github.com/RuntimeTools/appmetrics/wiki/Install-direct-from-github-source) by cloning the git repository. Requires a compiler)
-  * [IBM SDK for Node.js](https://developer.ibm.com/node/sdk/) (packaged with the SDK, native libraries are prebuilt)
+  * npmjs.org (install by running `npm install appmetrics`. [Requires a compiler](#pre-requisites))
+  * Github ([install from source](https://github.com/RuntimeTools/appmetrics/wiki/Install-direct-from-github-source) by cloning the git repository. [Requires a compiler](#pre-requisites))
+  * [IBM SDK for Node.js](https://developer.ibm.com/node/sdk/) (packaged with the SDK, native libraries are prebuilt. Nodejs v10 or earlier)
 
 ### Configuring Node Application Metrics
 
@@ -140,7 +144,7 @@ Sets various properties on the appmetrics monitoring agent. If the agent has alr
 
 Property name        | Property value type      | Property description
 :--------------------|:-------------------------|:-----------------------------
- `applicationID`     | `string`                 | Specifies a unique identifier for the mqtt connection             
+ `applicationID`     | `string`                 | Specifies a unique identifier for the mqtt connection
  `mqtt`              | `string['off'\|'on']`    | Specifies whether the monitoring agent sends data to the mqtt broker. The default value is `'on'`
  `mqttHost`          | `string`                 | Specifies the host name of the mqtt broker
  `mqttPort`          | `string['[0-9]*']`       | Specifies the port number of the mqtt broker
@@ -193,6 +197,7 @@ Creates a Node Application Metrics agent client instance. This can subsequently 
 Requests an object containing all of the available environment information for the running application. This will not contain all possible environment information until an 'initialized' event has been received.
 
 ### Event: 'cpu'
+**_Not supported on z/OS_**
 Emitted when a CPU monitoring sample is taken.
 * `data` (Object) the data from the CPU sample:
     * `time` (Number) the milliseconds when the sample was taken. This can be converted to a Date using `new Date(data.time)`.
@@ -399,7 +404,7 @@ Emitted when a query is executed using the `strong-oracle` module.
 ## API: Requests
 
 ### Event: 'request'
-Requests are a special type of event emitted by appmetrics.  All the probes named above can also create request events if requests are enabled.  Howver requests are nested within a root incoming request (usually http). Request events are disabled by default.
+Requests are a special type of event emitted by appmetrics.  All the probes named above can also create request events if requests are enabled.  However requests are nested within a root incoming request (usually http). Request events are disabled by default.
 * `data` (Object) the data from the request:
     * `time` (Number) the milliseconds when the request occurred. This can be converted to a Date using `new Date(data.time)`.
     * `type` (String) The type of the request event. This is the name of the probe that sent the request data, e.g. `http`, `socketio` etc.
@@ -417,18 +422,11 @@ Requests are a special type of event emitted by appmetrics.  All the probes name
 
 The Node Application Metrics agent supports the following runtime environments where a Node.js runtime is available:
 
-* **Node.js v4** on:
-  * 64-bit or 32-bit Windows (x64 or x86)
-  * 64-bit or 32-bit Linux (x64, x86, ppc64, ppc64le, s390, s390x)
-  * 64-bit AIX (ppc64)
-  * 64-bit macOS (x64)
-* **Node.js v6** on all of the above, plus:
-  * 64-bit runtime on z/OS (os390)
-* **Node.js v8** on:
+* **Node.js v10, 12, 14** on:
   * 64-bit Windows (x64)
   * 64-bit Linux (x64, ppc64, ppc64le, s390x)
   * 64-bit AIX (ppc64)
-  * 64-bit IBM i (ppc64) 
+  * 64-bit IBM i (ppc64)
     * Before running `npm install appmetrics`, ensure the environment variable `CC=gcc` is set.
     * Functionality for Memory and CPU stats not fully implemented, currently under construction.
   * 64-bit macOS (x64)
@@ -471,7 +469,7 @@ If a task uses the Node.js thread exclusively then shuts down the Node.js runtim
 The source code for Node Application Metrics is available in the [appmetrics project][6]. Information on working with the source code -- installing from source, developing, contributing -- is available on the [appmetrics wiki][3].
 
 ## License
-This project is released under an Apache 2.0 open source license.  
+This project is released under an Apache 2.0 open source license.
 
 ## Versioning scheme
 The npm package for this project uses a semver-parsable X.0.Z version number for releases, where X is incremented for breaking changes to the public API described in this document and Z is incremented for bug fixes **and** for non-breaking changes to the public API that provide new function.
@@ -483,14 +481,21 @@ Non-release versions of this project (for example on github.com/RuntimeTools/app
 
 This module adopts the [Module Long Term Support (LTS)](http://github.com/CloudNativeJS/ModuleLTS) policy, with the following End Of Life (EOL) dates:
 
-| Module Version   | Release Date | Minimum EOL | EOL With     | Status  |
-|------------------|--------------|-------------|--------------|---------|
-| V4.x.x	         | Jan 2018     | Dec 2019    |              | Current |
+| Module Version   | Release Date | Minimum EOL | EOL With     | Status      |
+|------------------|--------------|-------------|--------------|-------------|
+| V4.x.x           | Jan 2018     | Dec 2019    |              | Maintenance |
+| V5.x.x           | May 2019     | Dec 2020    |              | Current     |
 
 ## Version
-4.0.1
+5.1.1
 
 ## Release History
+`5.1.1` - Node13 support, bump dependency versions and a trace probe fix.  
+`5.0.5` - zAppmetrics fixes, and bump agentcore for Alpine support.  
+`5.0.3` - Bug fix.  
+`5.0.2` - Bump level of omragentcore.  
+`5.0.1` - Bug fix for incorrect timiings on http request.  
+`5.0.0` - Add Node 12 support, remove Node 6 support.  
 `4.0.1` - Bug fix release including adding Node 10 support on Windows (Unix already working).  
 `4.0.0` - Remove node-hc and add support for preloading.  
 `3.1.3` - Packaging fix.  
@@ -519,6 +524,8 @@ This module adopts the [Module Long Term Support (LTS)](http://github.com/CloudN
 `1.0.2` - HTTP, MySQL, MongoDB, request tracking and function tracing support.  
 `1.0.1` - Mac OS X support, io.js v2 support.  
 `1.0.0` - First release.
+
+
 
 [1]:https://marketplace.eclipse.org/content/ibm-monitoring-and-diagnostic-tools-health-center
 [2]:http://www.ibm.com/support/knowledgecenter/SS3KLZ/com.ibm.java.diagnostics.healthcenter.doc/topics/connecting.html

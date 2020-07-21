@@ -20,3 +20,6 @@ Authors ordered by first contribution:
  - Vladislav Botvin (https://github.com/darky)
  - John Barboza (https://github.com/jbarz)
  - Abdirahim Musse (https://github.com/ab-m)
+ - Richard Waller (https://github.com/rwalle61)
+ - Russell Howe (https://github.com/rhowe-gds)
+ - Gaby Baghdadi (https://github.com/gabylb)
