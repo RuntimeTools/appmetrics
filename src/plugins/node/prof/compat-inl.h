@@ -291,6 +291,7 @@ ReturnType ReturnableHandleScope::Return(v8::Local<v8::Value> value) {
 }
 
 #else
+v8::CpuProfiler* cpu_profiler_ = nullptr;
 
 void CpuProfiler::StartCpuProfiling(v8::Isolate* isolate,
                                     v8::Local<v8::String> title) {
@@ -299,7 +300,12 @@ void CpuProfiler::StartCpuProfiling(v8::Isolate* isolate,
 #if !NODE_VERSION_AT_LEAST(3, 0, 0)
   return isolate->GetCpuProfiler()->StartCpuProfiling(title, record_samples);
 #else
-  return isolate->GetCpuProfiler()->StartProfiling(title, record_samples);
+  if (cpu_profiler_ == nullptr) {
+    cpu_profiler_ = v8::CpuProfiler::New(isolate);
+  }
+  if (cpu_profiler_ != nullptr) {
+    cpu_profiler_->StartProfiling(title, record_samples);
+  }
 #endif
 }
 
@@ -309,7 +315,11 @@ const v8::CpuProfile* CpuProfiler::StopCpuProfiling(
 #if !NODE_VERSION_AT_LEAST(3, 0, 0)
   return isolate->GetCpuProfiler()->StopCpuProfiling(title);
 #else
-  return isolate->GetCpuProfiler()->StopProfiling(title);
+  v8::CpuProfile* profile = nullptr;
+  if (cpu_profiler_ != nullptr) {
+    profile = cpu_profiler_->StopProfiling(title);
+  }
+  return profile;
 #endif
 }
 
@@ -340,7 +350,11 @@ v8::Local<v8::String> String::NewFromUtf8(v8::Isolate* isolate,
                                           const char* data, NewStringType type,
                                           int length) {
   return v8::String::NewFromUtf8(
+#if NODE_VERSION_AT_LEAST(13, 0, 0)
+      isolate, data, static_cast<v8::NewStringType>(type), length).ToLocalChecked();
+#else
       isolate, data, static_cast<v8::String::NewStringType>(type), length);
+#endif
 }
 
 HandleScope::HandleScope(v8::Isolate* isolate) : handle_scope_(isolate) {}

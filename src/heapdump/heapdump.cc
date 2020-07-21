@@ -13,7 +13,7 @@
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
 #include "node.h"  // Picks up BUILDING_NODE_EXTENSION on Windows, see #30.
-
+#include "nan.h"
 #include "../plugins/node/prof/compat-inl.h"
 #include "uv.h"
 #include "v8-profiler.h"
@@ -49,7 +49,6 @@ namespace {
 using v8::Context;
 using v8::Function;
 using v8::FunctionTemplate;
-using v8::Handle;
 using v8::HandleScope;
 using v8::HeapSnapshot;
 using v8::Isolate;
@@ -103,7 +102,7 @@ inline C::ReturnType WriteSnapshot(const C::ArgumentType& args) {
 
   char filename[kMaxPath];
   if (args[0]->IsString()) {
-    String::Utf8Value filename_string(args[0]);
+    Nan::Utf8String filename_string(args[0]);
     snprintf(filename, sizeof(filename), "%s", *filename_string);
   } else {
     RandomSnapshotFilename(filename, sizeof(filename));
@@ -154,20 +153,36 @@ inline void RandomSnapshotFilename(char* buffer, size_t size) {
 
 inline C::ReturnType Configure(const C::ArgumentType& args) {
   C::ReturnableHandleScope handle_scope(args);
-  PlatformInit(args.GetIsolate(), args[0]->Int32Value());
+  PlatformInit(args.GetIsolate(), args[0]->Int32Value(Nan::GetCurrentContext()).FromJust());
   return handle_scope.Return();
 }
 
 inline void Initialize(Local<Object> binding) {
   Isolate* const isolate = Isolate::GetCurrent();
+  Local<Context> context = Nan::GetCurrentContext();
+#if NODE_VERSION_AT_LEAST(13, 0, 0)
+  binding->Set(context, C::String::NewFromUtf8(isolate, "kForkFlag"),
+               C::Integer::New(isolate, kForkFlag));
+  binding->Set(context, C::String::NewFromUtf8(isolate, "kSignalFlag"),
+               C::Integer::New(isolate, kSignalFlag));
+  binding->Set(context, C::String::NewFromUtf8(isolate, "configure"),
+               C::FunctionTemplate::New(isolate, Configure)
+                ->GetFunction(context).ToLocalChecked());
+  binding->Set(context, C::String::NewFromUtf8(isolate, "writeSnapshot"),
+               C::FunctionTemplate::New(isolate, WriteSnapshot)
+                ->GetFunction(context).ToLocalChecked());
+#else
   binding->Set(C::String::NewFromUtf8(isolate, "kForkFlag"),
                C::Integer::New(isolate, kForkFlag));
   binding->Set(C::String::NewFromUtf8(isolate, "kSignalFlag"),
                C::Integer::New(isolate, kSignalFlag));
   binding->Set(C::String::NewFromUtf8(isolate, "configure"),
-               C::FunctionTemplate::New(isolate, Configure)->GetFunction());
+               C::FunctionTemplate::New(isolate, Configure)
+                ->GetFunction(context).ToLocalChecked());
   binding->Set(C::String::NewFromUtf8(isolate, "writeSnapshot"),
-               C::FunctionTemplate::New(isolate, WriteSnapshot)->GetFunction());
+               C::FunctionTemplate::New(isolate, WriteSnapshot)
+                ->GetFunction(context).ToLocalChecked());
+#endif
 }
 
 NODE_MODULE(addon, Initialize)
