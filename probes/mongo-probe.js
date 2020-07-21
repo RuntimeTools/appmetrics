@@ -175,6 +175,7 @@ MongoProbe.prototype.metricsEnd = function(probeData, collectionName, method, me
     am.emit('mongo', {
       time: probeData.timer.startTimeMillis,
       query: JSON.stringify(methodArgs[0]),
+      extra: methodArgs[1] && typeof methodArgs[1] === 'object' && JSON.stringify(methodArgs[1]),
       duration: probeData.timer.timeDelta,
       method: method,
       collection: collectionName,
