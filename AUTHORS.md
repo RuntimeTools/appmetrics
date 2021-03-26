@@ -23,3 +23,4 @@ Authors ordered by first contribution:
  - Richard Waller (https://github.com/rwalle61)
  - Russell Howe (https://github.com/rhowe-gds)
  - Gaby Baghdadi (https://github.com/gabylb)
+ - Mark Frost (https://github.com/frostmar)

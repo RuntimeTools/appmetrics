@@ -28,6 +28,16 @@ util.inherits(SocketioProbe, Probe);
 SocketioProbe.prototype.attach = function(name, target) {
   var that = this;
   if (name != 'socket.io') return target;
+
+  /*
+   * socket.io v2 directly exports the function to be patched
+   * socket.io v3 & v4 exports a factory function, with a Class as .Server which can't be patched successfully by the code below
+   */
+  if (target.Server) {
+    // don't attempt to patch v3+
+    return target;
+  }
+
   /*
 	 * Don't set __ddProbeAttached__ = true as we need to probe and return
 	 * the constructor each time
