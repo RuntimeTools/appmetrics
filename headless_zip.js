@@ -16,6 +16,7 @@
 'use strict';
 
 var fs = require('fs');
+var fsPromise = require('fs/promises');
 var path = require('path');
 var JSZip = require('jszip');
 
@@ -85,14 +86,19 @@ module.exports.headlessZip = function headlessZip(dirToZip) {
 
   if (fs.existsSync(dirToZip)) {
     var zip = new JSZip();
-    var files = fs.readdirSync(dirToZip);
-    for (var i = 0, len = files.length; i < len; i++) {
-      zip.file(files[i], fs.readFileSync(path.join(dirToZip, files[i])), {
-        compression: 'DEFLATE',
-      });
-    }
-    fs.writeFileSync(outputFileName, zip.generate({ type: 'nodebuffer', compression: 'DEFLATE' }));
-    deleteDir(dirToZip);
+
+    fsPromise.readdir(dirToZip)
+      .then(files => {
+        let getFileAndContents = file => fsPromise.readFile(path.join(dirToZip, file))
+          .then(contents => { return { file, contents }; });
+        return Promise.all(files.map(getFileAndContents));
+      })
+      .then(files => {
+        files.forEach(({file, contents}) => zip.file(file, contents, {compression: 'DEFLATE'}));
+        return zip.generateAsync({type: 'nodebuffer', compression: 'DEFLATE'});
+      })
+      .then(buffer => fsPromise.writeFile(outputFileName, buffer))
+      .then(() => { deleteDir(dirToZip); });
   }
 };
 

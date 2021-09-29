@@ -13,3 +13,6 @@ headlesstestoutput*
 .nyc_output/
 package-lock.json
 resourceRegistry.log
+libagentcore.dylib
+nodejs_dc.log
+nodejs_restclient.log
