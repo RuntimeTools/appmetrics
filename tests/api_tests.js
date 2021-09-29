@@ -237,7 +237,7 @@ monitor.once('initialized', function() {
 function runCommonEnvTests(commonEnvData, t) {
   var ARCHS = ['x86', 'x86_64', 'ppc32', 'ppc64', 'ppc64le', 's390', 's390x'];
   var ZOS_ARCHS = ['3906', '2964', '2965', '2827', '2828', '2817', '2818'];
-  var OSES = ['AIX', 'Linux', 'Windows', 'Mac OS X', 'OS/390'];
+  var OSES = ['AIX', 'Linux', 'Windows', 'Mac OS X', 'macOS', 'OS/390'];
 
   t.ok(ARCHS.indexOf(commonEnvData['os.arch']) != -1, 'Contains a recognised value for os.arch', skipIfzOS);
   t.ok(ZOS_ARCHS.indexOf(commonEnvData['os.arch']) != -1, 'Contains a recognised value for z/OS os.arch', skipIfNotzOS);
