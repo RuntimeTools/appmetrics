@@ -6,12 +6,12 @@
   },
   "description": "Node Application Metrics",
   "dependencies": {
+    "ibmapm-embed": ">=19.9.0",
+    "jszip": "^3.7.1",
     "nan": "2.x",
     "node-gyp": "5.x",
-    "tar": "4.x",
     "semver": "^5.3.0",
-    "jszip": "2.5.x",
-    "ibmapm-embed": ">=19.9.0"
+    "tar": "4.x"
   },
   "devDependencies": {
     "codecov": "^3.1.0",
