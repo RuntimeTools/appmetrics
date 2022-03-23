@@ -23,3 +23,4 @@ Authors ordered by first contribution:
  - Richard Waller (https://github.com/rwalle61)
  - Russell Howe (https://github.com/rhowe-gds)
  - Gaby Baghdadi (https://github.com/gabylb)
+ - Alexey Kotlyarov (https://github.com/koterpillar)

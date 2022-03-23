@@ -3,8 +3,8 @@
     "srcdir%": "./src",
     "agentcoredir%": "./omr-agentcore",
     "nandir%": "<!(node -e \"try {require('nan')}catch (e){console.log(e)}\")",
-    'build_id%': '.<!(["python", "./generate_build_id.py"])',
-    'appmetricsversion%':  '<!(["python", "./get_from_json.py", "./package.json", "version"])',
+    'build_id%': '.<!(["python3", "./generate_build_id.py"])',
+    'appmetricsversion%':  '<!(["python3", "./get_from_json.py", "./package.json", "version"])',
     "conditions": [
       ['OS=="aix"', {
         "SHARED_LIB_SUFFIX": ".a",
@@ -119,7 +119,7 @@
         'inputs': [ "<(srcdir)/appmetrics.cpp" ],
         'outputs': [ "<(INTERMEDIATE_DIR)/appmetrics.cpp" ],
         'action': [
-          'python',
+          'python3',
           './replace_in_file.py',
           '<(srcdir)/appmetrics.cpp',
           '<(INTERMEDIATE_DIR)/appmetrics.cpp',
