@@ -421,7 +421,7 @@ static void emitMessage(uv_async_t *handle, int status) {
         argv[0] = Nan::New<String>(source).ToLocalChecked();
         argv[1] = buffer;
 
-        listener->callback->Call(argc, argv);
+        Nan::Call(*listener->callback, argc, argv);
         if (try_catch.HasCaught()) {
             Nan::FatalException(try_catch);
         }

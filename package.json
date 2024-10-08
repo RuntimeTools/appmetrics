@@ -2,16 +2,16 @@
   "name": "appmetrics",
   "version": "5.1.1",
   "engines": {
-    "node": ">=6"
+    "node": ">=14"
   },
   "description": "Node Application Metrics",
   "dependencies": {
-    "nan": "2.x",
-    "node-gyp": "5.x",
-    "tar": "4.x",
-    "semver": "^5.3.0",
-    "jszip": "2.5.x",
-    "ibmapm-embed": ">=19.9.0"
+    "ibmapm-embed": ">=19.9.0",
+    "jszip": "^3.10.1",
+    "nan": "^2.20.0",
+    "node-gyp": "^10.2.0",
+    "semver": "^7.6.3",
+    "tar": "^7.4.3"
   },
   "devDependencies": {
     "codecov": "^3.1.0",

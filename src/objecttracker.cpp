@@ -23,15 +23,17 @@
 #include "nan.h"
 
 using namespace v8;
-//Only perform object tracking on node v0.11 +
+// Only perform object tracking on node v0.11 +
 #if NODE_VERSION_AT_LEAST(0, 11, 0)
 /* Take a heap snapshot and convert it into a histogram giving the counts and sizes
  * of every type of object on the heap.
  */
-NAN_METHOD(getObjectHistogram) {
+NAN_METHOD(getObjectHistogram)
+{
 
-	Isolate *isolate =  info.GetIsolate();
-	if (isolate == NULL) {
+	Isolate *isolate = info.GetIsolate();
+	if (isolate == NULL)
+	{
 		return;
 	}
 
@@ -39,7 +41,7 @@ NAN_METHOD(getObjectHistogram) {
 	Local<Context> currentContext = isolate->GetCurrentContext();
 
 #if NODE_VERSION_AT_LEAST(4, 0, 0) // > v4.00+
-	// Title field removed in Node 4.x
+								   // Title field removed in Node 4.x
 #else
 	Local<String> snapshotName = String::NewFromUtf8(isolate, "snapshot");
 #endif
@@ -48,12 +50,12 @@ NAN_METHOD(getObjectHistogram) {
 	 * It's arguments changed so the latest versions don't need a title param.
 	 */
 #if NODE_VERSION_AT_LEAST(0, 11, 0) // > v0.11+
-	const HeapSnapshot* snapshot = heapProfiler->TakeHeapSnapshot(
+	const HeapSnapshot *snapshot = heapProfiler->TakeHeapSnapshot(
 #else
-	const HeapSnapshot* snapshot = heapProfiler->TakeSnapshot(snapshotName);
+	const HeapSnapshot *snapshot = heapProfiler->TakeSnapshot(snapshotName);
 #endif
 #if NODE_VERSION_AT_LEAST(4, 0, 0) // > v4.0+
-	// Title field removed in Node 4.x
+								   // Title field removed in Node 4.x
 #else
 	snapshotName
 #endif
@@ -83,12 +85,14 @@ NAN_METHOD(getObjectHistogram) {
 #endif
 
 	/* Walk every node by index (not id) */
-	for(int i = 0; i < snapshot->GetNodesCount(); i++ ) {
+	for (int i = 0; i < snapshot->GetNodesCount(); i++)
+	{
 
-		const HeapGraphNode* node = snapshot->GetNode(i);
+		const HeapGraphNode *node = snapshot->GetNode(i);
 
 		Local<String> name;
-		switch( node->GetType() ) {
+		switch (node->GetType())
+		{
 		case HeapGraphNode::kObject:
 			name = node->GetName();
 			break;
@@ -107,7 +111,8 @@ NAN_METHOD(getObjectHistogram) {
 
 		int64_t ncount = 0;
 		int64_t nsize = 0;
-		if( !(tupleval->IsNull() || tupleval->IsUndefined()) ) {
+		if (!(tupleval->IsNull() || tupleval->IsUndefined()))
+		{
 			tuple = Nan::To<Object>(tupleval).ToLocalChecked();
 
 			/* Nothing else can access the tuple or histogram objects,
@@ -119,8 +124,9 @@ NAN_METHOD(getObjectHistogram) {
 			ncount = count->IntegerValue(Nan::GetCurrentContext()).FromJust();
 			Local<Value> size = Nan::Get(tuple, sizeName).ToLocalChecked();
 			nsize = size->IntegerValue(Nan::GetCurrentContext()).FromJust();
-
-		} else {
+		}
+		else
+		{
 			/* Create a new tuple and add it to the histogram.
 			 * Number objects are immutable so we have to replace
 			 * existing values. There's no need to create initial
@@ -128,23 +134,31 @@ NAN_METHOD(getObjectHistogram) {
 			 */
 			tuple = Object::New(isolate);
 #if NODE_VERSION_AT_LEAST(13, 0, 0) // > v13.0+
-			histogram->Set(currentContext, name, tuple);
+			v8::Maybe<bool> result = histogram->Set(currentContext, name, tuple);
+			if (result.IsNothing())
+			{
+				// Handle the error
+			}
 		}
 
 		/* Update the values in the existing (or new) tuple */
 		Local<Value> newcount = Number::New(isolate, ++ncount);
 		tuple->Set(currentContext, countName, newcount);
-		Local<Value> newsize = Number::New(isolate, nsize+node->GetShallowSize());
-		tuple->Set(currentContext,sizeName, newsize);
+		Local<Value> newsize = Number::New(isolate, nsize + node->GetShallowSize());
+		tuple->Set(currentContext, sizeName, newsize);
 #else
-            histogram->Set(currentContext, name, tuple);
+			v8::Maybe<bool> result = histogram->Set(currentContext, name, tuple);
+			if (result.IsNothing())
+			{
+				// Handle the error
+			}
 		}
 
 		/* Update the values in the existing (or new) tuple */
 		Local<Value> newcount = Number::New(isolate, ++ncount);
 		tuple->Set(currentContext, countName, newcount);
-		Local<Value> newsize = Number::New(isolate, nsize+node->GetShallowSize());
-		tuple->Set(currentContext,sizeName, newsize);
+		Local<Value> newsize = Number::New(isolate, nsize + node->GetShallowSize());
+		tuple->Set(currentContext, sizeName, newsize);
 #endif
 	}
 
@@ -152,6 +166,5 @@ NAN_METHOD(getObjectHistogram) {
 	heapProfiler->DeleteAllHeapSnapshots();
 
 	info.GetReturnValue().Set(histogram);
-
 }
 #endif
