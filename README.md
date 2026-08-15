@@ -159,14 +159,14 @@ Stops the appmetrics monitoring agent. If the agent is not running this function
 
 ### appmetrics.enable(`type`, `config`)
 Enable data generation of the specified data type. Cannot be called until the agent has been started by calling `start()` or `monitor()`.
-* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `http-outbound`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
+* `type` (String) the type of event to start generating data for. Values of `eventloop`, `profiling`, `http`, `http-outbound`, `mongo`, `socket.io`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported. As `trace` is added to request data, both `requests` and `trace` must be enabled in order to receive trace data.
 * `config` (Object) (optional) configuration map to be added for the data type being enabled. (see *[setConfig](#appmetricssetconfigtype-config)*) for more information.
 
 The following data types are disabled by default: `profiling`, `requests`, `trace`
 
 ### appmetrics.disable(`type`)
 Disable data generation of the specified data type. Cannot be called until the agent has been started by calling `start()` or `monitor()`.
-* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socketio`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
+* `type` (String) the type of event to stop generating data for. Values of `eventloop`, `profiling`, `http`, `mongo`, `socket.io`, `mqlight`, `postgresql`, `mqtt`, `mysql`, `redis`, `riak`, `memcached`, `oracledb`, `oracle`, `strong-oracle`, `requests` and `trace` are currently supported.
 
 ### appmetrics.setConfig(`type`, `config`)
 Set the configuration to be applied to a specific data type. The configuration available is specific to the data type.
@@ -386,8 +386,8 @@ Emitted when a Riak method is called using the `basho-riak-client` module.
     * `query` (String) the query parameter used in the `mapReduce` method.
     * `duration` (Number) the time taken in milliseconds.
 
-### Event: 'socketio'
-Emitted when WebSocket data is sent or received by the application using socketio.
+### Event: 'socket.io'
+Emitted when WebSocket data is sent or received by the application using socket.io.
 * `data` (Object) the data from the socket.io request:
     * `time` (Number) the milliseconds when the event occurred. This can be converted to a Date using `new Date(data.time)`.
     * `method` (String) whether the event is a `broadcast` or `emit` from the application, or a `receive` from a client  .
@@ -407,10 +407,10 @@ Emitted when a query is executed using the `strong-oracle` module.
 Requests are a special type of event emitted by appmetrics.  All the probes named above can also create request events if requests are enabled.  However requests are nested within a root incoming request (usually http). Request events are disabled by default.
 * `data` (Object) the data from the request:
     * `time` (Number) the milliseconds when the request occurred. This can be converted to a Date using `new Date(data.time)`.
-    * `type` (String) The type of the request event. This is the name of the probe that sent the request data, e.g. `http`, `socketio` etc.
+    * `type` (String) The type of the request event. This is the name of the probe that sent the request data, e.g. `http`, `socket.io` etc.
     * `name` (String) The name of the request event. This is the request task, eg. the url, or the method being used.
     * `request` (Object) the detailed data for the root request event:
-        * `type` (String) The type of the request event. This is the name of the probe that sent the request data, e.g. `http`, `socketio` etc.
+        * `type` (String) The type of the request event. This is the name of the probe that sent the request data, e.g. `http`, `socket.io` etc.
         * `name` (String) The name of the request event. This is the request task, eg. the url, or the method being used.
         * `context` (Object) Additional context data (usually contains the same data as the associated non-request metric event).
         * `stack` (String) An optional stack trace for the event call.
